@@ -49,7 +49,7 @@ fun AnimationApp(modifier: Modifier) {
     var isPlaying by remember { mutableStateOf(false) }
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.animation_box))
 
-    // Animasyonun 1. ve 2. saniyeleri arasında gidip gelmesi için
+    // To switch between the start and destination frames of the animation
     val infiniteTransition = rememberInfiniteTransition()
     val progressValue by infiniteTransition.animateFloat(
         initialValue = 0.23f,
