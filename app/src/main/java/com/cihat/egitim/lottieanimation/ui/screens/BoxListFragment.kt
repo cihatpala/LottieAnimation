@@ -74,7 +74,7 @@ private fun BoxListScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Box ${'$'}{index + 1}: ${'$'}{box.size} questions")
+                Text("Box ${index + 1}: ${box.size} questions")
                 Button(onClick = { onQuiz(index) }) { Text("Quiz") }
             }
         }

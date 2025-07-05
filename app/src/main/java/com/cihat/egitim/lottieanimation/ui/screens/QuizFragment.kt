@@ -123,7 +123,7 @@ private fun QuizScreen(
         ) {
             if (!isAnswerVisible) {
                 Text(
-                    text = "${'$'}{question.text}\nClick for answer",
+                    text = "${question.text}\nClick for answer",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
