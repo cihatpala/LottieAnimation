@@ -1,17 +1,31 @@
 package com.cihat.egitim.lottieanimation
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 
-import org.junit.Assert.*
-
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class ExampleUnitTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+    fun animationClickTogglesIsPlaying() {
+        val isPlaying: MutableState<Boolean> = mutableStateOf(false)
+        composeRule.setContent {
+            AnimationApp(modifier = Modifier, onIsPlayingChanged = { isPlaying.value = it })
+        }
+
+        composeRule.onNodeWithTag("animation").performClick()
+
+        composeRule.runOnIdle {
+            assertTrue(isPlaying.value)
+        }
     }
 }
+

@@ -15,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.lottie.compose.LottieAnimation
@@ -44,8 +46,9 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun AnimationApp(modifier: Modifier) {
+fun AnimationApp(modifier: Modifier, onIsPlayingChanged: (Boolean) -> Unit = {}) {
     var isPlaying by remember { mutableStateOf(false) }
+    LaunchedEffect(isPlaying) { onIsPlayingChanged(isPlaying) }
     val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.animation_box))
 
     // To switch between the start and destination frames of the animation
@@ -72,8 +75,9 @@ fun AnimationApp(modifier: Modifier) {
             composition = composition,
             progress = { if (isPlaying) 0.23f + (progressNormal * 0.77f) else progressValue },
             modifier = Modifier.fillMaxSize()
+                .testTag("animation")
                 .clickable {
-                    isPlaying = true
+                    isPlaying = !isPlaying
                 }
         )
     }
