@@ -19,4 +19,5 @@ We use **Gradle Version Catalog** for clean and centralized dependency managemen
 lottie-ver = "6.6.6"
 
 # Lottie Compose dependency
-lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie-ver" 
+lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie-ver" }
+```
