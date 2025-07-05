@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/setupFragment">
+
+    <fragment
+        android:id="@+id/setupFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.SetupFragment"
+        android:label="Setup" />
+
+    <fragment
+        android:id="@+id/boxListFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.BoxListFragment"
+        android:label="Boxes" />
+
+    <fragment
+        android:id="@+id/addQuestionFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.AddQuestionFragment"
+        android:label="Add Question" />
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.QuizFragment"
+        android:label="Quiz" />
+</navigation>
