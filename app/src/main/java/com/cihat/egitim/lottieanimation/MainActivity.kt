@@ -13,17 +13,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +36,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 
 class MainActivity : ComponentActivity() {
@@ -43,20 +45,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LottieAnimationTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AnimationApp(modifier = Modifier.padding(innerPadding))
-                }
+                QuizApp()
             }
         }
     }
 }
 
 @Composable
-fun AnimationApp(modifier: Modifier) {
-    var isPlaying by remember { mutableStateOf(false) }
-    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.animation_box_no_circle))
+fun QuizApp(viewModel: QuizViewModel = viewModel()) {
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        QuizScreen(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
+    }
+}
 
-    // To switch between the start and destination frames of the animation
+@Composable
+fun QuizScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel = viewModel()) {
+    val question = viewModel.currentQuestion
+    val isPlaying = viewModel.isAnswerVisible
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.animation_box_no_circle))
+
     val infiniteTransition = rememberInfiniteTransition()
     val progressValue by infiniteTransition.animateFloat(
         initialValue = 0.23f,
@@ -79,10 +87,9 @@ fun AnimationApp(modifier: Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        //Question Text Clicked
         if (isPlaying) {
             Text(
-                text = "Question 1 xyz?",
+                text = question.text,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
@@ -91,17 +98,15 @@ fun AnimationApp(modifier: Modifier) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Lottie animation
         Box(
             modifier = Modifier
                 .size(width = 500.dp, height = 400.dp)
-                .clickable { isPlaying = true },
+                .clickable { if (!isPlaying) viewModel.revealAnswer() },
             contentAlignment = Alignment.Center
         ) {
-            //Question Text - No Click
             if (!isPlaying) {
                 Text(
-                    text = "Question 1 xyz?\nClick for answare",
+                    text = "${question.text}\nClick for answer",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
@@ -116,13 +121,24 @@ fun AnimationApp(modifier: Modifier) {
 
             if (isPlaying) {
                 Text(
-                    text = "Answare 1",
+                    text = question.answer,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black
                 )
             }
+        }
 
+        if (isPlaying) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Button(onClick = { viewModel.onAnswerSelected() }) {
+                    Text("Doğru")
+                }
+                Button(onClick = { viewModel.onAnswerSelected() }) {
+                    Text("Yanlış")
+                }
+            }
         }
     }
 }
@@ -130,5 +146,5 @@ fun AnimationApp(modifier: Modifier) {
 @Preview
 @Composable
 fun SimpleComposablePreview() {
-    AnimationApp(modifier = Modifier)
+    QuizApp()
 }
