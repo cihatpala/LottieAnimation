@@ -6,10 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import org.junit.runner.RunWith
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
+@RunWith(AndroidJUnit4::class)
 class ExampleUnitTest {
     @get:Rule
     val composeRule = createComposeRule()
