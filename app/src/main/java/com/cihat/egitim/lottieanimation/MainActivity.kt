@@ -19,11 +19,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,6 +41,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
+import com.cihat.egitim.lottieanimation.viewmodel.UiState
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 
 class MainActivity : ComponentActivity() {
@@ -54,13 +59,103 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun QuizApp(viewModel: QuizViewModel = viewModel()) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-        QuizScreen(modifier = Modifier.padding(innerPadding), viewModel = viewModel)
+        when (val state = viewModel.uiState) {
+            is UiState.SetupBoxes -> SetupScreen(Modifier.padding(innerPadding), viewModel)
+            is UiState.AddQuestion -> AddQuestionScreen(Modifier.padding(innerPadding), viewModel)
+            is UiState.BoxList -> BoxListScreen(Modifier.padding(innerPadding), viewModel)
+            is UiState.Quiz -> QuizScreen(Modifier.padding(innerPadding), viewModel)
+        }
     }
 }
 
 @Composable
-fun QuizScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel = viewModel()) {
-    val question = viewModel.currentQuestion
+fun SetupScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
+    var text by remember { mutableStateOf("4") }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text("Box count") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { text.toIntOrNull()?.let { viewModel.setBoxCount(it) } }) {
+            Text("Start")
+        }
+    }
+}
+
+@Composable
+fun AddQuestionScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
+    var questionText by remember { mutableStateOf("") }
+    var answerText by remember { mutableStateOf("") }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        OutlinedTextField(
+            value = questionText,
+            onValueChange = { questionText = it },
+            label = { Text("Question") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = answerText,
+            onValueChange = { answerText = it },
+            label = { Text("Answer") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Button(onClick = {
+                viewModel.addQuestion(questionText, answerText)
+                questionText = ""
+                answerText = ""
+            }) {
+                Text("Add")
+            }
+            Button(onClick = { viewModel.backToBoxes() }) { Text("Done") }
+        }
+    }
+}
+
+@Composable
+fun BoxListScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        viewModel.boxes.forEachIndexed { index, box ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Box ${index + 1}: ${box.size} questions")
+                Button(onClick = { viewModel.startQuiz(index) }) { Text("Quiz") }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { viewModel.toAddQuestion() }) { Text("Add Question") }
+    }
+}
+
+@Composable
+fun QuizScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
+    val question = viewModel.currentQuestion ?: return
     val isPlaying = viewModel.isAnswerVisible
 
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.animation_box_no_circle))
@@ -132,12 +227,8 @@ fun QuizScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel = viewMod
         if (isPlaying) {
             Spacer(modifier = Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = { viewModel.onAnswerSelected() }) {
-                    Text("Doğru")
-                }
-                Button(onClick = { viewModel.onAnswerSelected() }) {
-                    Text("Yanlış")
-                }
+                Button(onClick = { viewModel.onAnswerSelected(true) }) { Text("Doğru") }
+                Button(onClick = { viewModel.onAnswerSelected(false) }) { Text("Yanlış") }
             }
         }
     }
