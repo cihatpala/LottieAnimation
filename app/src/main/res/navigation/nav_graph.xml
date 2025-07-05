@@ -6,21 +6,21 @@
 
     <fragment
         android:id="@+id/setupFragment"
-        android:name="com.cihat.egitim.lottieanimation.ui.SetupFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.SetupFragment"
         android:label="Setup" />
 
     <fragment
         android:id="@+id/boxListFragment"
-        android:name="com.cihat.egitim.lottieanimation.ui.BoxListFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.BoxListFragment"
         android:label="Boxes" />
 
     <fragment
         android:id="@+id/addQuestionFragment"
-        android:name="com.cihat.egitim.lottieanimation.ui.AddQuestionFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.AddQuestionFragment"
         android:label="Add Question" />
 
     <fragment
         android:id="@+id/quizFragment"
-        android:name="com.cihat.egitim.lottieanimation.ui.QuizFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.QuizFragment"
         android:label="Quiz" />
 </navigation>
