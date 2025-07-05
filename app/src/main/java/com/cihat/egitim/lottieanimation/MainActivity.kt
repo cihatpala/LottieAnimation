@@ -96,6 +96,7 @@ fun SetupScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
 fun AddQuestionScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
     var questionText by remember { mutableStateOf("") }
     var answerText by remember { mutableStateOf("") }
+    var boxText by remember { mutableStateOf("1") }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -116,12 +117,21 @@ fun AddQuestionScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
             label = { Text("Answer") },
             modifier = Modifier.fillMaxWidth()
         )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = boxText,
+            onValueChange = { boxText = it },
+            label = { Text("Box number") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = {
-                viewModel.addQuestion(questionText, answerText)
+                val index = boxText.toIntOrNull()?.minus(1) ?: 0
+                viewModel.addQuestion(questionText, answerText, index)
                 questionText = ""
                 answerText = ""
+                boxText = "1"
             }) {
                 Text("Add")
             }
@@ -231,6 +241,8 @@ fun QuizScreen(modifier: Modifier = Modifier, viewModel: QuizViewModel) {
                 Button(onClick = { viewModel.onAnswerSelected(true) }) { Text("Doğru") }
                 Button(onClick = { viewModel.onAnswerSelected(false) }) { Text("Yanlış") }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { viewModel.backToBoxes() }) { Text("Quit") }
         }
     }
 }

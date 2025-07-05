@@ -38,10 +38,9 @@ class QuizViewModel : ViewModel() {
     val currentQuestion: Question?
         get() = boxes.getOrNull(currentBoxIndex)?.getOrNull(currentQuestionIndex)
 
-    /** Adds a new question to the first box */
-    fun addQuestion(text: String, answer: String) {
-        if (boxes.isEmpty()) return
-        boxes[0].add(Question(text, answer))
+    /** Adds a new question to the given box index */
+    fun addQuestion(text: String, answer: String, boxIndex: Int) {
+        boxes.getOrNull(boxIndex)?.add(Question(text, answer))
     }
 
     /** Starts quiz for the given box index */
