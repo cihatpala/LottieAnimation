@@ -4,10 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -22,6 +20,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class HomeFeedFragment : Fragment() {
@@ -42,8 +42,12 @@ class HomeFeedFragment : Fragment() {
                             android.widget.Toast.makeText(requireContext(), "Quiz imported", android.widget.Toast.LENGTH_SHORT).show()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
                         },
-                        onMyQuizzes = {
-                            findNavController().navigateUp()
+                        onBack = { findNavController().navigateUp() },
+                        onTab = { tab ->
+                            when (tab) {
+                                BottomTab.PROFILE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
+                                BottomTab.EXPLORE -> {}
+                            }
                         }
                     )
                 }
@@ -56,29 +60,35 @@ class HomeFeedFragment : Fragment() {
 private fun HomeFeedScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.PublicQuiz>,
     onImport: (Int) -> Unit,
-    onMyQuizzes: () -> Unit
+    onBack: () -> Unit,
+    onTab: (BottomTab) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = "Explore",
+        showBack = true,
+        onBack = onBack,
+        bottomTab = BottomTab.EXPLORE,
+        onTabSelected = onTab
     ) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
-            itemsIndexed(quizzes) { index, quiz ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Text(text = "${quiz.name} - by ${quiz.author}")
-                    Text(text = "${quiz.questions.size} questions")
-                    Button(onClick = { onImport(index) }) { Text("Import") }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                itemsIndexed(quizzes) { index, quiz ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    ) {
+                        Text(text = "${quiz.name} - by ${quiz.author}")
+                        Text(text = "${quiz.questions.size} questions")
+                        Button(onClick = { onImport(index) }) { Text("Import") }
+                    }
                 }
             }
-        }
-        Button(onClick = onMyQuizzes, modifier = Modifier.padding(top = 8.dp)) {
-            Text("Back to My Quizzes")
         }
     }
 }

@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class SetupFragment : Fragment() {
@@ -40,12 +41,15 @@ class SetupFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 LottieAnimationTheme {
-                    SetupScreen { count ->
-                        viewModel.createQuiz("Quiz ${viewModel.quizzes.size + 1}", count)
-                        findNavController().navigate(
-                            com.cihat.egitim.lottieanimation.R.id.quizListFragment
-                        )
-                    }
+                    SetupScreen(
+                        onStart = { count ->
+                            viewModel.createQuiz("Quiz ${viewModel.quizzes.size + 1}", count)
+                            findNavController().navigate(
+                                com.cihat.egitim.lottieanimation.R.id.quizListFragment
+                            )
+                        },
+                        onBack = { findNavController().navigateUp() }
+                    )
                 }
             }
         }
@@ -53,24 +57,33 @@ class SetupFragment : Fragment() {
 }
 
 @Composable
-private fun SetupScreen(onStart: (Int) -> Unit) {
+private fun SetupScreen(
+    onStart: (Int) -> Unit,
+    onBack: () -> Unit
+) {
     var text by remember { mutableStateOf("4") }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = "Setup",
+        showBack = false,
+        onBack = onBack
     ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = { text = it },
-            label = { Text("Box count") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { text.toIntOrNull()?.let(onStart) }) {
-            Text("Start")
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text("Box count") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { text.toIntOrNull()?.let(onStart) }) {
+                Text("Start")
+            }
         }
     }
 }
