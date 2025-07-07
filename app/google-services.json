@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "899265147052",
+    "project_id": "info-box-c9d85",
+    "storage_bucket": "info-box-c9d85.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899265147052:android:119ac91beb34e5cf73af09",
+        "android_client_info": {
+          "package_name": "com.cihat.egitim.lottieanimation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKlyxYdYE3SRMBlKagGf_RWF1IhtU9nnM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

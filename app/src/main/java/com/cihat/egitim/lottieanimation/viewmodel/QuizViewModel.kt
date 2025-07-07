@@ -32,8 +32,8 @@ class QuizViewModel : ViewModel() {
         get() = boxes.getOrNull(currentBoxIndex)?.getOrNull(currentQuestionIndex)
 
     /** Adds a new question to the given box index */
-    fun addQuestion(text: String, answer: String, boxIndex: Int) {
-        boxes.getOrNull(boxIndex)?.add(Question(text, answer))
+    fun addQuestion(text: String, answer: String, topic: String, subtopic: String, boxIndex: Int) {
+        boxes.getOrNull(boxIndex)?.add(Question(text, answer, topic, subtopic))
     }
 
     /** Starts quiz for the given box index */
