@@ -51,8 +51,8 @@ class AddQuestionFragment : Fragment() {
             setContent {
                 LottieAnimationTheme {
                     AddQuestionScreen(viewModel.boxes.size,
-                        onAdd = { q, a, box ->
-                            viewModel.addQuestion(q, a, box)
+                        onAdd = { q, a, topic, sub, box ->
+                            viewModel.addQuestion(q, a, topic, sub, box)
                         },
                         onDone = {
                             findNavController().navigateUp()
@@ -66,11 +66,13 @@ class AddQuestionFragment : Fragment() {
 @Composable
 private fun AddQuestionScreen(
     boxCount: Int,
-    onAdd: (String, String, Int) -> Unit,
+    onAdd: (String, String, String, String, Int) -> Unit,
     onDone: () -> Unit
 ) {
     var questionText by remember { mutableStateOf("") }
     var answerText by remember { mutableStateOf("") }
+    var topicText by remember { mutableStateOf("") }
+    var subTopicText by remember { mutableStateOf("") }
     var selectedBox by remember { mutableStateOf(0) }
 
     Column(
@@ -84,6 +86,20 @@ private fun AddQuestionScreen(
             value = questionText,
             onValueChange = { questionText = it },
             label = { Text("Question") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = topicText,
+            onValueChange = { topicText = it },
+            label = { Text("Topic") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = subTopicText,
+            onValueChange = { subTopicText = it },
+            label = { Text("Subtopic") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -124,9 +140,11 @@ private fun AddQuestionScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = {
-                onAdd(questionText, answerText, selectedBox)
+                onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
                 questionText = ""
                 answerText = ""
+                topicText = ""
+                subTopicText = ""
                 selectedBox = 0
             }) {
                 Text("Add")

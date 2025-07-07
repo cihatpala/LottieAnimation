@@ -37,6 +37,7 @@ import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class BoxListFragment : Fragment() {
     private val viewModel: QuizViewModel by activityViewModels()
+    private val authViewModel: com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,6 +65,10 @@ class BoxListFragment : Fragment() {
                                 com.cihat.egitim.lottieanimation.R.id.questionListFragment,
                                 Bundle().apply { putInt("boxIndex", index) }
                             )
+                        },
+                        onLogout = {
+                            authViewModel.logout()
+                            findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
                         }
                     )
                 }
@@ -77,7 +82,8 @@ private fun BoxListScreen(
     boxes: List<List<*>>,
     onQuiz: (Int) -> Unit,
     onAdd: () -> Unit,
-    onView: (Int) -> Unit
+    onView: (Int) -> Unit,
+    onLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -112,5 +118,7 @@ private fun BoxListScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onAdd) { Text("Add Question") }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onLogout) { Text("Logout") }
     }
 }

@@ -2,7 +2,17 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/setupFragment">
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.SplashFragment"
+        android:label="Splash" />
+
+    <fragment
+        android:id="@+id/authFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.AuthFragment"
+        android:label="Auth" />
 
     <fragment
         android:id="@+id/setupFragment"
