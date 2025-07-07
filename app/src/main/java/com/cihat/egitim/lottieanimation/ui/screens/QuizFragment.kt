@@ -25,7 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,6 +39,7 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class QuizFragment : Fragment() {
@@ -97,19 +98,24 @@ private fun QuizScreen(
         isPlaying = isAnswerVisible
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = "Quiz",
+        showBack = true,
+        onBack = onQuit
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         if (isAnswerVisible) {
             Text(
                 text = question.text,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -126,7 +132,7 @@ private fun QuizScreen(
                     text = "${question.text}\nClick for answer",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -141,7 +147,7 @@ private fun QuizScreen(
                     text = question.answer,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -155,5 +161,6 @@ private fun QuizScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = onQuit) { Text("Quit") }
         }
+    }
     }
 }

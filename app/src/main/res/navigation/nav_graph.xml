@@ -20,6 +20,11 @@
         android:label="Setup" />
 
     <fragment
+        android:id="@+id/quizListFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.QuizListFragment"
+        android:label="Quizzes" />
+
+    <fragment
         android:id="@+id/boxListFragment"
         android:name="com.cihat.egitim.lottieanimation.ui.screens.BoxListFragment"
         android:label="Boxes" />
@@ -28,6 +33,11 @@
         android:id="@+id/addQuestionFragment"
         android:name="com.cihat.egitim.lottieanimation.ui.screens.AddQuestionFragment"
         android:label="Add Question" />
+
+    <fragment
+        android:id="@+id/homeFeedFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.HomeFeedFragment"
+        android:label="Home" />
 
     <fragment
         android:id="@+id/quizFragment"

@@ -32,11 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import android.widget.Toast
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class AddQuestionFragment : Fragment() {
@@ -50,13 +53,14 @@ class AddQuestionFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 LottieAnimationTheme {
-                    AddQuestionScreen(viewModel.boxes.size,
+                    AddQuestionScreen(
+                        boxCount = viewModel.boxes.size,
                         onAdd = { q, a, topic, sub, box ->
                             viewModel.addQuestion(q, a, topic, sub, box)
                         },
-                        onDone = {
-                            findNavController().navigateUp()
-                        })
+                        onBack = { findNavController().navigateUp() },
+                        onDone = { findNavController().navigateUp() }
+                    )
                 }
             }
         }
@@ -67,6 +71,7 @@ class AddQuestionFragment : Fragment() {
 private fun AddQuestionScreen(
     boxCount: Int,
     onAdd: (String, String, String, String, Int) -> Unit,
+    onBack: () -> Unit,
     onDone: () -> Unit
 ) {
     var questionText by remember { mutableStateOf("") }
@@ -74,14 +79,20 @@ private fun AddQuestionScreen(
     var topicText by remember { mutableStateOf("") }
     var subTopicText by remember { mutableStateOf("") }
     var selectedBox by remember { mutableStateOf(0) }
+    val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = "Add Question",
+        showBack = true,
+        onBack = onBack
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         OutlinedTextField(
             value = questionText,
             onValueChange = { questionText = it },
@@ -140,16 +151,21 @@ private fun AddQuestionScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = {
-                onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
-                questionText = ""
-                answerText = ""
-                topicText = ""
-                subTopicText = ""
-                selectedBox = 0
+                if (questionText.isBlank() || answerText.isBlank()) {
+                    Toast.makeText(context, "Question and answer cannot be empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
+                    questionText = ""
+                    answerText = ""
+                    topicText = ""
+                    subTopicText = ""
+                    selectedBox = 0
+                }
             }) {
                 Text("Add")
             }
             Button(onClick = onDone) { Text("Done") }
         }
+    }
     }
 }

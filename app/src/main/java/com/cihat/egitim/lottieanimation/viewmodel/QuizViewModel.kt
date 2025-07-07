@@ -5,15 +5,50 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.cihat.egitim.lottieanimation.data.Question
+import com.cihat.egitim.lottieanimation.data.PublicQuiz
+import com.cihat.egitim.lottieanimation.data.UserQuiz
 import kotlin.math.min
 
 /**
- * ViewModel that holds the quiz state with dynamic boxes.
+ * ViewModel that holds quizzes, each containing its own set of boxes and
+ * questions. Also manages quiz progress state.
  */
 class QuizViewModel : ViewModel() {
 
-    var boxes: MutableList<MutableList<Question>> = mutableListOf()
+    /** Quizzes created or imported by the user */
+    var quizzes: MutableList<UserQuiz> = mutableListOf()
         private set
+
+    /** Index of the quiz currently being viewed */
+    private var currentQuizIndex by mutableStateOf(0)
+
+    /** Convenient access to boxes of the current quiz */
+    val boxes: MutableList<MutableList<Question>>
+        get() = quizzes.getOrNull(currentQuizIndex)?.boxes ?: mutableListOf()
+
+    /** Name of the active quiz */
+    val currentQuizName: String
+        get() = quizzes.getOrNull(currentQuizIndex)?.name ?: ""
+
+    /** Sample public quizzes that could come from a backend in a real app */
+    val publicQuizzes: List<PublicQuiz> = listOf(
+        PublicQuiz(
+            name = "Capital Cities",
+            author = "Alice",
+            questions = listOf(
+                Question("Capital of France?", "Paris"),
+                Question("Capital of Spain?", "Madrid")
+            )
+        ),
+        PublicQuiz(
+            name = "Math Basics",
+            author = "Bob",
+            questions = listOf(
+                Question("2 + 2?", "4"),
+                Question("5 * 3?", "15")
+            )
+        )
+    )
 
     private var currentBoxIndex by mutableStateOf(0)
     private var currentQuestionIndex by mutableStateOf(0)
@@ -21,27 +56,56 @@ class QuizViewModel : ViewModel() {
     var isAnswerVisible by mutableStateOf(false)
         private set
 
-    /** Sets the desired number of boxes */
-    fun setBoxCount(count: Int) {
+    /** Creates a new quiz with the given name and box count */
+    fun createQuiz(name: String, count: Int) {
         if (count <= 0) return
-        boxes = MutableList(count) { mutableListOf() }
+        quizzes.add(UserQuiz(name, MutableList(count) { mutableListOf() }))
+        currentQuizIndex = quizzes.lastIndex
+    }
+
+    /** Changes the active quiz */
+    fun setCurrentQuiz(index: Int) {
+        currentQuizIndex = index.coerceIn(0, quizzes.lastIndex)
+    }
+
+    /**
+     * Imports a public quiz as a new user quiz. If a quiz with the same name
+     * already exists, the import is ignored to avoid duplicates.
+     */
+    fun importQuiz(quiz: PublicQuiz) {
+        val exists = quizzes.any { it.name == quiz.name }
+        if (exists) return
+        val newBoxes = MutableList(4) { mutableListOf<Question>() }
+        newBoxes[0].addAll(quiz.questions.map { it.copy() })
+        quizzes.add(UserQuiz(quiz.name, newBoxes))
     }
 
     /** Returns the current question in quiz mode */
     val currentQuestion: Question?
         get() = boxes.getOrNull(currentBoxIndex)?.getOrNull(currentQuestionIndex)
 
-    /** Adds a new question to the given box index */
-    fun addQuestion(text: String, answer: String, topic: String, subtopic: String, boxIndex: Int) {
+    /** Adds a new question to the given box index of the current quiz */
+    fun addQuestion(
+        text: String,
+        answer: String,
+        topic: String,
+        subtopic: String,
+        boxIndex: Int
+    ) {
         boxes.getOrNull(boxIndex)?.add(Question(text, answer, topic, subtopic))
     }
 
-    /** Starts quiz for the given box index */
-    fun startQuiz(index: Int) {
-        if (boxes.getOrNull(index).isNullOrEmpty()) return
+    /**
+     * Starts quiz for the given box index.
+     * @return true if the selected box contains at least one question
+     */
+    fun startQuiz(index: Int): Boolean {
+        val selected = boxes.getOrNull(index)
+        if (selected.isNullOrEmpty()) return false
         currentBoxIndex = index
         currentQuestionIndex = 0
         isAnswerVisible = false
+        return true
     }
 
     /** Reveals the current answer */

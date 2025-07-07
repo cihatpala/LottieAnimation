@@ -10,11 +10,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -29,10 +27,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
 class BoxListFragment : Fragment() {
@@ -48,12 +49,16 @@ class BoxListFragment : Fragment() {
             setContent {
                 LottieAnimationTheme {
                     BoxListScreen(
+                        quizName = viewModel.currentQuizName,
                         boxes = viewModel.boxes,
                         onQuiz = { index ->
-                            viewModel.startQuiz(index)
-                            findNavController().navigate(
-                                com.cihat.egitim.lottieanimation.R.id.quizFragment
-                            )
+                            if (viewModel.startQuiz(index)) {
+                                findNavController().navigate(
+                                    com.cihat.egitim.lottieanimation.R.id.quizFragment
+                                )
+                            } else {
+                                Toast.makeText(requireContext(), "Bu kutuda soru yok", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         onAdd = {
                             findNavController().navigate(
@@ -66,9 +71,16 @@ class BoxListFragment : Fragment() {
                                 Bundle().apply { putInt("boxIndex", index) }
                             )
                         },
+                        onBack = { findNavController().navigateUp() },
                         onLogout = {
                             authViewModel.logout()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
+                        },
+                        onTab = { tab ->
+                            when (tab) {
+                                BottomTab.PROFILE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
+                                BottomTab.EXPLORE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.homeFeedFragment)
+                            }
                         }
                     )
                 }
@@ -79,46 +91,57 @@ class BoxListFragment : Fragment() {
 
 @Composable
 private fun BoxListScreen(
+    quizName: String,
     boxes: List<List<*>>,
     onQuiz: (Int) -> Unit,
     onAdd: () -> Unit,
     onView: (Int) -> Unit,
-    onLogout: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit,
+    onTab: (BottomTab) -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = quizName,
+        showBack = true,
+        onBack = onBack,
+        bottomTab = BottomTab.PROFILE,
+        onTabSelected = onTab
     ) {
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            itemsIndexed(boxes) { index, box ->
-                Box(
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .clickable { onView(index) }
-                        .padding(4.dp)
-                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(text = "Box ${index + 1}")
-                        Text(text = "${box.size} soru")
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Button(onClick = { onQuiz(index) }) { Text("Quiz") }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                itemsIndexed(boxes) { index, box ->
+                    Box(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clickable { onView(index) }
+                            .padding(4.dp)
+                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(text = "Box ${index + 1}")
+                            Text(text = "${box.size} soru")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Button(onClick = { onQuiz(index) }) { Text("Quiz") }
+                        }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onAdd) { Text("Add Question") }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onLogout) { Text("Logout") }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onAdd) { Text("Add Question") }
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onLogout) { Text("Logout") }
+        }
     }
 }
