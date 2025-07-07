@@ -144,30 +144,40 @@ private fun QuizListScreen(
                             )
                         }
                         if (expanded) {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                                    .padding(8.dp)
                             ) {
-                                itemsIndexed(quiz.boxes) { boxIndex, box ->
-                                    Box(
-                                        modifier = Modifier
-                                            .aspectRatio(1f)
-                                            .clickable { onView(quizIndex, boxIndex) }
-                                            .padding(4.dp)
-                                            .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
-                                        contentAlignment = Alignment.Center
+                                quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            Text(text = "Box ${boxIndex + 1}")
-                                            Text(text = "${box.size} soru")
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                            Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                        pair.forEachIndexed { colIndex, box ->
+                                            val boxIndex = rowIndex * 2 + colIndex
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .aspectRatio(1f)
+                                                    .clickable { onView(quizIndex, boxIndex) }
+                                                    .padding(4.dp)
+                                                    .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                    Text(text = "Box ${boxIndex + 1}")
+                                                    Text(text = "${box.size} soru")
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                                }
+                                            }
+                                        }
+                                        if (pair.size == 1) {
+                                            Spacer(modifier = Modifier.weight(1f))
                                         }
                                     }
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                             Button(
