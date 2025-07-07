@@ -30,6 +30,11 @@
         android:label="Add Question" />
 
     <fragment
+        android:id="@+id/homeFeedFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.HomeFeedFragment"
+        android:label="Home" />
+
+    <fragment
         android:id="@+id/quizFragment"
         android:name="com.cihat.egitim.lottieanimation.ui.screens.QuizFragment"
         android:label="Quiz" />

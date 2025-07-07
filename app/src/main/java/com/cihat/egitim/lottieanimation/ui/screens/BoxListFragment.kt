@@ -66,6 +66,11 @@ class BoxListFragment : Fragment() {
                                 Bundle().apply { putInt("boxIndex", index) }
                             )
                         },
+                        onExplore = {
+                            findNavController().navigate(
+                                com.cihat.egitim.lottieanimation.R.id.homeFeedFragment
+                            )
+                        },
                         onLogout = {
                             authViewModel.logout()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
@@ -83,6 +88,7 @@ private fun BoxListScreen(
     onQuiz: (Int) -> Unit,
     onAdd: () -> Unit,
     onView: (Int) -> Unit,
+    onExplore: () -> Unit,
     onLogout: () -> Unit
 ) {
     Column(
@@ -118,6 +124,8 @@ private fun BoxListScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onAdd) { Text("Add Question") }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onExplore) { Text("Explore Quizzes") }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = onLogout) { Text("Logout") }
     }
