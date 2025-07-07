@@ -32,10 +32,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import android.widget.Toast
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
@@ -77,6 +79,7 @@ private fun AddQuestionScreen(
     var topicText by remember { mutableStateOf("") }
     var subTopicText by remember { mutableStateOf("") }
     var selectedBox by remember { mutableStateOf(0) }
+    val context = LocalContext.current
 
     AppScaffold(
         title = "Add Question",
@@ -148,12 +151,16 @@ private fun AddQuestionScreen(
         Spacer(modifier = Modifier.height(16.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             Button(onClick = {
-                onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
-                questionText = ""
-                answerText = ""
-                topicText = ""
-                subTopicText = ""
-                selectedBox = 0
+                if (questionText.isBlank() || answerText.isBlank()) {
+                    Toast.makeText(context, "Question and answer cannot be empty", Toast.LENGTH_SHORT).show()
+                } else {
+                    onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
+                    questionText = ""
+                    answerText = ""
+                    topicText = ""
+                    subTopicText = ""
+                    selectedBox = 0
+                }
             }) {
                 Text("Add")
             }
