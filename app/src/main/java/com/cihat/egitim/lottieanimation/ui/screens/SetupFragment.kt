@@ -41,9 +41,9 @@ class SetupFragment : Fragment() {
             setContent {
                 LottieAnimationTheme {
                     SetupScreen { count ->
-                        viewModel.setBoxCount(count)
+                        viewModel.createQuiz("Quiz ${viewModel.quizzes.size + 1}", count)
                         findNavController().navigate(
-                            com.cihat.egitim.lottieanimation.R.id.boxListFragment
+                            com.cihat.egitim.lottieanimation.R.id.quizListFragment
                         )
                     }
                 }

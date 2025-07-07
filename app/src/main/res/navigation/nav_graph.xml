@@ -20,6 +20,11 @@
         android:label="Setup" />
 
     <fragment
+        android:id="@+id/quizListFragment"
+        android:name="com.cihat.egitim.lottieanimation.ui.screens.QuizListFragment"
+        android:label="Quizzes" />
+
+    <fragment
         android:id="@+id/boxListFragment"
         android:name="com.cihat.egitim.lottieanimation.ui.screens.BoxListFragment"
         android:label="Boxes" />

@@ -22,10 +22,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 
-class HomeFeedFragment : Fragment() {
+class QuizListFragment : Fragment() {
     private val viewModel: QuizViewModel by activityViewModels()
+    private val authViewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,15 +37,18 @@ class HomeFeedFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 LottieAnimationTheme {
-                    HomeFeedScreen(
-                        quizzes = viewModel.publicQuizzes,
-                        onImport = { index ->
-                            viewModel.importQuiz(viewModel.publicQuizzes[index])
-                            android.widget.Toast.makeText(requireContext(), "Quiz imported", android.widget.Toast.LENGTH_SHORT).show()
-                            findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
+                    QuizListScreen(
+                        quizzes = viewModel.quizzes.map { it.name },
+                        onSelect = {
+                            viewModel.setCurrentQuiz(it)
+                            findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.boxListFragment)
                         },
-                        onMyQuizzes = {
-                            findNavController().navigateUp()
+                        onExplore = {
+                            findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.homeFeedFragment)
+                        },
+                        onLogout = {
+                            authViewModel.logout()
+                            findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
                         }
                     )
                 }
@@ -53,10 +58,11 @@ class HomeFeedFragment : Fragment() {
 }
 
 @Composable
-private fun HomeFeedScreen(
-    quizzes: List<com.cihat.egitim.lottieanimation.data.PublicQuiz>,
-    onImport: (Int) -> Unit,
-    onMyQuizzes: () -> Unit
+private fun QuizListScreen(
+    quizzes: List<String>,
+    onSelect: (Int) -> Unit,
+    onExplore: () -> Unit,
+    onLogout: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -65,20 +71,18 @@ private fun HomeFeedScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(modifier = Modifier.weight(1f)) {
-            itemsIndexed(quizzes) { index, quiz ->
+            itemsIndexed(quizzes) { index, name ->
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    Text(text = "${quiz.name} - by ${quiz.author}")
-                    Text(text = "${quiz.questions.size} questions")
-                    Button(onClick = { onImport(index) }) { Text("Import") }
+                    Text(text = name)
+                    Button(onClick = { onSelect(index) }) { Text("View Boxes") }
                 }
             }
         }
-        Button(onClick = onMyQuizzes, modifier = Modifier.padding(top = 8.dp)) {
-            Text("Back to My Quizzes")
-        }
+        Button(onClick = onExplore, modifier = Modifier.padding(top = 8.dp)) { Text("Explore Quizzes") }
+        Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) { Text("Logout") }
     }
 }

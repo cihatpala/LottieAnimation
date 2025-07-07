@@ -48,6 +48,7 @@ class BoxListFragment : Fragment() {
             setContent {
                 LottieAnimationTheme {
                     BoxListScreen(
+                        quizName = viewModel.currentQuizName,
                         boxes = viewModel.boxes,
                         onQuiz = { index ->
                             viewModel.startQuiz(index)
@@ -84,6 +85,7 @@ class BoxListFragment : Fragment() {
 
 @Composable
 private fun BoxListScreen(
+    quizName: String,
     boxes: List<List<*>>,
     onQuiz: (Int) -> Unit,
     onAdd: () -> Unit,
@@ -97,6 +99,8 @@ private fun BoxListScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Text(text = quizName)
+        Spacer(modifier = Modifier.height(8.dp))
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.weight(1f),
