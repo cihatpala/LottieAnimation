@@ -95,12 +95,17 @@ class QuizViewModel : ViewModel() {
         boxes.getOrNull(boxIndex)?.add(Question(text, answer, topic, subtopic))
     }
 
-    /** Starts quiz for the given box index */
-    fun startQuiz(index: Int) {
-        if (boxes.getOrNull(index).isNullOrEmpty()) return
+    /**
+     * Starts quiz for the given box index.
+     * @return true if the selected box contains at least one question
+     */
+    fun startQuiz(index: Int): Boolean {
+        val selected = boxes.getOrNull(index)
+        if (selected.isNullOrEmpty()) return false
         currentBoxIndex = index
         currentQuestionIndex = 0
         isAnswerVisible = false
+        return true
     }
 
     /** Reveals the current answer */

@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -51,10 +52,13 @@ class BoxListFragment : Fragment() {
                         quizName = viewModel.currentQuizName,
                         boxes = viewModel.boxes,
                         onQuiz = { index ->
-                            viewModel.startQuiz(index)
-                            findNavController().navigate(
-                                com.cihat.egitim.lottieanimation.R.id.quizFragment
-                            )
+                            if (viewModel.startQuiz(index)) {
+                                findNavController().navigate(
+                                    com.cihat.egitim.lottieanimation.R.id.quizFragment
+                                )
+                            } else {
+                                Toast.makeText(requireContext(), "Bu kutuda soru yok", Toast.LENGTH_SHORT).show()
+                            }
                         },
                         onAdd = {
                             findNavController().navigate(
