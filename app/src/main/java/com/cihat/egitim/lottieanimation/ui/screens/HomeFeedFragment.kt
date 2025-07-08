@@ -58,7 +58,7 @@ class HomeFeedFragment : Fragment() {
 }
 
 @Composable
-private fun HomeFeedScreen(
+fun HomeFeedScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.PublicQuiz>,
     onImport: (Int) -> Unit,
     onBack: () -> Unit,

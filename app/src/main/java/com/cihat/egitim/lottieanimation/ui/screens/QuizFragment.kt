@@ -72,7 +72,7 @@ class QuizFragment : Fragment() {
 }
 
 @Composable
-private fun QuizScreen(
+fun QuizScreen(
     question: com.cihat.egitim.lottieanimation.data.Question?,
     isAnswerVisible: Boolean,
     onReveal: () -> Unit,

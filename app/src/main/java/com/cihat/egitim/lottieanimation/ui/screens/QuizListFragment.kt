@@ -103,7 +103,7 @@ class QuizListFragment : Fragment() {
 }
 
 @Composable
-private fun QuizListScreen(
+fun QuizListScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.UserQuiz>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,

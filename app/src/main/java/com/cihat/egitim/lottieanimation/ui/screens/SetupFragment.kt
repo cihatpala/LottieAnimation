@@ -57,7 +57,7 @@ class SetupFragment : Fragment() {
 }
 
 @Composable
-private fun SetupScreen(
+fun SetupScreen(
     onStart: (Int) -> Unit,
     onBack: () -> Unit
 ) {

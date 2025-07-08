@@ -90,7 +90,7 @@ class BoxListFragment : Fragment() {
 }
 
 @Composable
-private fun BoxListScreen(
+fun BoxListScreen(
     quizName: String,
     boxes: List<List<*>>,
     onQuiz: (Int) -> Unit,
