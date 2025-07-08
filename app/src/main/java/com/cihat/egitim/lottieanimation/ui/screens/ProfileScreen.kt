@@ -33,12 +33,13 @@ fun ProfileScreen(
     onFolders: () -> Unit,
     onSupport: () -> Unit,
     onRate: () -> Unit,
+    onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "Profile",
-        showBack = false,
-        onBack = {},
+        showBack = true,
+        onBack = onBack,
         bottomTab = BottomTab.PROFILE,
         onTabSelected = onTab
     ) {

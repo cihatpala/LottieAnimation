@@ -64,7 +64,7 @@ fun SetupScreen(
     var text by remember { mutableStateOf("4") }
     AppScaffold(
         title = "Setup",
-        showBack = false,
+        showBack = true,
         onBack = onBack
     ) {
         Column(

@@ -77,6 +77,7 @@ class QuizListFragment : Fragment() {
                             authViewModel.logout()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
                         },
+                        onBack = { findNavController().navigateUp() },
                         onTab = { tab ->
                             when (tab) {
                                 BottomTab.PROFILE -> {}
@@ -98,12 +99,13 @@ fun QuizListScreen(
     onView: (Int, Int) -> Unit,
     onAdd: (Int) -> Unit,
     onLogout: () -> Unit,
+    onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "My Quizzes",
-        showBack = false,
-        onBack = {},
+        showBack = true,
+        onBack = onBack,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {

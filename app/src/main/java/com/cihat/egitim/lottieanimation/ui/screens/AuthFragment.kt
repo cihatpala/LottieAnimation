@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 
 class AuthFragment : Fragment() {
@@ -49,7 +50,8 @@ class AuthFragment : Fragment() {
                             authViewModel.register(e, p) { success ->
                                 if (success) goMain()
                             }
-                        }
+                        },
+                        onBack = { findNavController().navigateUp() }
                     )
                 }
             }
@@ -64,18 +66,24 @@ class AuthFragment : Fragment() {
 @Composable
 fun AuthScreen(
     onLogin: (String, String) -> Unit,
-    onRegister: (String, String) -> Unit
+    onRegister: (String, String) -> Unit,
+    onBack: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+    AppScaffold(
+        title = "Auth",
+        showBack = true,
+        onBack = onBack
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
@@ -102,5 +110,6 @@ fun AuthScreen(
                 onRegister(email, password)
             }
         }) { Text("Register") }
+    }
     }
 }

@@ -60,7 +60,8 @@ fun AppNavHost(
                             }
                         }
                     }
-                }
+                },
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Profile.route) {
@@ -71,6 +72,7 @@ fun AppNavHost(
                 onFolders = { navController.navigate(Screen.QuizList.route) },
                 onSupport = {},
                 onRate = {},
+                onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
@@ -118,6 +120,7 @@ fun AppNavHost(
                         popUpTo(Screen.QuizList.route) { inclusive = true }
                     }
                 },
+                onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
