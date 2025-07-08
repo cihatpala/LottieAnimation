@@ -43,17 +43,8 @@ fun AppNavHost(
     NavHost(navController = navController, startDestination = Screen.QuizList.route) {
         composable(Screen.Auth.route) {
             AuthScreen(
-                onLogin = { e, p ->
-                    authViewModel.login(e, p) { success ->
-                        if (success) {
-                            navController.navigate(Screen.Profile.route) {
-                                popUpTo(Screen.Auth.route) { inclusive = true }
-                            }
-                        }
-                    }
-                },
-                onRegister = { e, p ->
-                    authViewModel.register(e, p) { success ->
+                onGoogle = { token ->
+                    authViewModel.loginWithGoogle(token) { success ->
                         if (success) {
                             navController.navigate(Screen.Profile.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
