@@ -9,8 +9,10 @@ import androidx.activity.viewModels
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
@@ -25,14 +27,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val activity = this@MainActivity
-            val showDialog = remember { mutableStateOf(false) }
+            var showDialog by remember { mutableStateOf(false) }
 
             LottieAnimationTheme {
-                BackHandler { showDialog.value = true }
-
-                if (showDialog.value) {
+                if (showDialog) {
                     AlertDialog(
-                        onDismissRequest = { showDialog.value = false },
+                        onDismissRequest = { showDialog = false },
                         text = { Text("Uygulamadan çıkmak istiyor musunuz?") },
                         confirmButton = {
                             TextButton(onClick = { activity.finish() }) {
@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         dismissButton = {
-                            TextButton(onClick = { showDialog.value = false }) {
+                            TextButton(onClick = { showDialog = false }) {
                                 Text("Hayır")
                             }
                         }
@@ -48,6 +48,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 AppNavHost(authViewModel, quizViewModel)
+                BackHandler(enabled = !showDialog) { showDialog = true }
             }
         }
     }
