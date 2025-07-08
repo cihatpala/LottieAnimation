@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.navigation.compose.rememberNavController
 import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val activity = this@MainActivity
+            val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
 
             LottieAnimationTheme {
@@ -47,8 +49,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                AppNavHost(authViewModel, quizViewModel)
-                BackHandler(enabled = !showDialog) { showDialog = true }
+                AppNavHost(navController, authViewModel, quizViewModel)
+                BackHandler(enabled = !showDialog) {
+                    if (navController.previousBackStackEntry != null) {
+                        navController.popBackStack()
+                    } else {
+                        showDialog = true
+                    }
+                }
             }
         }
     }
