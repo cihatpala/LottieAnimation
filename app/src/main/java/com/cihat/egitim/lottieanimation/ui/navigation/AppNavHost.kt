@@ -2,9 +2,9 @@ package com.cihat.egitim.lottieanimation.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavType
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
@@ -36,15 +36,15 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavHost(
+    navController: NavHostController,
     authViewModel: AuthViewModel,
     quizViewModel: QuizViewModel
 ) {
-    val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Screen.QuizList.route) {
         composable(Screen.Auth.route) {
             AuthScreen(
-                onLogin = { e, p ->
-                    authViewModel.login(e, p) { success ->
+                onGoogle = { token ->
+                    authViewModel.loginWithGoogle(token) { success ->
                         if (success) {
                             navController.navigate(Screen.Profile.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
@@ -52,18 +52,11 @@ fun AppNavHost(
                         }
                     }
                 },
-                onRegister = { e, p ->
-                    authViewModel.register(e, p) { success ->
-                        if (success) {
-                            navController.navigate(Screen.Profile.route) {
-                                popUpTo(Screen.Auth.route) { inclusive = true }
-                            }
-                        }
-                    }
-                }
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Profile.route) {
+            val canPop = navController.previousBackStackEntry != null
             ProfileScreen(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
@@ -71,6 +64,8 @@ fun AppNavHost(
                 onFolders = { navController.navigate(Screen.QuizList.route) },
                 onSupport = {},
                 onRate = {},
+                showBack = canPop,
+                onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
@@ -118,6 +113,7 @@ fun AppNavHost(
                         popUpTo(Screen.QuizList.route) { inclusive = true }
                     }
                 },
+                onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
@@ -171,6 +167,7 @@ fun AppNavHost(
             )
         }
         composable(Screen.HomeFeed.route) {
+            val canPop = navController.previousBackStackEntry != null
             HomeFeedScreen(
                 quizzes = quizViewModel.publicQuizzes,
                 onImport = { index ->
@@ -182,6 +179,7 @@ fun AppNavHost(
                     ).show()
                     navController.navigate(Screen.QuizList.route)
                 },
+                showBack = canPop,
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {

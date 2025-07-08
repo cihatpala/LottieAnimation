@@ -37,6 +37,7 @@ class HomeFeedFragment : Fragment() {
         return ComposeView(requireContext()).apply {
             setContent {
                 LottieAnimationTheme {
+                    val canPop = findNavController().previousBackStackEntry != null
                     HomeFeedScreen(
                         quizzes = viewModel.publicQuizzes,
                         onImport = { index ->
@@ -44,6 +45,7 @@ class HomeFeedFragment : Fragment() {
                             android.widget.Toast.makeText(requireContext(), "Quiz imported", android.widget.Toast.LENGTH_SHORT).show()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
                         },
+                        showBack = canPop,
                         onBack = { findNavController().navigateUp() },
                         onTab = { tab ->
                             when (tab) {
@@ -63,12 +65,13 @@ class HomeFeedFragment : Fragment() {
 fun HomeFeedScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.PublicQuiz>,
     onImport: (Int) -> Unit,
+    showBack: Boolean,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "Explore",
-        showBack = true,
+        showBack = showBack,
         onBack = onBack,
         bottomTab = BottomTab.EXPLORE,
         onTabSelected = onTab

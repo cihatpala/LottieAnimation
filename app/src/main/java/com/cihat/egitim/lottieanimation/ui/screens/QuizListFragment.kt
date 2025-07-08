@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -79,6 +77,7 @@ class QuizListFragment : Fragment() {
                             authViewModel.logout()
                             findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.authFragment)
                         },
+                        onBack = { findNavController().navigateUp() },
                         onTab = { tab ->
                             when (tab) {
                                 BottomTab.PROFILE -> {}
@@ -91,17 +90,6 @@ class QuizListFragment : Fragment() {
             }
         }
     }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            AlertDialog.Builder(requireContext())
-                .setMessage("Uygulamadan çıkmak istiyor musunuz?")
-                .setPositiveButton("Evet") { _, _ -> requireActivity().finish() }
-                .setNegativeButton("Hayır", null)
-                .show()
-        }
-    }
 }
 
 @Composable
@@ -111,12 +99,13 @@ fun QuizListScreen(
     onView: (Int, Int) -> Unit,
     onAdd: (Int) -> Unit,
     onLogout: () -> Unit,
+    onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "My Quizzes",
-        showBack = false,
-        onBack = {},
+        showBack = true,
+        onBack = onBack,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
