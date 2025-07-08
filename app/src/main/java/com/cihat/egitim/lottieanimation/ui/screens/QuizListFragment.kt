@@ -4,8 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.addCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -89,17 +87,6 @@ class QuizListFragment : Fragment() {
                     )
                 }
             }
-        }
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
-            AlertDialog.Builder(requireContext())
-                .setMessage("Uygulamadan çıkmak istiyor musunuz?")
-                .setPositiveButton("Evet") { _, _ -> requireActivity().finish() }
-                .setNegativeButton("Hayır", null)
-                .show()
         }
     }
 }
