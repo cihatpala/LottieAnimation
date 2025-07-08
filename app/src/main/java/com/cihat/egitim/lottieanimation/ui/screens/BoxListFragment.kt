@@ -31,6 +31,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
@@ -78,8 +79,9 @@ class BoxListFragment : Fragment() {
                         },
                         onTab = { tab ->
                             when (tab) {
-                                BottomTab.PROFILE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
-                                BottomTab.EXPLORE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.homeFeedFragment)
+                                BottomTab.PROFILE -> findNavController().navigate(R.id.quizListFragment)
+                                BottomTab.EXPLORE -> findNavController().navigate(R.id.homeFeedFragment)
+                                BottomTab.HOME -> TODO()
                             }
                         }
                     )
