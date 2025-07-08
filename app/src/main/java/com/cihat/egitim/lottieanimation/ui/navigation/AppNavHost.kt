@@ -14,6 +14,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
+import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
@@ -25,6 +26,7 @@ sealed class Screen(val route: String) {
     data object Auth : Screen("auth")
     data object Setup : Screen("setup")
     data object QuizList : Screen("quizList")
+    data object Profile : Screen("profile")
     data object BoxList : Screen("boxList")
     data object AddQuestion : Screen("addQuestion")
     data object HomeFeed : Screen("homeFeed")
@@ -47,7 +49,7 @@ fun AppNavHost(
             LaunchedEffect(Unit) {
                 kotlinx.coroutines.delay(2000)
                 if (authViewModel.currentUser != null) {
-                    navController.navigate(Screen.Setup.route) {
+                    navController.navigate(Screen.Profile.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 } else {
@@ -62,7 +64,7 @@ fun AppNavHost(
                 onLogin = { e, p ->
                     authViewModel.login(e, p) { success ->
                         if (success) {
-                            navController.navigate(Screen.Setup.route) {
+                            navController.navigate(Screen.Profile.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
                             }
                         }
@@ -71,10 +73,26 @@ fun AppNavHost(
                 onRegister = { e, p ->
                     authViewModel.register(e, p) { success ->
                         if (success) {
-                            navController.navigate(Screen.Setup.route) {
+                            navController.navigate(Screen.Profile.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
                             }
                         }
+                    }
+                }
+            )
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onPro = {},
+                onAuth = { navController.navigate(Screen.Auth.route) },
+                onSettings = {},
+                onFolders = { navController.navigate(Screen.QuizList.route) },
+                onSupport = {},
+                onRate = {},
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
             )
@@ -119,7 +137,7 @@ fun AppNavHost(
                 },
                 onTab = { tab ->
                     when (tab) {
-                        BottomTab.PROFILE -> {}
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -151,7 +169,7 @@ fun AppNavHost(
                 },
                 onTab = { tab ->
                     when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -182,7 +200,7 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.EXPLORE -> {}
                     }
                 }
