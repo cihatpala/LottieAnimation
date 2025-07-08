@@ -46,7 +46,7 @@ class QuestionListFragment : Fragment() {
 }
 
 @Composable
-private fun QuestionListScreen(
+fun QuestionListScreen(
     questions: List<com.cihat.egitim.lottieanimation.data.Question>,
     onBack: () -> Unit
 ) {

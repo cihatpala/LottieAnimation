@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
@@ -46,8 +47,9 @@ class HomeFeedFragment : Fragment() {
                         onBack = { findNavController().navigateUp() },
                         onTab = { tab ->
                             when (tab) {
-                                BottomTab.PROFILE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.quizListFragment)
+                                BottomTab.PROFILE -> findNavController().navigate(R.id.quizListFragment)
                                 BottomTab.EXPLORE -> {}
+                                BottomTab.HOME -> TODO()
                             }
                         }
                     )
@@ -58,7 +60,7 @@ class HomeFeedFragment : Fragment() {
 }
 
 @Composable
-private fun HomeFeedScreen(
+fun HomeFeedScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.PublicQuiz>,
     onImport: (Int) -> Unit,
     onBack: () -> Unit,

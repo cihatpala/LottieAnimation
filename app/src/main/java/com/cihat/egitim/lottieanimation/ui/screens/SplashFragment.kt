@@ -43,7 +43,7 @@ class SplashFragment : Fragment() {
 }
 
 @Composable
-private fun SplashScreen() {
+fun SplashScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text("LOGO")
     }

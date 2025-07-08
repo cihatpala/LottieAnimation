@@ -62,7 +62,7 @@ class AuthFragment : Fragment() {
 }
 
 @Composable
-private fun AuthScreen(
+fun AuthScreen(
     onLogin: (String, String) -> Unit,
     onRegister: (String, String) -> Unit
 ) {

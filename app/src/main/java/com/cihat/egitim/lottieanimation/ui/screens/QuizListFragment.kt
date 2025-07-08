@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
@@ -81,7 +82,8 @@ class QuizListFragment : Fragment() {
                         onTab = { tab ->
                             when (tab) {
                                 BottomTab.PROFILE -> {}
-                                BottomTab.EXPLORE -> findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.homeFeedFragment)
+                                BottomTab.EXPLORE -> findNavController().navigate(R.id.homeFeedFragment)
+                                BottomTab.HOME -> TODO()
                             }
                         }
                     )
@@ -103,7 +105,7 @@ class QuizListFragment : Fragment() {
 }
 
 @Composable
-private fun QuizListScreen(
+fun QuizListScreen(
     quizzes: List<com.cihat.egitim.lottieanimation.data.UserQuiz>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
@@ -115,7 +117,7 @@ private fun QuizListScreen(
         title = "My Quizzes",
         showBack = false,
         onBack = {},
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
         Column(
@@ -124,76 +126,80 @@ private fun QuizListScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(quizzes) { quizIndex, quiz ->
-                    var expanded by remember { mutableStateOf(false) }
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                    ) {
-                        Row(
+            if (quizzes.isEmpty()) {
+                androidx.compose.material3.Text("Henüz quiziniz yok")
+            } else {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    itemsIndexed(quizzes) { quizIndex, quiz ->
+                        var expanded by remember { mutableStateOf(false) }
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { expanded = !expanded }
-                                .padding(8.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(vertical = 8.dp)
                         ) {
-                            Text(text = quiz.name, modifier = Modifier.weight(1f))
-                            Icon(
-                                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                contentDescription = null
-                            )
-                        }
-                        if (expanded) {
-                            Column(
+                            Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(8.dp)
+                                    .clickable { expanded = !expanded }
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        pair.forEachIndexed { colIndex, box ->
-                                            val boxIndex = rowIndex * 2 + colIndex
-                                            Box(
-                                                modifier = Modifier
-                                                    .weight(1f)
-                                                    .aspectRatio(1f)
-                                                    .clickable { onView(quizIndex, boxIndex) }
-                                                    .padding(4.dp)
-                                                    .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                    Text(text = "Box ${boxIndex + 1}")
-                                                    Text(text = "${box.size} soru")
-                                                    Spacer(modifier = Modifier.height(4.dp))
-                                                    Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                Text(text = quiz.name, modifier = Modifier.weight(1f))
+                                Icon(
+                                    imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                    contentDescription = null
+                                )
+                            }
+                            if (expanded) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(8.dp)
+                                ) {
+                                    quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            pair.forEachIndexed { colIndex, box ->
+                                                val boxIndex = rowIndex * 2 + colIndex
+                                                Box(
+                                                    modifier = Modifier
+                                                        .weight(1f)
+                                                        .aspectRatio(1f)
+                                                        .clickable { onView(quizIndex, boxIndex) }
+                                                        .padding(4.dp)
+                                                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                        Text(text = "Box ${boxIndex + 1}")
+                                                        Text(text = "${box.size} soru")
+                                                        Spacer(modifier = Modifier.height(4.dp))
+                                                        Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                                    }
                                                 }
                                             }
+                                            if (pair.size == 1) {
+                                                Spacer(modifier = Modifier.weight(1f))
+                                            }
                                         }
-                                        if (pair.size == 1) {
-                                            Spacer(modifier = Modifier.weight(1f))
-                                        }
+                                        Spacer(modifier = Modifier.height(8.dp))
                                     }
-                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
+                                Button(
+                                    onClick = { onAdd(quizIndex) },
+                                    modifier = Modifier
+                                        .padding(top = 8.dp)
+                                        .align(Alignment.CenterHorizontally)
+                                ) { Text("Add Question") }
                             }
-                            Button(
-                                onClick = { onAdd(quizIndex) },
-                                modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .align(Alignment.CenterHorizontally)
-                            ) { Text("Add Question") }
                         }
                     }
                 }
-            }
-            Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
-                Text("Logout")
+                Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Logout")
+                }
             }
         }
     }

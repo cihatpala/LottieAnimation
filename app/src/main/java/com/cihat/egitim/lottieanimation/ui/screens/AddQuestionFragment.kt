@@ -68,7 +68,7 @@ class AddQuestionFragment : Fragment() {
 }
 
 @Composable
-private fun AddQuestionScreen(
+fun AddQuestionScreen(
     boxCount: Int,
     onAdd: (String, String, String, String, Int) -> Unit,
     onBack: () -> Unit,

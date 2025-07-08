@@ -1,0 +1,219 @@
+package com.cihat.egitim.lottieanimation.ui.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
+import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
+import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
+import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
+import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
+import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
+import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
+import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
+import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
+import com.cihat.egitim.lottieanimation.ui.screens.SetupScreen
+
+sealed class Screen(val route: String) {
+    data object Auth : Screen("auth")
+    data object Setup : Screen("setup")
+    data object QuizList : Screen("quizList")
+    data object Profile : Screen("profile")
+    data object BoxList : Screen("boxList")
+    data object AddQuestion : Screen("addQuestion")
+    data object HomeFeed : Screen("homeFeed")
+    data object Quiz : Screen("quiz")
+    data object QuestionList : Screen("questionList/{boxIndex}") {
+        const val boxArg = "boxIndex"
+        fun createRoute(boxIndex: Int) = "questionList/$boxIndex"
+    }
+}
+
+@Composable
+fun AppNavHost(
+    authViewModel: AuthViewModel,
+    quizViewModel: QuizViewModel
+) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Screen.QuizList.route) {
+        composable(Screen.Auth.route) {
+            AuthScreen(
+                onLogin = { e, p ->
+                    authViewModel.login(e, p) { success ->
+                        if (success) {
+                            navController.navigate(Screen.Profile.route) {
+                                popUpTo(Screen.Auth.route) { inclusive = true }
+                            }
+                        }
+                    }
+                },
+                onRegister = { e, p ->
+                    authViewModel.register(e, p) { success ->
+                        if (success) {
+                            navController.navigate(Screen.Profile.route) {
+                                popUpTo(Screen.Auth.route) { inclusive = true }
+                            }
+                        }
+                    }
+                }
+            )
+        }
+        composable(Screen.Profile.route) {
+            ProfileScreen(
+                onPro = {},
+                onAuth = { navController.navigate(Screen.Auth.route) },
+                onSettings = {},
+                onFolders = { navController.navigate(Screen.QuizList.route) },
+                onSupport = {},
+                onRate = {},
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    }
+                }
+            )
+        }
+        composable(Screen.Setup.route) {
+            SetupScreen(
+                onStart = { count ->
+                    quizViewModel.createQuiz("Quiz ${quizViewModel.quizzes.size + 1}", count)
+                    navController.navigate(Screen.QuizList.route)
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.QuizList.route) {
+            QuizListScreen(
+                quizzes = quizViewModel.quizzes,
+                onQuiz = { quizIdx, boxIdx ->
+                    quizViewModel.setCurrentQuiz(quizIdx)
+                    if (quizViewModel.startQuiz(boxIdx)) {
+                        navController.navigate(Screen.Quiz.route)
+                    } else {
+                        android.widget.Toast.makeText(
+                            navController.context,
+                            "Bu kutuda soru yok",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                onView = { quizIdx, boxIdx ->
+                    quizViewModel.setCurrentQuiz(quizIdx)
+                    navController.navigate(Screen.QuestionList.createRoute(boxIdx))
+                },
+                onAdd = { quizIdx ->
+                    quizViewModel.setCurrentQuiz(quizIdx)
+                    navController.navigate(Screen.AddQuestion.route)
+                },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.QuizList.route) { inclusive = true }
+                    }
+                },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    }
+                }
+            )
+        }
+        composable(Screen.BoxList.route) {
+            BoxListScreen(
+                quizName = quizViewModel.currentQuizName,
+                boxes = quizViewModel.boxes,
+                onQuiz = { index ->
+                    if (quizViewModel.startQuiz(index)) {
+                        navController.navigate(Screen.Quiz.route)
+                    } else {
+                        android.widget.Toast.makeText(
+                            navController.context,
+                            "Bu kutuda soru yok",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                },
+                onAdd = { navController.navigate(Screen.AddQuestion.route) },
+                onView = { index -> navController.navigate(Screen.QuestionList.createRoute(index)) },
+                onBack = { navController.popBackStack() },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.BoxList.route) { inclusive = true }
+                    }
+                },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    }
+                }
+            )
+        }
+        composable(Screen.AddQuestion.route) {
+            AddQuestionScreen(
+                boxCount = quizViewModel.boxes.size,
+                onAdd = { q, a, topic, sub, box ->
+                    quizViewModel.addQuestion(q, a, topic, sub, box)
+                },
+                onBack = { navController.popBackStack() },
+                onDone = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.HomeFeed.route) {
+            HomeFeedScreen(
+                quizzes = quizViewModel.publicQuizzes,
+                onImport = { index ->
+                    quizViewModel.importQuiz(quizViewModel.publicQuizzes[index])
+                    android.widget.Toast.makeText(
+                        navController.context,
+                        "Quiz imported",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                    navController.navigate(Screen.QuizList.route)
+                },
+                onBack = { navController.popBackStack() },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> {}
+                    }
+                }
+            )
+        }
+        composable(Screen.Quiz.route) {
+            QuizScreen(
+                question = quizViewModel.currentQuestion,
+                isAnswerVisible = quizViewModel.isAnswerVisible,
+                onReveal = { quizViewModel.revealAnswer() },
+                onAnswer = { correct ->
+                    val more = quizViewModel.onAnswerSelected(correct)
+                    if (!more) navController.popBackStack()
+                },
+                onQuit = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.QuestionList.route,
+            arguments = listOf(navArgument(Screen.QuestionList.boxArg) { type = NavType.IntType })
+        ) { backStackEntry ->
+            val index = backStackEntry.arguments?.getInt(Screen.QuestionList.boxArg) ?: 0
+            val questions = quizViewModel.boxes.getOrNull(index).orEmpty()
+            QuestionListScreen(
+                questions = questions,
+                onBack = { navController.popBackStack() }
+            )
+        }
+    }
+}
