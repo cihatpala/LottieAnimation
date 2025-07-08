@@ -104,7 +104,7 @@ fun BoxListScreen(
         title = quizName,
         showBack = true,
         onBack = onBack,
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
         Column(

@@ -115,7 +115,7 @@ fun QuizListScreen(
         title = "My Quizzes",
         showBack = false,
         onBack = {},
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
         Column(
@@ -124,10 +124,13 @@ fun QuizListScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
-                itemsIndexed(quizzes) { quizIndex, quiz ->
-                    var expanded by remember { mutableStateOf(false) }
-                    Column(
+            if (quizzes.isEmpty()) {
+                androidx.compose.material3.Text("Henüz quiziniz yok")
+            } else {
+                LazyColumn(modifier = Modifier.weight(1f)) {
+                    itemsIndexed(quizzes) { quizIndex, quiz ->
+                        var expanded by remember { mutableStateOf(false) }
+                        Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)

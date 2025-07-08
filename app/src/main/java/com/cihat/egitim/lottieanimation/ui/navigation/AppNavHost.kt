@@ -1,7 +1,6 @@
 package com.cihat.egitim.lottieanimation.ui.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -19,10 +18,8 @@ import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SetupScreen
-import com.cihat.egitim.lottieanimation.ui.screens.SplashScreen
 
 sealed class Screen(val route: String) {
-    data object Splash : Screen("splash")
     data object Auth : Screen("auth")
     data object Setup : Screen("setup")
     data object QuizList : Screen("quizList")
@@ -43,22 +40,7 @@ fun AppNavHost(
     quizViewModel: QuizViewModel
 ) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.Splash.route) {
-        composable(Screen.Splash.route) {
-            SplashScreen()
-            LaunchedEffect(Unit) {
-                kotlinx.coroutines.delay(2000)
-                if (authViewModel.currentUser != null) {
-                    navController.navigate(Screen.Profile.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                } else {
-                    navController.navigate(Screen.Auth.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                }
-            }
-        }
+    NavHost(navController = navController, startDestination = Screen.QuizList.route) {
         composable(Screen.Auth.route) {
             AuthScreen(
                 onLogin = { e, p ->
@@ -92,6 +74,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -138,6 +121,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -170,6 +154,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -201,6 +186,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> {}
                     }
                 }
