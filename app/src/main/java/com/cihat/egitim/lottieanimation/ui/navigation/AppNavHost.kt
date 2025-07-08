@@ -65,6 +65,7 @@ fun AppNavHost(
             )
         }
         composable(Screen.Profile.route) {
+            val canPop = navController.previousBackStackEntry != null
             ProfileScreen(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
@@ -72,6 +73,7 @@ fun AppNavHost(
                 onFolders = { navController.navigate(Screen.QuizList.route) },
                 onSupport = {},
                 onRate = {},
+                showBack = canPop,
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
