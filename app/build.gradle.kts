@@ -61,6 +61,7 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)    implementation(libs.lottie)
+    debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.lottie)
     implementation(libs.androidx.material)
 }

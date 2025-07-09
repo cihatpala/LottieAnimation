@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DismissDirection
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.AlertDialog
@@ -41,6 +43,7 @@ import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun QuizListScreen(
     quizzes: List<UserQuiz>,
@@ -75,7 +78,7 @@ fun QuizListScreen(
                         var showRename by remember { mutableStateOf(false) }
                         var showDelete by remember { mutableStateOf(false) }
                         var newName by remember { mutableStateOf(quiz.name) }
-                        val dismissState = rememberDismissState(confirmValueChange = { false })
+                        val dismissState = rememberDismissState(positionalThreshold = { 300.dp })
 
                         SwipeToDismiss(
                             state = dismissState,
