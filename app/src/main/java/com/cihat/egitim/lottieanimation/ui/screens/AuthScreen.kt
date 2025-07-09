@@ -58,9 +58,9 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
-                modifier = Modifier.size(96.dp)
+                modifier = Modifier.size(250.dp)
             )
             Spacer(Modifier.height(24.dp))
             Text(

@@ -47,7 +47,7 @@ fun AppNavHost(
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
             LaunchedEffect(Unit) {
-                delay(2000)
+                delay(2500)
                 if (authViewModel.currentUser != null) {
                     navController.navigate(Screen.Setup.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
