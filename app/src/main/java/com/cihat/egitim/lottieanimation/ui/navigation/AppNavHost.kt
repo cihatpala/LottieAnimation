@@ -18,14 +18,14 @@ import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
-import com.cihat.egitim.lottieanimation.ui.screens.SetupScreen
+import com.cihat.egitim.lottieanimation.ui.screens.SettingsScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SplashScreen
 import kotlinx.coroutines.delay
 
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Auth : Screen("auth")
-    data object Setup : Screen("setup")
+    data object Settings : Screen("settings")
     data object QuizList : Screen("quizList")
     data object Profile : Screen("profile")
     data object BoxList : Screen("boxList")
@@ -49,7 +49,7 @@ fun AppNavHost(
             LaunchedEffect(Unit) {
                 delay(2500)
                 if (authViewModel.currentUser != null) {
-                    navController.navigate(Screen.Setup.route) {
+                    navController.navigate(Screen.Profile.route) {
                         popUpTo(Screen.Splash.route) { inclusive = true }
                     }
                 } else {
@@ -79,7 +79,7 @@ fun AppNavHost(
             ProfileScreen(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
-                onSettings = {},
+                onSettings = { navController.navigate(Screen.Settings.route) },
                 onFolders = { navController.navigate(Screen.QuizList.route) },
                 onSupport = {},
                 onRate = {},
@@ -94,9 +94,9 @@ fun AppNavHost(
                 }
             )
         }
-        composable(Screen.Setup.route) {
-            SetupScreen(
-                onStart = { count ->
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onCreateQuiz = { count ->
                     quizViewModel.createQuiz("Quiz ${quizViewModel.quizzes.size + 1}", count)
                     navController.navigate(Screen.QuizList.route)
                 },
@@ -126,6 +126,8 @@ fun AppNavHost(
                     quizViewModel.setCurrentQuiz(quizIdx)
                     navController.navigate(Screen.AddQuestion.route)
                 },
+                onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
+                onDelete = { index -> quizViewModel.deleteQuiz(index) },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate(Screen.Auth.route) {

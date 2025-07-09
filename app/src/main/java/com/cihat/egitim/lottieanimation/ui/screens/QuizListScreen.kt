@@ -13,12 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DismissDirection
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.SwipeToDismiss
+import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -38,12 +43,15 @@ import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun QuizListScreen(
     quizzes: List<UserQuiz>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
     onAdd: (Int) -> Unit,
+    onRename: (Int, String) -> Unit,
+    onDelete: (Int) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -67,68 +75,131 @@ fun QuizListScreen(
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     itemsIndexed(quizzes) { quizIndex, quiz ->
                         var expanded by remember { mutableStateOf(false) }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { expanded = !expanded }
-                                    .padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(text = quiz.name, modifier = Modifier.weight(1f))
-                                Icon(
-                                    imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                    contentDescription = null
-                                )
-                            }
-                            if (expanded) {
+                        var showRename by remember { mutableStateOf(false) }
+                        var showDelete by remember { mutableStateOf(false) }
+                        var newName by remember { mutableStateOf(quiz.name) }
+                        val dismissState = rememberDismissState(positionalThreshold = { 300.dp })
+
+                        SwipeToDismiss(
+                            state = dismissState,
+                            directions = setOf(DismissDirection.EndToStart),
+                            background = {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    TextButton(onClick = { showRename = true }) { Text("Edit") }
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    TextButton(onClick = { showDelete = true }) { Text("Delete") }
+                                }
+                            },
+                            dismissContent = {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(8.dp)
+                                        .padding(vertical = 8.dp)
                                 ) {
-                                    quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable { expanded = !expanded }
+                                            .padding(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(text = quiz.name, modifier = Modifier.weight(1f))
+                                        Icon(
+                                            imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                            contentDescription = null
+                                        )
+                                    }
+                                    if (expanded) {
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(8.dp)
                                         ) {
-                                            pair.forEachIndexed { colIndex, box ->
-                                                val boxIndex = rowIndex * 2 + colIndex
-                                                Box(
-                                                    modifier = Modifier
-                                                        .weight(1f)
-                                                        .aspectRatio(1f)
-                                                        .clickable { onView(quizIndex, boxIndex) }
-                                                        .padding(4.dp)
-                                                        .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
-                                                    contentAlignment = Alignment.Center
+                                            quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                                 ) {
-                                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                                        Text(text = "Box ${boxIndex + 1}")
-                                                        Text(text = "${box.size} soru")
-                                                        Spacer(modifier = Modifier.height(4.dp))
-                                                        Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                                    pair.forEachIndexed { colIndex, box ->
+                                                        val boxIndex = rowIndex * 2 + colIndex
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .weight(1f)
+                                                                .aspectRatio(1f)
+                                                                .clickable { onView(quizIndex, boxIndex) }
+                                                                .padding(4.dp)
+                                                                .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                                Text(text = "Box ${boxIndex + 1}")
+                                                                Text(text = "${box.size} soru")
+                                                                Spacer(modifier = Modifier.height(4.dp))
+                                                                Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
+                                                            }
+                                                        }
+                                                    }
+                                                    if (pair.size == 1) {
+                                                        Spacer(modifier = Modifier.weight(1f))
                                                     }
                                                 }
-                                            }
-                                            if (pair.size == 1) {
-                                                Spacer(modifier = Modifier.weight(1f))
+                                                Spacer(modifier = Modifier.height(8.dp))
                                             }
                                         }
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(
+                                            onClick = { onAdd(quizIndex) },
+                                            modifier = Modifier
+                                                .padding(top = 8.dp)
+                                                .align(Alignment.CenterHorizontally)
+                                        ) { Text("Add Question") }
                                     }
                                 }
-                                Button(
-                                    onClick = { onAdd(quizIndex) },
-                                    modifier = Modifier
-                                        .padding(top = 8.dp)
-                                        .align(Alignment.CenterHorizontally)
-                                ) { Text("Add Question") }
                             }
+                        )
+
+                        if (showRename) {
+                            AlertDialog(
+                                onDismissRequest = { showRename = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        onRename(quizIndex, newName)
+                                        showRename = false
+                                    }) { Text("Save") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showRename = false }) { Text("Cancel") }
+                                },
+                                title = { Text("Edit Quiz") },
+                                text = {
+                                    OutlinedTextField(
+                                        value = newName,
+                                        onValueChange = { newName = it },
+                                        label = { Text("Name") }
+                                    )
+                                }
+                            )
+                        }
+
+                        if (showDelete) {
+                            AlertDialog(
+                                onDismissRequest = { showDelete = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        onDelete(quizIndex)
+                                        showDelete = false
+                                    }) { Text("Evet") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDelete = false }) { Text("Hayır") }
+                                },
+                                text = { Text("Silmek istediğinize emin misiniz?") }
+                            )
                         }
                     }
                 }
