@@ -50,9 +50,9 @@ class SplashFragment : Fragment() {
 fun SplashScreen() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Image(
-            painter = painterResource(id = com.cihat.egitim.lottieanimation.R.mipmap.ic_launcher_foreground),
+            painter = painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.size(128.dp)
+            modifier = Modifier.size(192.dp)
         )
     }
 }
