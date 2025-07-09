@@ -1,6 +1,7 @@
 package com.cihat.egitim.lottieanimation.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -18,8 +19,11 @@ import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SetupScreen
+import com.cihat.egitim.lottieanimation.ui.screens.SplashScreen
+import kotlinx.coroutines.delay
 
 sealed class Screen(val route: String) {
+    data object Splash : Screen("splash")
     data object Auth : Screen("auth")
     data object Setup : Screen("setup")
     data object QuizList : Screen("quizList")
@@ -40,7 +44,22 @@ fun AppNavHost(
     authViewModel: AuthViewModel,
     quizViewModel: QuizViewModel
 ) {
-    NavHost(navController = navController, startDestination = Screen.QuizList.route) {
+    NavHost(navController = navController, startDestination = Screen.Splash.route) {
+        composable(Screen.Splash.route) {
+            LaunchedEffect(Unit) {
+                delay(2500)
+                if (authViewModel.currentUser != null) {
+                    navController.navigate(Screen.Setup.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                }
+            }
+            SplashScreen()
+        }
         composable(Screen.Auth.route) {
             AuthScreen(
                 onGoogle = { token ->

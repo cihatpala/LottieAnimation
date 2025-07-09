@@ -1,69 +1,30 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.layout.Arrangement
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.cihat.egitim.lottieanimation.R
-import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
-import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
-
-class AuthFragment : Fragment() {
-    private val authViewModel: AuthViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                LottieAnimationTheme {
-                    AuthScreen(
-                        onGoogle = { token ->
-                            authViewModel.loginWithGoogle(token) { success ->
-                                if (success) goMain()
-                            }
-                        },
-                        onBack = { findNavController().navigateUp() }
-                    )
-                }
-            }
-        }
-    }
-
-    private fun goMain() {
-        findNavController().navigate(com.cihat.egitim.lottieanimation.R.id.setupFragment)
-    }
-}
 
 @Composable
 fun AuthScreen(
@@ -97,9 +58,9 @@ fun AuthScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
-                modifier = Modifier.size(96.dp)
+                modifier = Modifier.size(250.dp)
             )
             Spacer(Modifier.height(24.dp))
             Text(

@@ -49,8 +49,6 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
-    implementation(libs.navigation.fragment.ktx)
-    implementation(libs.navigation.ui.ktx)
     implementation(libs.navigation.compose)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
@@ -64,5 +62,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.lottie)
-}
+    implementation(libs.lottie)}

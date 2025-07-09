@@ -1,9 +1,5 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,40 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
-import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
-
-class SetupFragment : Fragment() {
-    private val viewModel: QuizViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setContent {
-                LottieAnimationTheme {
-                    SetupScreen(
-                        onStart = { count ->
-                            viewModel.createQuiz("Quiz ${viewModel.quizzes.size + 1}", count)
-                            findNavController().navigate(
-                                com.cihat.egitim.lottieanimation.R.id.quizListFragment
-                            )
-                        },
-                        onBack = { findNavController().navigateUp() }
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun SetupScreen(
