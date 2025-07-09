@@ -126,6 +126,8 @@ fun AppNavHost(
                     quizViewModel.setCurrentQuiz(quizIdx)
                     navController.navigate(Screen.AddQuestion.route)
                 },
+                onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
+                onDelete = { index -> quizViewModel.deleteQuiz(index) },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate(Screen.Auth.route) {

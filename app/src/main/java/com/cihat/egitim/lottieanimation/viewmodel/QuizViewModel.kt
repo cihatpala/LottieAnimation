@@ -56,6 +56,22 @@ class QuizViewModel : ViewModel() {
     var isAnswerVisible by mutableStateOf(false)
         private set
 
+    /** Renames the quiz at the given index */
+    fun renameQuiz(index: Int, newName: String) {
+        val quiz = quizzes.getOrNull(index) ?: return
+        if (newName.isNotBlank()) {
+            quizzes[index] = quiz.copy(name = newName)
+        }
+    }
+
+    /** Deletes the quiz at the given index */
+    fun deleteQuiz(index: Int) {
+        if (index in quizzes.indices) {
+            quizzes.removeAt(index)
+            if (currentQuizIndex >= quizzes.size) currentQuizIndex = quizzes.lastIndex.coerceAtLeast(0)
+        }
+    }
+
     /** Creates a new quiz with the given name and box count */
     fun createQuiz(name: String, count: Int) {
         if (count <= 0) return
