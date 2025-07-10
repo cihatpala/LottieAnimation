@@ -1,6 +1,7 @@
 package com.cihat.egitim.lottieanimation.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -16,7 +17,7 @@ import kotlin.math.min
 class QuizViewModel : ViewModel() {
 
     /** Quizzes created or imported by the user */
-    var quizzes: MutableList<UserQuiz> = mutableListOf()
+    var quizzes = mutableStateListOf<UserQuiz>()
         private set
 
     private var nextQuizId = 0
