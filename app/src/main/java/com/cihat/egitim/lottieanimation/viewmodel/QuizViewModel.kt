@@ -1,6 +1,7 @@
 package com.cihat.egitim.lottieanimation.viewmodel
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -16,8 +17,10 @@ import kotlin.math.min
 class QuizViewModel : ViewModel() {
 
     /** Quizzes created or imported by the user */
-    var quizzes: MutableList<UserQuiz> = mutableListOf()
+    var quizzes = mutableStateListOf<UserQuiz>()
         private set
+
+    private var nextQuizId = 0
 
     /** Index of the quiz currently being viewed */
     private var currentQuizIndex by mutableStateOf(0)
@@ -75,7 +78,7 @@ class QuizViewModel : ViewModel() {
     /** Creates a new quiz with the given name and box count */
     fun createQuiz(name: String, count: Int) {
         if (count <= 0) return
-        quizzes.add(UserQuiz(name, MutableList(count) { mutableListOf() }))
+        quizzes.add(UserQuiz(nextQuizId++, name, MutableList(count) { mutableListOf() }))
         currentQuizIndex = quizzes.lastIndex
     }
 
@@ -93,7 +96,7 @@ class QuizViewModel : ViewModel() {
         if (exists) return
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
-        quizzes.add(UserQuiz(quiz.name, newBoxes))
+        quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
     }
 
     /** Returns the current question in quiz mode */
