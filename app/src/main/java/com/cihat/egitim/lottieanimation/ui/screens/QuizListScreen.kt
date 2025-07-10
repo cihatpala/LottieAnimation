@@ -105,6 +105,7 @@ fun QuizListScreen(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .clipToBounds()
                                 .swipeable(
                                     state = swipeState,
                                     anchors = mapOf(0f to 0, -maxOffset to 1),
@@ -144,6 +145,7 @@ fun QuizListScreen(
                             Column(
                                 modifier = Modifier
                                     .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                                    .background(Color.White)
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                             ) {
