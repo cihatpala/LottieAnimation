@@ -87,7 +87,14 @@ fun QuizListScreen(
                 Text("Henüz quiziniz yok")
             } else {
                 LazyColumn(modifier = Modifier.weight(1f)) {
-                    itemsIndexed(quizzes) { quizIndex, quiz ->
+                    // Use a stable key so Compose properly disposes state when
+                    // an item is removed. Without this, deleting the last item
+                    // triggers an IndexOutOfBoundsException as the old state
+                    // tries to read a missing index from the list.
+                    itemsIndexed(
+                        items = quizzes,
+                        key = { _, quiz -> quiz.name }
+                    ) { quizIndex, quiz ->
                         var expanded by remember { mutableStateOf(false) }
                         var showRename by remember { mutableStateOf(false) }
                         var showDelete by remember { mutableStateOf(false) }
