@@ -93,12 +93,12 @@ fun QuizListScreen(
                     // tries to read a missing index from the list.
                     itemsIndexed(
                         items = quizzes,
-                        key = { _, quiz -> quiz.name }
+                        key = { _, quiz -> quiz.id }
                     ) { quizIndex, quiz ->
-                        var expanded by remember { mutableStateOf(false) }
-                        var showRename by remember { mutableStateOf(false) }
-                        var showDelete by remember { mutableStateOf(false) }
-                        var newName by remember { mutableStateOf(quiz.name) }
+                        var expanded by remember(quiz.id) { mutableStateOf(false) }
+                        var showRename by remember(quiz.id) { mutableStateOf(false) }
+                        var showDelete by remember(quiz.id) { mutableStateOf(false) }
+                        var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                         val scope = rememberCoroutineScope()
                         val actionWidth = 72.dp
                         val swipeState = rememberSwipeableState(0)
