@@ -95,6 +95,13 @@ fun QuizListScreen(
                         val swipeState = rememberSwipeableState(0)
                         val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
+                        // Collapse the item whenever it is swiped to reveal actions
+                        LaunchedEffect(swipeState.offset) {
+                            if (swipeState.offset.value != 0f) {
+                                expanded = false
+                            }
+                        }
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -149,10 +156,12 @@ fun QuizListScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(text = quiz.name, modifier = Modifier.weight(1f))
-                                        Icon(
-                                            imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                            contentDescription = null
-                                        )
+                                        if (swipeState.offset.value == 0f) {
+                                            Icon(
+                                                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                                                contentDescription = null
+                                            )
+                                        }
                                     }
                                     if (expanded) {
                                         Column(
