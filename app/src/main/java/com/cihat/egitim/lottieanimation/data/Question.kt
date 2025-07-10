@@ -5,5 +5,7 @@ package com.cihat.egitim.lottieanimation.data
  */
 data class Question(
     val text: String,
-    val answer: String
+    val answer: String,
+    val topic: String = "",
+    val subtopic: String = ""
 )
