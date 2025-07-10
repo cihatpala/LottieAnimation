@@ -38,6 +38,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -95,6 +97,9 @@ fun QuizListScreen(
                         val swipeState = rememberSwipeableState(0)
                         val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
+                        // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
+                        val revealProgress = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+
                         // Collapse the item whenever it is swiped to reveal actions
                         LaunchedEffect(swipeState.offset) {
                             if (swipeState.offset.value != 0f) {
@@ -117,12 +122,14 @@ fun QuizListScreen(
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
                                     .height(72.dp)
+                                    .alpha(revealProgress)
                             ) {
                                 IconButton(
                                     onClick = {
                                         scope.launch { swipeState.animateTo(0) }
                                         showRename = true
                                     },
+                                    enabled = swipeState.currentValue == 1,
                                     modifier = Modifier
                                         .background(Color(0xFFFFA500))
                                         .size(actionWidth)
@@ -134,6 +141,7 @@ fun QuizListScreen(
                                         scope.launch { swipeState.animateTo(0) }
                                         showDelete = true
                                     },
+                                    enabled = swipeState.currentValue == 1,
                                     modifier = Modifier
                                         .background(Color.Red)
                                         .size(actionWidth)
@@ -145,7 +153,6 @@ fun QuizListScreen(
                             Column(
                                 modifier = Modifier
                                     .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
-                                    .background(Color.White)
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                             ) {
