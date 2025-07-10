@@ -1,8 +1,10 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,36 +14,46 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DismissDirection
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.rememberDismissState
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material.swipeable
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -78,35 +90,62 @@ fun QuizListScreen(
                         var showRename by remember { mutableStateOf(false) }
                         var showDelete by remember { mutableStateOf(false) }
                         var newName by remember { mutableStateOf(quiz.name) }
-                        val dismissState = rememberDismissState(positionalThreshold = { 300.dp })
+                        val scope = rememberCoroutineScope()
+                        val actionWidth = 72.dp
+                        val swipeState = rememberSwipeableState(0)
+                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
-                        SwipeToDismiss(
-                            state = dismissState,
-                            directions = setOf(DismissDirection.EndToStart),
-                            background = {
-                                Row(
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .swipeable(
+                                    state = swipeState,
+                                    anchors = mapOf(0f to 0, -maxOffset to 1),
+                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                    orientation = Orientation.Horizontal
+                                )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .height(72.dp)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        showRename = true
+                                    },
                                     modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 16.dp),
-                                    horizontalArrangement = Arrangement.End,
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .background(Color(0xFFFFA500))
+                                        .size(actionWidth)
                                 ) {
-                                    TextButton(onClick = { showRename = true }) { Text("Edit") }
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    TextButton(onClick = { showDelete = true }) { Text("Delete") }
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                                 }
-                            },
-                            dismissContent = {
-                                Column(
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        showDelete = true
+                                    },
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
+                                        .background(Color.Red)
+                                        .size(actionWidth)
                                 ) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                }
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                            ) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .height(64.dp)
                                             .clickable { expanded = !expanded }
-                                            .padding(8.dp),
+                                            .padding(horizontal = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(text = quiz.name, modifier = Modifier.weight(1f))
@@ -161,7 +200,7 @@ fun QuizListScreen(
                                     }
                                 }
                             }
-                        )
+
 
                         if (showRename) {
                             AlertDialog(
@@ -202,6 +241,7 @@ fun QuizListScreen(
                             )
                         }
                     }
+                    }
                 }
                 Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
                     Text("Logout")
@@ -209,4 +249,4 @@ fun QuizListScreen(
             }
         }
     }
-}
+
