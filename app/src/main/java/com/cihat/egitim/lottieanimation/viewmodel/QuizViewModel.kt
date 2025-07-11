@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.data.PublicQuiz
 import com.cihat.egitim.lottieanimation.data.UserQuiz
+import com.cihat.egitim.lottieanimation.data.UserFolder
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 import kotlin.math.min
 
 /**
@@ -15,6 +17,13 @@ import kotlin.math.min
  * questions. Also manages quiz progress state.
  */
 class QuizViewModel : ViewModel() {
+
+    /** Folders created by the user */
+    var folders = mutableStateListOf<UserFolder>()
+        private set
+
+    private var nextFolderId = 0
+    private var nextHeadingId = 0
 
     /** Quizzes created or imported by the user */
     var quizzes = mutableStateListOf<UserQuiz>()
@@ -59,6 +68,96 @@ class QuizViewModel : ViewModel() {
     var isAnswerVisible by mutableStateOf(false)
         private set
 
+    /** Returns the heading at the given path, or null if not found */
+    private fun getHeadingAt(list: MutableList<FolderHeading>, path: List<Int>): FolderHeading? {
+        var current: FolderHeading? = null
+        var currentList = list
+        for (index in path) {
+            current = currentList.getOrNull(index) ?: return null
+            currentList = current.children
+        }
+        return current
+    }
+
+    /** Returns the parent list for the heading at path */
+    private fun getHeadingParent(list: MutableList<FolderHeading>, path: List<Int>): MutableList<FolderHeading>? {
+        if (path.isEmpty()) return list
+        var currentList = list
+        for (i in 0 until path.size - 1) {
+            val h = currentList.getOrNull(i) ?: return null
+            currentList = h.children
+        }
+        return currentList
+    }
+
+    /** Renames the folder at the given index */
+    fun renameFolder(index: Int, newName: String) {
+        val folder = folders.getOrNull(index) ?: return
+        if (newName.isNotBlank()) {
+            folders[index] = folder.copy(name = newName)
+        }
+    }
+
+    /** Deletes the folder at the given index */
+    fun deleteFolder(index: Int) {
+        if (index in folders.indices) {
+            folders.removeAt(index)
+        }
+    }
+
+    /** Creates a new folder with optional root headings */
+    fun createFolder(name: String, headings: List<String> = emptyList()) {
+        if (name.isBlank()) return
+        val exists = folders.any { it.name == name }
+        if (exists) return
+        val headingObjs = headings.map {
+            FolderHeading(id = nextHeadingId++, name = it).also { _ -> }
+        }
+        folders.add(
+            UserFolder(
+                id = nextFolderId++,
+                name = name,
+                headings = headingObjs.toMutableList()
+            )
+        )
+    }
+
+    /** Renames a heading specified by path */
+    fun renameHeading(folderIndex: Int, path: List<Int>, newName: String) {
+        if (newName.isBlank()) return
+        val folder = folders.getOrNull(folderIndex) ?: return
+        val parent = getHeadingParent(folder.headings, path) ?: return
+        val idx = path.lastOrNull() ?: return
+        val heading = parent.getOrNull(idx) ?: return
+        parent[idx] = heading.copy(name = newName)
+        folders[folderIndex] = folder.copy()
+    }
+
+    /** Deletes the heading specified by path */
+    fun deleteHeading(folderIndex: Int, path: List<Int>) {
+        val folder = folders.getOrNull(folderIndex) ?: return
+        val parent = getHeadingParent(folder.headings, path) ?: return
+        val idx = path.lastOrNull() ?: return
+        if (idx !in parent.indices) return
+        parent.removeAt(idx)
+        folders[folderIndex] = folder.copy()
+    }
+
+    /** Adds a new child heading to the node specified by path */
+    fun addHeading(folderIndex: Int, path: List<Int>, name: String) {
+        if (name.isBlank()) return
+        val folder = folders.getOrNull(folderIndex) ?: return
+        val targetList: MutableList<FolderHeading> =
+            if (path.isEmpty()) {
+                folder.headings
+            } else {
+                getHeadingAt(folder.headings, path)?.children ?: return
+            }
+
+        targetList.add(FolderHeading(id = nextHeadingId++, name = name))
+        folders[folderIndex] = folder.copy()
+    }
+
     /** Renames the quiz at the given index */
     fun renameQuiz(index: Int, newName: String) {
         val quiz = quizzes.getOrNull(index) ?: return
@@ -76,7 +175,12 @@ class QuizViewModel : ViewModel() {
     }
 
     /** Creates a new quiz with the given name, box count and optional sub headings */
-    fun createQuiz(name: String, count: Int, subHeadings: List<String> = emptyList()) {
+    fun createQuiz(
+        name: String,
+        count: Int,
+        subHeadings: List<String> = emptyList(),
+        folderId: Int? = null
+    ) {
         if (count <= 0) return
         // Prevent creating multiple quizzes with the same name
         val exists = quizzes.any { it.name == name }
@@ -86,7 +190,8 @@ class QuizViewModel : ViewModel() {
                 id = nextQuizId++,
                 name = name,
                 boxes = MutableList(count) { mutableListOf() },
-                subHeadings = subHeadings.toMutableList()
+                subHeadings = subHeadings.toMutableList(),
+                folderId = folderId
             )
         )
         currentQuizIndex = quizzes.lastIndex
