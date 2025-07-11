@@ -62,6 +62,9 @@ fun FolderListScreen(
     folders: List<UserFolder>,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
+    onRenameSub: (Int, Int, String) -> Unit,
+    onDeleteSub: (Int, Int) -> Unit,
+    onAddSub: (Int, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
@@ -173,8 +176,135 @@ fun FolderListScreen(
                                             .fillMaxWidth()
                                             .padding(start = 32.dp, top = 4.dp)
                                     ) {
-                                        folder.subHeadings.forEach { sub ->
-                                            Text(text = sub)
+                                        folder.subHeadings.forEachIndexed { subIndex, sub ->
+                                            var showSubRename by remember(subIndex) { mutableStateOf(false) }
+                                            var showSubDelete by remember(subIndex) { mutableStateOf(false) }
+                                            var newSubName by remember(subIndex) { mutableStateOf(sub) }
+                                            val subSwipe = rememberSwipeableState(0)
+                                            val subActionWidth = 64.dp
+                                            val subMax = with(LocalDensity.current) { (subActionWidth * 2).toPx() }
+                                            val subAlpha = (-subSwipe.offset.value / subMax).coerceIn(0f, 1f)
+
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clipToBounds()
+                                                    .swipeable(
+                                                        state = subSwipe,
+                                                        anchors = mapOf(0f to 0, -subMax to 1),
+                                                        thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                                        orientation = Orientation.Horizontal
+                                                    )
+                                            ) {
+                                                Row(
+                                                    modifier = Modifier
+                                                        .align(Alignment.CenterEnd)
+                                                        .height(48.dp)
+                                                        .alpha(subAlpha)
+                                                ) {
+                                                    IconButton(
+                                                        onClick = {
+                                                            scope.launch { subSwipe.animateTo(0) }
+                                                            showSubRename = true
+                                                        },
+                                                        enabled = subSwipe.currentValue == 1,
+                                                        modifier = Modifier
+                                                            .background(Color(0xFFFFA500))
+                                                            .size(subActionWidth)
+                                                    ) {
+                                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                                    }
+                                                    IconButton(
+                                                        onClick = {
+                                                            scope.launch { subSwipe.animateTo(0) }
+                                                            showSubDelete = true
+                                                        },
+                                                        enabled = subSwipe.currentValue == 1,
+                                                        modifier = Modifier
+                                                            .background(Color.Red)
+                                                            .size(subActionWidth)
+                                                    ) {
+                                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                                    }
+                                                }
+
+                                                Row(
+                                                    modifier = Modifier
+                                                        .offset { IntOffset(subSwipe.offset.value.roundToInt(), 0) }
+                                                        .fillMaxWidth()
+                                                        .height(48.dp)
+                                                        .clickable { /* no expand */ }
+                                                        .padding(horizontal = 8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(sub, modifier = Modifier.weight(1f))
+                                                }
+                                            }
+
+                                            if (showSubRename) {
+                                                AlertDialog(
+                                                    onDismissRequest = { showSubRename = false },
+                                                    confirmButton = {
+                                                        TextButton(onClick = {
+                                                            onRenameSub(index, subIndex, newSubName)
+                                                            showSubRename = false
+                                                        }) { Text("Save") }
+                                                    },
+                                                    dismissButton = {
+                                                        TextButton(onClick = { showSubRename = false }) { Text("Cancel") }
+                                                    },
+                                                    title = { Text("Edit Heading") },
+                                                    text = {
+                                                        OutlinedTextField(
+                                                            value = newSubName,
+                                                            onValueChange = { newSubName = it },
+                                                            label = { Text("Name") }
+                                                        )
+                                                    }
+                                                )
+                                            }
+
+                                            if (showSubDelete) {
+                                                AlertDialog(
+                                                    onDismissRequest = { showSubDelete = false },
+                                                    confirmButton = {
+                                                        TextButton(onClick = {
+                                                            onDeleteSub(index, subIndex)
+                                                            showSubDelete = false
+                                                        }) { Text("Evet") }
+                                                    },
+                                                    dismissButton = {
+                                                        TextButton(onClick = { showSubDelete = false }) { Text("Hayır") }
+                                                    },
+                                                    text = { Text("Silmek istediğinize emin misiniz?") }
+                                                )
+                                            }
+
+                                            Spacer(modifier = Modifier.height(4.dp))
+                                        }
+
+                                        // Add new sub heading
+                                        var newSubText by remember(folder.id) { mutableStateOf("") }
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp)
+                                        ) {
+                                            OutlinedTextField(
+                                                value = newSubText,
+                                                onValueChange = { newSubText = it },
+                                                label = { Text("Alt Başlık Ekle") },
+                                                modifier = Modifier.weight(1f)
+                                            )
+                                            IconButton(onClick = {
+                                                if (newSubText.isNotBlank()) {
+                                                    onAddSub(index, newSubText)
+                                                    newSubText = ""
+                                                }
+                                            }) {
+                                                Icon(Icons.Default.Add, contentDescription = "Add sub")
+                                            }
                                         }
                                     }
                                 }

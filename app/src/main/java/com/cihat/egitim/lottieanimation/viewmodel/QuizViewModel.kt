@@ -95,6 +95,31 @@ class QuizViewModel : ViewModel() {
         )
     }
 
+    /** Renames a sub heading of the folder */
+    fun renameSubHeading(folderIndex: Int, subIndex: Int, newName: String) {
+        val folder = folders.getOrNull(folderIndex) ?: return
+        if (newName.isBlank() || subIndex !in folder.subHeadings.indices) return
+        folder.subHeadings[subIndex] = newName
+        // Trigger recomposition
+        folders[folderIndex] = folder.copy()
+    }
+
+    /** Deletes the sub heading at the given index */
+    fun deleteSubHeading(folderIndex: Int, subIndex: Int) {
+        val folder = folders.getOrNull(folderIndex) ?: return
+        if (subIndex !in folder.subHeadings.indices) return
+        folder.subHeadings.removeAt(subIndex)
+        folders[folderIndex] = folder.copy()
+    }
+
+    /** Adds a new sub heading to the folder */
+    fun addSubHeading(folderIndex: Int, name: String) {
+        val folder = folders.getOrNull(folderIndex) ?: return
+        if (name.isBlank()) return
+        folder.subHeadings.add(name)
+        folders[folderIndex] = folder.copy()
+    }
+
     /** Renames the quiz at the given index */
     fun renameQuiz(index: Int, newName: String) {
         val quiz = quizzes.getOrNull(index) ?: return
