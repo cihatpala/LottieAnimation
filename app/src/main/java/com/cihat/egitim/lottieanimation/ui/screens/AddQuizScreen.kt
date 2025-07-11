@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +29,7 @@ fun AddQuizScreen(
     onBack: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var boxText by remember { mutableStateOf("4") }
+    var boxValue by remember { mutableFloatStateOf(4f) }
     val categories = remember { mutableStateListOf<String>() }
 
     AppScaffold(
@@ -49,12 +51,16 @@ fun AddQuizScreen(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = boxText,
-                onValueChange = { boxText = it },
-                label = { Text("Box count") },
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Slider(
+                    value = boxValue,
+                    onValueChange = { boxValue = it },
+                    valueRange = 1f..10f,
+                    steps = 8,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(text = "${boxValue.toInt()} kutu")
+            }
             categories.forEachIndexed { index, text ->
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
@@ -64,11 +70,18 @@ fun AddQuizScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = { categories.add("") }) { Text("Add Category") }
+            if (categories.size < 2) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(onClick = { categories.add("") }) { Text("Add Category") }
+            }
+            val path = listOf(name) + categories
+            if (path.any { it.isNotBlank() }) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Path: " + path.filter { it.isNotBlank() }.joinToString(" / "))
+            }
             Spacer(modifier = Modifier.height(16.dp))
             Button(onClick = {
-                val count = boxText.toIntOrNull() ?: 0
+                val count = boxValue.toInt()
                 if (name.isNotBlank() && count > 0) {
                     onCreate(name, count, categories.filter { it.isNotBlank() })
                 }
@@ -78,3 +91,4 @@ fun AddQuizScreen(
         }
     }
 }
+
