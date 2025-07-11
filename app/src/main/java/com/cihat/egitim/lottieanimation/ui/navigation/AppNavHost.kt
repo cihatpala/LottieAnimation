@@ -14,6 +14,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
+import com.cihat.egitim.lottieanimation.ui.screens.FolderListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
@@ -27,6 +28,7 @@ sealed class Screen(val route: String) {
     data object Auth : Screen("auth")
     data object Settings : Screen("settings")
     data object QuizList : Screen("quizList")
+    data object FolderList : Screen("folderList")
     data object Profile : Screen("profile")
     data object BoxList : Screen("boxList")
     data object AddQuestion : Screen("addQuestion")
@@ -80,7 +82,7 @@ fun AppNavHost(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
                 onSettings = { navController.navigate(Screen.Settings.route) },
-                onFolders = { navController.navigate(Screen.QuizList.route) },
+                onFolders = { navController.navigate(Screen.FolderList.route) },
                 onSupport = {},
                 onRate = {},
                 showBack = canPop,
@@ -103,9 +105,35 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() }
             )
         }
+        composable(Screen.FolderList.route) {
+                FolderListScreen(
+                folders = quizViewModel.folders,
+                onRename = { index, name -> quizViewModel.renameFolder(index, name) },
+                onDelete = { index -> quizViewModel.deleteFolder(index) },
+                onRenameHeading = { f, path, n -> quizViewModel.renameHeading(f, path, n) },
+                onDeleteHeading = { f, path -> quizViewModel.deleteHeading(f, path) },
+                onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
+                onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.FolderList.route) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    }
+                }
+            )
+        }
         composable(Screen.QuizList.route) {
             QuizListScreen(
                 quizzes = quizViewModel.quizzes,
+                folders = quizViewModel.folders,
                 onQuiz = { quizIdx, boxIdx ->
                     quizViewModel.setCurrentQuiz(quizIdx)
                     if (quizViewModel.startQuiz(boxIdx)) {
@@ -128,8 +156,8 @@ fun AppNavHost(
                 },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
-                onCreate = { name, count, subs ->
-                    quizViewModel.createQuiz(name, count, subs)
+                onCreate = { name, count, subs, folderId ->
+                    quizViewModel.createQuiz(name, count, subs, folderId)
                 },
                 onLogout = {
                     authViewModel.logout()

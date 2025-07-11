@@ -8,5 +8,7 @@ data class UserQuiz(
     val name: String,
     val boxes: MutableList<MutableList<Question>>,
     /** Optional sub headings defined by the user */
-    val subHeadings: MutableList<String> = mutableListOf()
+    val subHeadings: MutableList<String> = mutableListOf(),
+    /** Id of the folder this quiz belongs to */
+    val folderId: Int? = null
 )
