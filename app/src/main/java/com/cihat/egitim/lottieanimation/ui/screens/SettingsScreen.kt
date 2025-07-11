@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Slider
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,11 +23,12 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 
 @Composable
 fun SettingsScreen(
-    onCreateQuiz: (Int) -> Unit,
+    onCreateQuiz: (String, Int) -> Unit,
     onBack: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
     var sliderValue by remember { mutableFloatStateOf(4f) }
+    var nameText by remember { mutableStateOf("") }
 
     AppScaffold(
         title = "Settings",
@@ -52,7 +54,7 @@ fun SettingsScreen(
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 Button(onClick = {
-                    onCreateQuiz(sliderValue.toInt())
+                    onCreateQuiz(nameText, sliderValue.toInt())
                     showDialog = false
                 }) { Text("Başla") }
             },
@@ -62,6 +64,12 @@ fun SettingsScreen(
             title = { Text("Kutu Sayısı") },
             text = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    OutlinedTextField(
+                        value = nameText,
+                        onValueChange = { nameText = it },
+                        label = { Text("Quiz Adı") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Slider(
                         value = sliderValue,
                         onValueChange = { sliderValue = it },

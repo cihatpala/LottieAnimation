@@ -96,8 +96,8 @@ fun AppNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onCreateQuiz = { count ->
-                    quizViewModel.createQuiz("Quiz ${quizViewModel.quizzes.size + 1}", count)
+                onCreateQuiz = { name, count ->
+                    quizViewModel.createQuiz(name, count)
                     navController.navigate(Screen.QuizList.route)
                 },
                 onBack = { navController.popBackStack() }
@@ -128,6 +128,7 @@ fun AppNavHost(
                 },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
+                onCreate = { navController.navigate(Screen.Settings.route) },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate(Screen.Auth.route) {
