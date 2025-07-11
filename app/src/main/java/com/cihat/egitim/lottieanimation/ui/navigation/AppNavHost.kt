@@ -106,13 +106,13 @@ fun AppNavHost(
             )
         }
         composable(Screen.FolderList.route) {
-            FolderListScreen(
+                FolderListScreen(
                 folders = quizViewModel.folders,
                 onRename = { index, name -> quizViewModel.renameFolder(index, name) },
                 onDelete = { index -> quizViewModel.deleteFolder(index) },
-                onRenameSub = { f, s, n -> quizViewModel.renameSubHeading(f, s, n) },
-                onDeleteSub = { f, s -> quizViewModel.deleteSubHeading(f, s) },
-                onAddSub = { f, n -> quizViewModel.addSubHeading(f, n) },
+                onRenameHeading = { f, path, n -> quizViewModel.renameHeading(f, path, n) },
+                onDeleteHeading = { f, path -> quizViewModel.deleteHeading(f, path) },
+                onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
                 onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
                 onLogout = {
                     authViewModel.logout()

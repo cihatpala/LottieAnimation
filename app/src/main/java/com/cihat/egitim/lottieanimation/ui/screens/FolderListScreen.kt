@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
@@ -62,9 +63,9 @@ fun FolderListScreen(
     folders: List<UserFolder>,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
-    onRenameSub: (Int, Int, String) -> Unit,
-    onDeleteSub: (Int, Int) -> Unit,
-    onAddSub: (Int, String) -> Unit,
+    onRenameHeading: (Int, List<Int>, String) -> Unit,
+    onDeleteHeading: (Int, List<Int>) -> Unit,
+    onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
@@ -79,8 +80,8 @@ fun FolderListScreen(
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }
-        val subHeadings = remember { mutableStateListOf<String>() }
-        var newSub by remember { mutableStateOf("") }
+        val newHeadings = remember { mutableStateListOf<String>() }
+        var newHeadingText by remember { mutableStateOf("") }
 
         Column(
             modifier = Modifier
@@ -92,263 +93,16 @@ fun FolderListScreen(
                 Text("Henüz klasör yok")
             } else {
                 LazyColumn(modifier = Modifier.weight(1f)) {
-                    itemsIndexed(items = folders, key = { _, f -> f.id }) { index, folder ->
-                        var expanded by remember(folder.id) { mutableStateOf(false) }
-                        var showRename by remember(folder.id) { mutableStateOf(false) }
-                        var showDelete by remember(folder.id) { mutableStateOf(false) }
-                        var newName by remember(folder.id) { mutableStateOf(folder.name) }
-                        val scope = rememberCoroutineScope()
-                        val actionWidth = 72.dp
-                        val swipeState = rememberSwipeableState(0)
-                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
-                        val revealProgress = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-                        LaunchedEffect(swipeState.offset) {
-                            if (swipeState.offset.value != 0f) expanded = false
-                        }
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clipToBounds()
-                                .swipeable(
-                                    state = swipeState,
-                                    anchors = mapOf(0f to 0, -maxOffset to 1),
-                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                    orientation = Orientation.Horizontal
-                                )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .height(72.dp)
-                                    .alpha(revealProgress)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showRename = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color(0xFFFFA500))
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
-                                }
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showDelete = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color.Red)
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(64.dp)
-                                        .clickable { expanded = !expanded }
-                                        .padding(horizontal = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(text = folder.name, modifier = Modifier.weight(1f))
-                                    if (swipeState.offset.value == 0f) {
-                                        Icon(
-                                            imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                            contentDescription = null
-                                        )
-                                    }
-                                }
-                                if (expanded) {
-                                    Column(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 32.dp, top = 4.dp)
-                                    ) {
-                                        folder.subHeadings.forEachIndexed { subIndex, sub ->
-                                            var showSubRename by remember(subIndex) { mutableStateOf(false) }
-                                            var showSubDelete by remember(subIndex) { mutableStateOf(false) }
-                                            var newSubName by remember(subIndex) { mutableStateOf(sub) }
-                                            val subSwipe = rememberSwipeableState(0)
-                                            val subActionWidth = 64.dp
-                                            val subMax = with(LocalDensity.current) { (subActionWidth * 2).toPx() }
-                                            val subAlpha = (-subSwipe.offset.value / subMax).coerceIn(0f, 1f)
-
-                                            Box(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clipToBounds()
-                                                    .swipeable(
-                                                        state = subSwipe,
-                                                        anchors = mapOf(0f to 0, -subMax to 1),
-                                                        thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                                        orientation = Orientation.Horizontal
-                                                    )
-                                            ) {
-                                                Row(
-                                                    modifier = Modifier
-                                                        .align(Alignment.CenterEnd)
-                                                        .height(48.dp)
-                                                        .alpha(subAlpha)
-                                                ) {
-                                                    IconButton(
-                                                        onClick = {
-                                                            scope.launch { subSwipe.animateTo(0) }
-                                                            showSubRename = true
-                                                        },
-                                                        enabled = subSwipe.currentValue == 1,
-                                                        modifier = Modifier
-                                                            .background(Color(0xFFFFA500))
-                                                            .size(subActionWidth)
-                                                    ) {
-                                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
-                                                    }
-                                                    IconButton(
-                                                        onClick = {
-                                                            scope.launch { subSwipe.animateTo(0) }
-                                                            showSubDelete = true
-                                                        },
-                                                        enabled = subSwipe.currentValue == 1,
-                                                        modifier = Modifier
-                                                            .background(Color.Red)
-                                                            .size(subActionWidth)
-                                                    ) {
-                                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                                                    }
-                                                }
-
-                                                Row(
-                                                    modifier = Modifier
-                                                        .offset { IntOffset(subSwipe.offset.value.roundToInt(), 0) }
-                                                        .fillMaxWidth()
-                                                        .height(48.dp)
-                                                        .clickable { /* no expand */ }
-                                                        .padding(horizontal = 8.dp),
-                                                    verticalAlignment = Alignment.CenterVertically
-                                                ) {
-                                                    Text(sub, modifier = Modifier.weight(1f))
-                                                }
-                                            }
-
-                                            if (showSubRename) {
-                                                AlertDialog(
-                                                    onDismissRequest = { showSubRename = false },
-                                                    confirmButton = {
-                                                        TextButton(onClick = {
-                                                            onRenameSub(index, subIndex, newSubName)
-                                                            showSubRename = false
-                                                        }) { Text("Save") }
-                                                    },
-                                                    dismissButton = {
-                                                        TextButton(onClick = { showSubRename = false }) { Text("Cancel") }
-                                                    },
-                                                    title = { Text("Edit Heading") },
-                                                    text = {
-                                                        OutlinedTextField(
-                                                            value = newSubName,
-                                                            onValueChange = { newSubName = it },
-                                                            label = { Text("Name") }
-                                                        )
-                                                    }
-                                                )
-                                            }
-
-                                            if (showSubDelete) {
-                                                AlertDialog(
-                                                    onDismissRequest = { showSubDelete = false },
-                                                    confirmButton = {
-                                                        TextButton(onClick = {
-                                                            onDeleteSub(index, subIndex)
-                                                            showSubDelete = false
-                                                        }) { Text("Evet") }
-                                                    },
-                                                    dismissButton = {
-                                                        TextButton(onClick = { showSubDelete = false }) { Text("Hayır") }
-                                                    },
-                                                    text = { Text("Silmek istediğinize emin misiniz?") }
-                                                )
-                                            }
-
-                                            Spacer(modifier = Modifier.height(4.dp))
-                                        }
-
-                                        // Add new sub heading
-                                        var newSubText by remember(folder.id) { mutableStateOf("") }
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 4.dp)
-                                        ) {
-                                            OutlinedTextField(
-                                                value = newSubText,
-                                                onValueChange = { newSubText = it },
-                                                label = { Text("Alt Başlık Ekle") },
-                                                modifier = Modifier.weight(1f)
-                                            )
-                                            IconButton(onClick = {
-                                                if (newSubText.isNotBlank()) {
-                                                    onAddSub(index, newSubText)
-                                                    newSubText = ""
-                                                }
-                                            }) {
-                                                Icon(Icons.Default.Add, contentDescription = "Add sub")
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if (showRename) {
-                            AlertDialog(
-                                onDismissRequest = { showRename = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onRename(index, newName)
-                                        showRename = false
-                                    }) { Text("Save") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showRename = false }) { Text("Cancel") }
-                                },
-                                title = { Text("Edit Folder") },
-                                text = {
-                                    OutlinedTextField(
-                                        value = newName,
-                                        onValueChange = { newName = it },
-                                        label = { Text("Name") }
-                                    )
-                                }
-                            )
-                        }
-
-                        if (showDelete) {
-                            AlertDialog(
-                                onDismissRequest = { showDelete = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onDelete(index)
-                                        showDelete = false
-                                    }) { Text("Evet") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showDelete = false }) { Text("Hayır") }
-                                },
-                                text = { Text("Silmek istediğinize emin misiniz?") }
-                            )
-                        }
+                    itemsIndexed(folders, key = { _, f -> f.id }) { index, folder ->
+                        FolderItem(
+                            folder = folder,
+                            folderIndex = index,
+                            onRename = onRename,
+                            onDelete = onDelete,
+                            onRenameHeading = onRenameHeading,
+                            onDeleteHeading = onDeleteHeading,
+                            onAddHeading = onAddHeading
+                        )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
@@ -373,10 +127,11 @@ fun FolderListScreen(
                 onDismissRequest = { showCreate = false },
                 confirmButton = {
                     TextButton(onClick = {
-                        onCreate(createName, subHeadings.toList())
+                        onCreate(createName, newHeadings.toList())
                         showCreate = false
                         createName = ""
-                        subHeadings.clear()
+                        newHeadings.clear()
+                        newHeadingText = ""
                     }) { Text("Oluştur") }
                 },
                 dismissButton = {
@@ -391,11 +146,11 @@ fun FolderListScreen(
                             label = { Text("Ad") },
                             modifier = Modifier.fillMaxWidth()
                         )
-                        subHeadings.forEachIndexed { index, text ->
+                        newHeadings.forEachIndexed { i, text ->
                             OutlinedTextField(
                                 value = text,
-                                onValueChange = { subHeadings[index] = it },
-                                label = { Text("Alt Başlık ${index + 1}") },
+                                onValueChange = { newHeadings[i] = it },
+                                label = { Text("Başlık ${i + 1}") },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(top = 4.dp)
@@ -408,23 +163,341 @@ fun FolderListScreen(
                                 .padding(top = 8.dp)
                         ) {
                             OutlinedTextField(
-                                value = newSub,
-                                onValueChange = { newSub = it },
-                                label = { Text("Alt Başlık Ekle") },
+                                value = newHeadingText,
+                                onValueChange = { newHeadingText = it },
+                                label = { Text("Başlık Ekle") },
                                 modifier = Modifier.weight(1f)
                             )
                             IconButton(onClick = {
-                                if (newSub.isNotBlank()) {
-                                    subHeadings.add(newSub)
-                                    newSub = ""
+                                if (newHeadingText.isNotBlank()) {
+                                    newHeadings.add(newHeadingText)
+                                    newHeadingText = ""
                                 }
                             }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add sub")
+                                Icon(Icons.Default.Add, contentDescription = "Add")
                             }
                         }
                     }
                 }
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun FolderItem(
+    folder: UserFolder,
+    folderIndex: Int,
+    onRename: (Int, String) -> Unit,
+    onDelete: (Int) -> Unit,
+    onRenameHeading: (Int, List<Int>, String) -> Unit,
+    onDeleteHeading: (Int, List<Int>) -> Unit,
+    onAddHeading: (Int, List<Int>, String) -> Unit
+) {
+    var expanded by remember(folder.id) { mutableStateOf(false) }
+    var showRename by remember(folder.id) { mutableStateOf(false) }
+    var showDelete by remember(folder.id) { mutableStateOf(false) }
+    var newName by remember(folder.id) { mutableStateOf(folder.name) }
+    val scope = rememberCoroutineScope()
+    val actionWidth = 72.dp
+    val swipeState = rememberSwipeableState(0)
+    val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+    val reveal = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+    LaunchedEffect(swipeState.offset) { if (swipeState.offset.value != 0f) expanded = false }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clipToBounds()
+            .swipeable(
+                state = swipeState,
+                anchors = mapOf(0f to 0, -maxOffset to 1),
+                thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                orientation = Orientation.Horizontal
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .height(72.dp)
+                .alpha(reveal)
+        ) {
+            IconButton(
+                onClick = {
+                    scope.launch { swipeState.animateTo(0) }
+                    showRename = true
+                },
+                enabled = swipeState.currentValue == 1,
+                modifier = Modifier
+                    .background(Color(0xFFFFA500))
+                    .size(actionWidth)
+            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            IconButton(
+                onClick = {
+                    scope.launch { swipeState.animateTo(0) }
+                    showDelete = true
+                },
+                enabled = swipeState.currentValue == 1,
+                modifier = Modifier
+                    .background(Color.Red)
+                    .size(actionWidth)
+            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+        }
+
+        Column(
+            modifier = Modifier
+                .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .clickable { expanded = !expanded }
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(folder.name, modifier = Modifier.weight(1f))
+                if (swipeState.offset.value == 0f) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null
+                    )
+                }
+            }
+            if (expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 32.dp, top = 4.dp)
+                ) {
+                    folder.headings.forEachIndexed { idx, heading ->
+                        HeadingItem(
+                            heading = heading,
+                            folderIndex = folderIndex,
+                            path = listOf(idx),
+                            onRenameHeading = onRenameHeading,
+                            onDeleteHeading = onDeleteHeading,
+                            onAddHeading = onAddHeading
+                        )
+                    }
+                    var newSub by remember(folder.id) { mutableStateOf("") }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newSub,
+                            onValueChange = { newSub = it },
+                            label = { Text("Başlık Ekle") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = {
+                            if (newSub.isNotBlank()) {
+                                onAddHeading(folderIndex, emptyList(), newSub)
+                                newSub = ""
+                            }
+                        }) { Icon(Icons.Default.Add, contentDescription = "Add") }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showRename) {
+        AlertDialog(
+            onDismissRequest = { showRename = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    onRename(folderIndex, newName)
+                    showRename = false
+                }) { Text("Save") }
+            },
+            dismissButton = { TextButton(onClick = { showRename = false }) { Text("Cancel") } },
+            title = { Text("Edit Folder") },
+            text = {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Name") }
+                )
+            }
+        )
+    }
+
+    if (showDelete) {
+        AlertDialog(
+            onDismissRequest = { showDelete = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDelete(folderIndex)
+                    showDelete = false
+                }) { Text("Evet") }
+            },
+            dismissButton = { TextButton(onClick = { showDelete = false }) { Text("Hayır") } },
+            text = { Text("Silmek istediğinize emin misiniz?") }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun HeadingItem(
+    heading: FolderHeading,
+    folderIndex: Int,
+    path: List<Int>,
+    onRenameHeading: (Int, List<Int>, String) -> Unit,
+    onDeleteHeading: (Int, List<Int>) -> Unit,
+    onAddHeading: (Int, List<Int>, String) -> Unit
+) {
+    var expanded by remember(heading.id) { mutableStateOf(false) }
+    var showRename by remember(heading.id) { mutableStateOf(false) }
+    var showDelete by remember(heading.id) { mutableStateOf(false) }
+    var newName by remember(heading.id) { mutableStateOf(heading.name) }
+    val scope = rememberCoroutineScope()
+    val actionWidth = 64.dp
+    val swipeState = rememberSwipeableState(0)
+    val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+    val reveal = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+    LaunchedEffect(swipeState.offset) { if (swipeState.offset.value != 0f) expanded = false }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clipToBounds()
+            .swipeable(
+                state = swipeState,
+                anchors = mapOf(0f to 0, -maxOffset to 1),
+                thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                orientation = Orientation.Horizontal
+            )
+    ) {
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .height(48.dp)
+                .alpha(reveal)
+        ) {
+            IconButton(
+                onClick = {
+                    scope.launch { swipeState.animateTo(0) }
+                    showRename = true
+                },
+                enabled = swipeState.currentValue == 1,
+                modifier = Modifier
+                    .background(Color(0xFFFFA500))
+                    .size(actionWidth)
+            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            IconButton(
+                onClick = {
+                    scope.launch { swipeState.animateTo(0) }
+                    showDelete = true
+                },
+                enabled = swipeState.currentValue == 1,
+                modifier = Modifier
+                    .background(Color.Red)
+                    .size(actionWidth)
+            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+        }
+
+        Column(
+            modifier = Modifier
+                .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                .fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .clickable { expanded = !expanded }
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(heading.name, modifier = Modifier.weight(1f))
+                if (swipeState.offset.value == 0f) {
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                        contentDescription = null
+                    )
+                }
+            }
+            if (expanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 24.dp)
+                ) {
+                    heading.children.forEachIndexed { idx, child ->
+                        HeadingItem(
+                            heading = child,
+                            folderIndex = folderIndex,
+                            path = path + idx,
+                            onRenameHeading = onRenameHeading,
+                            onDeleteHeading = onDeleteHeading,
+                            onAddHeading = onAddHeading
+                        )
+                    }
+                    var newSub by remember(heading.id) { mutableStateOf("") }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newSub,
+                            onValueChange = { newSub = it },
+                            label = { Text("Alt Başlık") },
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = {
+                            if (newSub.isNotBlank()) {
+                                onAddHeading(folderIndex, path, newSub)
+                                newSub = ""
+                            }
+                        }) { Icon(Icons.Default.Add, contentDescription = "Add") }
+                    }
+                }
+            }
+        }
+    }
+
+    if (showRename) {
+        AlertDialog(
+            onDismissRequest = { showRename = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    onRenameHeading(folderIndex, path, newName)
+                    showRename = false
+                }) { Text("Save") }
+            },
+            dismissButton = { TextButton(onClick = { showRename = false }) { Text("Cancel") } },
+            title = { Text("Edit Heading") },
+            text = {
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = { newName = it },
+                    label = { Text("Name") }
+                )
+            }
+        )
+    }
+
+    if (showDelete) {
+        AlertDialog(
+            onDismissRequest = { showDelete = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    onDeleteHeading(folderIndex, path)
+                    showDelete = false
+                }) { Text("Evet") }
+            },
+            dismissButton = { TextButton(onClick = { showDelete = false }) { Text("Hayır") } },
+            text = { Text("Silmek istediğinize emin misiniz?") }
+        )
     }
 }

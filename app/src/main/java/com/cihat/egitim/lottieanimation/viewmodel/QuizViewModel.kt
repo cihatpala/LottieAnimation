@@ -9,6 +9,7 @@ import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.data.PublicQuiz
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 import kotlin.math.min
 
 /**
@@ -22,6 +23,7 @@ class QuizViewModel : ViewModel() {
         private set
 
     private var nextFolderId = 0
+    private var nextHeadingId = 0
 
     /** Quizzes created or imported by the user */
     var quizzes = mutableStateListOf<UserQuiz>()
@@ -66,6 +68,28 @@ class QuizViewModel : ViewModel() {
     var isAnswerVisible by mutableStateOf(false)
         private set
 
+    /** Returns the heading at the given path, or null if not found */
+    private fun getHeadingAt(list: MutableList<FolderHeading>, path: List<Int>): FolderHeading? {
+        var current: FolderHeading? = null
+        var currentList = list
+        for (index in path) {
+            current = currentList.getOrNull(index) ?: return null
+            currentList = current.children
+        }
+        return current
+    }
+
+    /** Returns the parent list for the heading at path */
+    private fun getHeadingParent(list: MutableList<FolderHeading>, path: List<Int>): MutableList<FolderHeading>? {
+        if (path.isEmpty()) return list
+        var currentList = list
+        for (i in 0 until path.size - 1) {
+            val h = currentList.getOrNull(i) ?: return null
+            currentList = h.children
+        }
+        return currentList
+    }
+
     /** Renames the folder at the given index */
     fun renameFolder(index: Int, newName: String) {
         val folder = folders.getOrNull(index) ?: return
@@ -81,42 +105,50 @@ class QuizViewModel : ViewModel() {
         }
     }
 
-    /** Creates a new folder with optional sub headings */
-    fun createFolder(name: String, subHeadings: List<String> = emptyList()) {
+    /** Creates a new folder with optional root headings */
+    fun createFolder(name: String, headings: List<String> = emptyList()) {
         if (name.isBlank()) return
         val exists = folders.any { it.name == name }
         if (exists) return
+        val headingObjs = headings.map {
+            FolderHeading(id = nextHeadingId++, name = it).also { _ -> }
+        }
         folders.add(
             UserFolder(
                 id = nextFolderId++,
                 name = name,
-                subHeadings = subHeadings.toMutableList()
+                headings = headingObjs.toMutableList()
             )
         )
     }
 
-    /** Renames a sub heading of the folder */
-    fun renameSubHeading(folderIndex: Int, subIndex: Int, newName: String) {
+    /** Renames a heading specified by path */
+    fun renameHeading(folderIndex: Int, path: List<Int>, newName: String) {
+        if (newName.isBlank()) return
         val folder = folders.getOrNull(folderIndex) ?: return
-        if (newName.isBlank() || subIndex !in folder.subHeadings.indices) return
-        folder.subHeadings[subIndex] = newName
-        // Trigger recomposition
+        val parent = getHeadingParent(folder.headings, path) ?: return
+        val idx = path.lastOrNull() ?: return
+        val heading = parent.getOrNull(idx) ?: return
+        parent[idx] = heading.copy(name = newName)
         folders[folderIndex] = folder.copy()
     }
 
-    /** Deletes the sub heading at the given index */
-    fun deleteSubHeading(folderIndex: Int, subIndex: Int) {
+    /** Deletes the heading specified by path */
+    fun deleteHeading(folderIndex: Int, path: List<Int>) {
         val folder = folders.getOrNull(folderIndex) ?: return
-        if (subIndex !in folder.subHeadings.indices) return
-        folder.subHeadings.removeAt(subIndex)
+        val parent = getHeadingParent(folder.headings, path) ?: return
+        val idx = path.lastOrNull() ?: return
+        if (idx !in parent.indices) return
+        parent.removeAt(idx)
         folders[folderIndex] = folder.copy()
     }
 
-    /** Adds a new sub heading to the folder */
-    fun addSubHeading(folderIndex: Int, name: String) {
-        val folder = folders.getOrNull(folderIndex) ?: return
+    /** Adds a new child heading to the node specified by path */
+    fun addHeading(folderIndex: Int, path: List<Int>, name: String) {
         if (name.isBlank()) return
-        folder.subHeadings.add(name)
+        val folder = folders.getOrNull(folderIndex) ?: return
+        val parent = if (path.isEmpty()) folder.headings else getHeadingAt(folder.headings, path) ?: return
+        parent.children.add(FolderHeading(id = nextHeadingId++, name = name))
         folders[folderIndex] = folder.copy()
     }
 
