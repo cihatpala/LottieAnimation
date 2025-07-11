@@ -83,8 +83,9 @@ class QuizViewModel : ViewModel() {
     private fun getHeadingParent(list: MutableList<FolderHeading>, path: List<Int>): MutableList<FolderHeading>? {
         if (path.isEmpty()) return list
         var currentList = list
-        for (i in 0 until path.size - 1) {
-            val h = currentList.getOrNull(i) ?: return null
+        for (level in 0 until path.size - 1) {
+            val index = path[level]
+            val h = currentList.getOrNull(index) ?: return null
             currentList = h.children
         }
         return currentList
