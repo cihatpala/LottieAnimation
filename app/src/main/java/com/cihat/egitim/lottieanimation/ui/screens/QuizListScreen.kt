@@ -42,6 +42,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +62,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
@@ -80,6 +83,7 @@ fun QuizListScreen(
     onDelete: (Int) -> Unit,
     onCreate: (String, Int, List<String>, Int?) -> Unit,
     onLogout: () -> Unit,
+    onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
@@ -92,6 +96,7 @@ fun QuizListScreen(
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var showFolderSelect by remember { mutableStateOf(false) }
+        var showWarning by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }
         var createCount by remember { mutableFloatStateOf(4f) }
         val subHeadings = remember { mutableStateListOf<String>() }
@@ -294,7 +299,13 @@ fun QuizListScreen(
                 }
             }
             ExtendedFloatingActionButton(
-                onClick = { showCreate = true },
+                onClick = {
+                    if (folders.isEmpty()) {
+                        showWarning = true
+                    } else {
+                        showCreate = true
+                    }
+                },
                 icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
                 text = { Text("Quiz Ekle") },
                 modifier = Modifier
@@ -414,6 +425,32 @@ fun QuizListScreen(
                         }
                     }
                 }
+            )
+        }
+
+        if (showWarning) {
+            AlertDialog(
+                onDismissRequest = { showWarning = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showWarning = false
+                        onFolders()
+                    }) { Text("Klasör Oluştur") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showWarning = false }) { Text("Kapat") }
+                },
+                icon = {
+                    androidx.compose.foundation.Image(
+                        painter = androidx.compose.ui.res.painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.knowledge_logo),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(64.dp)
+                            .clip(CircleShape)
+                    )
+                },
+                title = { Text("Uyarı") },
+                text = { Text("Quiz oluşturmak için klasör oluşturunuz.") }
             )
         }
         }

@@ -42,6 +42,13 @@ class QuizViewModel : ViewModel() {
     val currentQuizName: String
         get() = quizzes.getOrNull(currentQuizIndex)?.name ?: ""
 
+    /** Headings of the folder the current quiz belongs to */
+    val currentQuizFolderHeadings: List<FolderHeading>
+        get() {
+            val folderId = quizzes.getOrNull(currentQuizIndex)?.folderId
+            return folders.find { it.id == folderId }?.headings ?: emptyList()
+        }
+
     /** Sample public quizzes that could come from a backend in a real app */
     val publicQuizzes: List<PublicQuiz> = listOf(
         PublicQuiz(

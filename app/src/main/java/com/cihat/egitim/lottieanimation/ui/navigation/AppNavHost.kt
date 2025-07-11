@@ -165,6 +165,7 @@ fun AppNavHost(
                         popUpTo(Screen.QuizList.route) { inclusive = true }
                     }
                 },
+                onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
                     when (tab) {
@@ -211,6 +212,7 @@ fun AppNavHost(
         composable(Screen.AddQuestion.route) {
             AddQuestionScreen(
                 boxCount = quizViewModel.boxes.size,
+                headings = quizViewModel.currentQuizFolderHeadings,
                 onAdd = { q, a, topic, sub, box ->
                     quizViewModel.addQuestion(q, a, topic, sub, box)
                 },
