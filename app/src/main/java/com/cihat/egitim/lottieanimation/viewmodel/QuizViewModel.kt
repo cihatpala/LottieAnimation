@@ -42,6 +42,13 @@ class QuizViewModel : ViewModel() {
     val currentQuizName: String
         get() = quizzes.getOrNull(currentQuizIndex)?.name ?: ""
 
+    /** Headings of the folder the current quiz belongs to */
+    val currentQuizFolderHeadings: List<FolderHeading>
+        get() {
+            val folderId = quizzes.getOrNull(currentQuizIndex)?.folderId
+            return folders.find { it.id == folderId }?.headings ?: emptyList()
+        }
+
     /** Sample public quizzes that could come from a backend in a real app */
     val publicQuizzes: List<PublicQuiz> = listOf(
         PublicQuiz(
@@ -195,6 +202,22 @@ class QuizViewModel : ViewModel() {
             )
         )
         currentQuizIndex = quizzes.lastIndex
+    }
+
+    /**
+     * Creates a quiz and immediately adds an initial question to the first box.
+     */
+    fun createQuizWithQuestion(
+        name: String,
+        count: Int,
+        folderId: Int?,
+        topic: String,
+        subtopic: String,
+        question: String,
+        answer: String
+    ) {
+        createQuiz(name, count, emptyList(), folderId)
+        addQuestion(question, answer, topic, subtopic, 0)
     }
 
     /** Changes the active quiz */

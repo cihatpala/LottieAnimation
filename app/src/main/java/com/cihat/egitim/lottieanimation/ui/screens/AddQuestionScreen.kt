@@ -17,9 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,19 +36,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun AddQuestionScreen(
     boxCount: Int,
+    headings: List<FolderHeading>,
     onAdd: (String, String, String, String, Int) -> Unit,
     onBack: () -> Unit,
     onDone: () -> Unit
 ) {
     var questionText by remember { mutableStateOf("") }
     var answerText by remember { mutableStateOf("") }
-    var topicText by remember { mutableStateOf("") }
-    var subTopicText by remember { mutableStateOf("") }
     var selectedBox by remember { mutableStateOf(0) }
+    var path by remember { mutableStateOf<List<Int>>(emptyList()) }
     val context = LocalContext.current
 
     AppScaffold(
@@ -58,34 +65,6 @@ fun AddQuestionScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedTextField(
-                value = questionText,
-                onValueChange = { questionText = it },
-                label = { Text("Question") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = topicText,
-                onValueChange = { topicText = it },
-                label = { Text("Topic") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = subTopicText,
-                onValueChange = { subTopicText = it },
-                label = { Text("Subtopic") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
-                value = answerText,
-                onValueChange = { answerText = it },
-                label = { Text("Answer") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -113,17 +92,80 @@ fun AddQuestionScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Dynamic heading selection
+            var currentList = headings
+            for (level in 0..path.size) {
+                val options = currentList
+                if (options.isEmpty()) break
+                var expanded by remember(level, path) { mutableStateOf(false) }
+                val selectedIdx = path.getOrNull(level)
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Başlık ${level + 1}") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        options.forEachIndexed { index, h ->
+                            DropdownMenuItem(
+                                text = { Text(h.name) },
+                                onClick = {
+                                    path = path.take(level) + index
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                selectedIdx?.let { idx -> currentList = options[idx].children } ?: run { currentList = emptyList() }
+            }
+
+            OutlinedTextField(
+                value = questionText,
+                onValueChange = { questionText = it },
+                label = { Text("Question") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = answerText,
+                onValueChange = { answerText = it },
+                label = { Text("Answer") },
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Button(onClick = {
                     if (questionText.isBlank() || answerText.isBlank()) {
                         Toast.makeText(context, "Question and answer cannot be empty", Toast.LENGTH_SHORT).show()
                     } else {
-                        onAdd(questionText, answerText, topicText, subTopicText, selectedBox)
+                        val names = mutableListOf<String>()
+                        var list = headings
+                        for (idx in path) {
+                            val h = list.getOrNull(idx) ?: break
+                            names.add(h.name)
+                            list = h.children
+                        }
+                        val topic = names.firstOrNull() ?: ""
+                        val sub = names.drop(1).joinToString(" > ")
+                        onAdd(questionText, answerText, topic, sub, selectedBox)
                         questionText = ""
                         answerText = ""
-                        topicText = ""
-                        subTopicText = ""
+                        path = emptyList()
                         selectedBox = 0
                     }
                 }) {
