@@ -147,8 +147,14 @@ class QuizViewModel : ViewModel() {
     fun addHeading(folderIndex: Int, path: List<Int>, name: String) {
         if (name.isBlank()) return
         val folder = folders.getOrNull(folderIndex) ?: return
-        val parent = if (path.isEmpty()) folder.headings else getHeadingAt(folder.headings, path) ?: return
-        parent.children.add(FolderHeading(id = nextHeadingId++, name = name))
+        val targetList: MutableList<FolderHeading> =
+            if (path.isEmpty()) {
+                folder.headings
+            } else {
+                getHeadingAt(folder.headings, path)?.children ?: return
+            }
+
+        targetList.add(FolderHeading(id = nextHeadingId++, name = name))
         folders[folderIndex] = folder.copy()
     }
 
