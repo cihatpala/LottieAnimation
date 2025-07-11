@@ -35,6 +35,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Add
 import com.cihat.egitim.lottieanimation.data.UserQuiz
+import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import kotlinx.coroutines.launch
@@ -70,12 +72,13 @@ import kotlin.math.roundToInt
 @Composable
 fun QuizListScreen(
     quizzes: List<UserQuiz>,
+    folders: List<UserFolder>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
-    onCreate: (String, Int, List<String>) -> Unit,
+    onCreate: (String, Int, List<String>, Int?) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -88,6 +91,7 @@ fun QuizListScreen(
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }
+        var showFolderSelect by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }
         var createCount by remember { mutableFloatStateOf(4f) }
         val subHeadings = remember { mutableStateListOf<String>() }
@@ -292,7 +296,7 @@ fun QuizListScreen(
             ExtendedFloatingActionButton(
                 onClick = { showCreate = true },
                 icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
-                text = { Text("Klasör Oluştur") },
+                text = { Text("Quiz Ekle") },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
@@ -310,17 +314,14 @@ fun QuizListScreen(
                 onDismissRequest = { showCreate = false },
                 confirmButton = {
                     TextButton(onClick = {
-                        onCreate(createName, createCount.toInt(), subHeadings.toList())
                         showCreate = false
-                        createName = ""
-                        createCount = 4f
-                        subHeadings.clear()
-                    }) { Text("Oluştur") }
+                        showFolderSelect = true
+                    }) { Text("İleri") }
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreate = false }) { Text("İptal") }
                 },
-                title = { Text("Klasör Oluştur") },
+                title = { Text("Quiz Oluştur") },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         OutlinedTextField(
@@ -365,6 +366,50 @@ fun QuizListScreen(
                                 }
                             }) {
                                 Icon(Icons.Default.Add, contentDescription = "Add sub")
+                            }
+                        }
+                    }
+                }
+            )
+        }
+
+        if (showFolderSelect) {
+            var selected by remember { mutableStateOf(folders.firstOrNull()?.id) }
+            AlertDialog(
+                onDismissRequest = { showFolderSelect = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onCreate(createName, createCount.toInt(), subHeadings.toList(), selected)
+                        showFolderSelect = false
+                        createName = ""
+                        createCount = 4f
+                        subHeadings.clear()
+                        newSub = ""
+                    }) { Text("Oluştur") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showFolderSelect = false }) { Text("İptal") }
+                },
+                title = { Text("Klasör Seç") },
+                text = {
+                    if (folders.isEmpty()) {
+                        Text("Önce klasör oluşturun")
+                    } else {
+                        Column {
+                            folders.forEach { folder ->
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { selected = folder.id }
+                                        .padding(4.dp)
+                                ) {
+                                    RadioButton(
+                                        selected = selected == folder.id,
+                                        onClick = { selected = folder.id }
+                                    )
+                                    Text(folder.name, modifier = Modifier.padding(start = 8.dp))
+                                }
                             }
                         }
                     }

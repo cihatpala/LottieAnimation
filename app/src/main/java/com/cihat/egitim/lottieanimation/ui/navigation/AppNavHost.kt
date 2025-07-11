@@ -133,6 +133,7 @@ fun AppNavHost(
         composable(Screen.QuizList.route) {
             QuizListScreen(
                 quizzes = quizViewModel.quizzes,
+                folders = quizViewModel.folders,
                 onQuiz = { quizIdx, boxIdx ->
                     quizViewModel.setCurrentQuiz(quizIdx)
                     if (quizViewModel.startQuiz(boxIdx)) {
@@ -155,8 +156,8 @@ fun AppNavHost(
                 },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
-                onCreate = { name, count, subs ->
-                    quizViewModel.createQuiz(name, count, subs)
+                onCreate = { name, count, subs, folderId ->
+                    quizViewModel.createQuiz(name, count, subs, folderId)
                 },
                 onLogout = {
                     authViewModel.logout()
