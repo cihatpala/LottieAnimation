@@ -23,7 +23,7 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 
 @Composable
 fun SettingsScreen(
-    onCreateQuiz: (String, Int) -> Unit,
+    onCreateQuiz: (String, Int, List<String>) -> Unit,
     onBack: () -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -54,7 +54,7 @@ fun SettingsScreen(
             onDismissRequest = { showDialog = false },
             confirmButton = {
                 Button(onClick = {
-                    onCreateQuiz(nameText, sliderValue.toInt())
+                    onCreateQuiz(nameText, sliderValue.toInt(), emptyList())
                     showDialog = false
                 }) { Text("Başla") }
             },

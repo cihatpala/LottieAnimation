@@ -37,6 +37,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -73,7 +76,7 @@ fun QuizListScreen(
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
-    onCreate: () -> Unit,
+    onCreate: (String, Int, List<String>) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -85,6 +88,12 @@ fun QuizListScreen(
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
+        var showCreate by remember { mutableStateOf(false) }
+        var createName by remember { mutableStateOf("") }
+        var createCount by remember { mutableFloatStateOf(4f) }
+        val subHeadings = remember { mutableStateListOf<String>() }
+        var newSub by remember { mutableStateOf("") }
+
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -284,7 +293,7 @@ fun QuizListScreen(
         }
 
         ExtendedFloatingActionButton(
-            onClick = onCreate,
+            onClick = { showCreate = true },
             icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
             text = { Text("Klasör Oluştur") },
             modifier = Modifier
@@ -295,6 +304,73 @@ fun QuizListScreen(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
+
+        if (showCreate) {
+            AlertDialog(
+                onDismissRequest = { showCreate = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onCreate(createName, createCount.toInt(), subHeadings.toList())
+                        showCreate = false
+                        createName = ""
+                        createCount = 4f
+                        subHeadings.clear()
+                    }) { Text("Oluştur") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCreate = false }) { Text("İptal") }
+                },
+                title = { Text("Klasör Oluştur") },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        OutlinedTextField(
+                            value = createName,
+                            onValueChange = { createName = it },
+                            label = { Text("Ad") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Slider(
+                            value = createCount,
+                            onValueChange = { createCount = it },
+                            valueRange = 1f..10f,
+                            steps = 8
+                        )
+                        Text("${createCount.toInt()} kutu")
+                        subHeadings.forEachIndexed { index, text ->
+                            OutlinedTextField(
+                                value = text,
+                                onValueChange = { subHeadings[index] = it },
+                                label = { Text("Alt Başlık ${index + 1}") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp)
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = newSub,
+                                onValueChange = { newSub = it },
+                                label = { Text("Alt Başlık Ekle") },
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = {
+                                if (newSub.isNotBlank()) {
+                                    subHeadings.add(newSub)
+                                    newSub = ""
+                                }
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add sub")
+                            }
+                        }
+                    }
+                }
+            )
+        }
         }
     }
 

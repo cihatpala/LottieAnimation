@@ -6,5 +6,7 @@ package com.cihat.egitim.lottieanimation.data
 data class UserQuiz(
     val id: Int,
     val name: String,
-    val boxes: MutableList<MutableList<Question>>
+    val boxes: MutableList<MutableList<Question>>,
+    /** Optional sub headings defined by the user */
+    val subHeadings: MutableList<String> = mutableListOf()
 )
