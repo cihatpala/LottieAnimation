@@ -127,36 +127,82 @@ class QuizViewModel : ViewModel() {
     fun renameHeading(folderIndex: Int, path: List<Int>, newName: String) {
         if (newName.isBlank()) return
         val folder = folders.getOrNull(folderIndex) ?: return
-        val parent = getHeadingParent(folder.headings, path) ?: return
-        val idx = path.lastOrNull() ?: return
-        val heading = parent.getOrNull(idx) ?: return
-        parent[idx] = heading.copy(name = newName)
-        folders[folderIndex] = folder.copy()
+        val newHeadings = renameHeadingRec(folder.headings, path, newName) ?: return
+        folders[folderIndex] = folder.copy(headings = newHeadings)
+    }
+
+    private fun renameHeadingRec(
+        list: MutableList<FolderHeading>,
+        path: List<Int>,
+        newName: String
+    ): MutableList<FolderHeading>? {
+        val idx = path.firstOrNull() ?: return null
+        val heading = list.getOrNull(idx) ?: return null
+        val copy = list.toMutableList()
+        if (path.size == 1) {
+            copy[idx] = heading.copy(name = newName)
+            return copy
+        }
+        val childCopy = renameHeadingRec(heading.children, path.drop(1), newName) ?: return null
+        copy[idx] = heading.copy(children = childCopy)
+        return copy
     }
 
     /** Deletes the heading specified by path */
     fun deleteHeading(folderIndex: Int, path: List<Int>) {
         val folder = folders.getOrNull(folderIndex) ?: return
-        val parent = getHeadingParent(folder.headings, path) ?: return
-        val idx = path.lastOrNull() ?: return
-        if (idx !in parent.indices) return
-        parent.removeAt(idx)
-        folders[folderIndex] = folder.copy()
+        val newHeadings = deleteHeadingRec(folder.headings, path) ?: return
+        folders[folderIndex] = folder.copy(headings = newHeadings)
+    }
+
+    private fun deleteHeadingRec(
+        list: MutableList<FolderHeading>,
+        path: List<Int>
+    ): MutableList<FolderHeading>? {
+        val idx = path.firstOrNull() ?: return null
+        val heading = list.getOrNull(idx) ?: return null
+        val copy = list.toMutableList()
+        if (path.size == 1) {
+            if (idx !in copy.indices) return null
+            copy.removeAt(idx)
+            return copy
+        }
+        val childCopy = deleteHeadingRec(heading.children, path.drop(1)) ?: return null
+        copy[idx] = heading.copy(children = childCopy)
+        return copy
     }
 
     /** Adds a new child heading to the node specified by path */
     fun addHeading(folderIndex: Int, path: List<Int>, name: String) {
         if (name.isBlank()) return
         val folder = folders.getOrNull(folderIndex) ?: return
-        val targetList: MutableList<FolderHeading> =
-            if (path.isEmpty()) {
-                folder.headings
-            } else {
-                getHeadingAt(folder.headings, path)?.children ?: return
-            }
+        val newHeadings = if (path.isEmpty()) {
+            val copy = folder.headings.toMutableList()
+            copy.add(FolderHeading(id = nextHeadingId++, name = name))
+            copy
+        } else {
+            addHeadingRec(folder.headings, path, name) ?: return
+        }
+        folders[folderIndex] = folder.copy(headings = newHeadings)
+    }
 
-        targetList.add(FolderHeading(id = nextHeadingId++, name = name))
-        folders[folderIndex] = folder.copy()
+    private fun addHeadingRec(
+        list: MutableList<FolderHeading>,
+        path: List<Int>,
+        name: String
+    ): MutableList<FolderHeading>? {
+        val idx = path.firstOrNull() ?: return null
+        val heading = list.getOrNull(idx) ?: return null
+        val copy = list.toMutableList()
+        if (path.size == 1) {
+            val childrenCopy = heading.children.toMutableList()
+            childrenCopy.add(FolderHeading(id = nextHeadingId++, name = name))
+            copy[idx] = heading.copy(children = childrenCopy)
+            return copy
+        }
+        val childCopy = addHeadingRec(heading.children, path.drop(1), name) ?: return null
+        copy[idx] = heading.copy(children = childCopy)
+        return copy
     }
 
     /** Renames the quiz at the given index */
