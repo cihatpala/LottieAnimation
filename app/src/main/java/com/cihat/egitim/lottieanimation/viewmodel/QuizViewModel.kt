@@ -204,6 +204,22 @@ class QuizViewModel : ViewModel() {
         currentQuizIndex = quizzes.lastIndex
     }
 
+    /**
+     * Creates a quiz and immediately adds an initial question to the first box.
+     */
+    fun createQuizWithQuestion(
+        name: String,
+        count: Int,
+        folderId: Int?,
+        topic: String,
+        subtopic: String,
+        question: String,
+        answer: String
+    ) {
+        createQuiz(name, count, emptyList(), folderId)
+        addQuestion(question, answer, topic, subtopic, 0)
+    }
+
     /** Changes the active quiz */
     fun setCurrentQuiz(index: Int) {
         currentQuizIndex = index.coerceIn(0, quizzes.lastIndex)

@@ -40,6 +40,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExposedDropdownMenu
+import androidx.compose.material3.menuAnchor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
@@ -48,7 +53,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -71,7 +75,7 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, androidx.compose.material3.ExperimentalMaterialApi::class)
 @Composable
 fun QuizListScreen(
     quizzes: List<UserQuiz>,
@@ -81,7 +85,8 @@ fun QuizListScreen(
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
-    onCreate: (String, Int, List<String>, Int?) -> Unit,
+    onCreate: (String, Int, Int?) -> Unit,
+    onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onLogout: () -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
@@ -95,12 +100,13 @@ fun QuizListScreen(
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }
-        var showFolderSelect by remember { mutableStateOf(false) }
         var showWarning by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }
         var createCount by remember { mutableFloatStateOf(4f) }
-        val subHeadings = remember { mutableStateListOf<String>() }
-        var newSub by remember { mutableStateOf("") }
+        var selectedFolder by remember { mutableStateOf(folders.firstOrNull()?.id) }
+        var path by remember { mutableStateOf<List<Int>>(emptyList()) }
+        var questionText by remember { mutableStateOf("") }
+        var answerText by remember { mutableStateOf("") }
 
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -325,9 +331,27 @@ fun QuizListScreen(
                 onDismissRequest = { showCreate = false },
                 confirmButton = {
                     TextButton(onClick = {
+                        val folderId = selectedFolder
+                        if (folderId != null) {
+                            val names = mutableListOf<String>()
+                            var list = folders.find { it.id == folderId }?.headings ?: emptyList()
+                            for (idx in path) {
+                                val h = list.getOrNull(idx) ?: break
+                                names.add(h.name)
+                                list = h.children
+                            }
+                            val topic = names.firstOrNull() ?: ""
+                            val sub = names.drop(1).joinToString(" > ")
+                            onCreateWithQuestion(createName, createCount.toInt(), folderId, topic, sub, questionText, answerText)
+                        }
                         showCreate = false
-                        showFolderSelect = true
-                    }) { Text("İleri") }
+                        createName = ""
+                        createCount = 4f
+                        selectedFolder = folders.firstOrNull()?.id
+                        path = emptyList()
+                        questionText = ""
+                        answerText = ""
+                    }) { Text("Soru Ekle") }
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreate = false }) { Text("İptal") }
@@ -335,12 +359,6 @@ fun QuizListScreen(
                 title = { Text("Quiz Oluştur") },
                 text = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        OutlinedTextField(
-                            value = createName,
-                            onValueChange = { createName = it },
-                            label = { Text("Ad") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
                         Slider(
                             value = createCount,
                             onValueChange = { createCount = it },
@@ -348,85 +366,106 @@ fun QuizListScreen(
                             steps = 8
                         )
                         Text("${createCount.toInt()} kutu")
-                        subHeadings.forEachIndexed { index, text ->
-                            OutlinedTextField(
-                                value = text,
-                                onValueChange = { subHeadings[index] = it },
-                                label = { Text("Alt Başlık ${index + 1}") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 4.dp)
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
+                        OutlinedTextField(
+                            value = createName,
+                            onValueChange = { createName = it },
+                            label = { Text("Ad") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        // Folder selection
+                        var expandedFolder by remember { mutableStateOf(false) }
+                        ExposedDropdownMenuBox(
+                            expanded = expandedFolder,
+                            onExpandedChange = { expandedFolder = !expandedFolder }
                         ) {
                             OutlinedTextField(
-                                value = newSub,
-                                onValueChange = { newSub = it },
-                                label = { Text("Alt Başlık Ekle") },
-                                modifier = Modifier.weight(1f)
+                                value = folders.find { it.id == selectedFolder }?.name ?: "Klasör Seç",
+                                onValueChange = {},
+                                readOnly = true,
+                                label = { Text("Klasör") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedFolder) },
+                                modifier = Modifier
+                                    .menuAnchor()
+                                    .fillMaxWidth()
                             )
-                            IconButton(onClick = {
-                                if (newSub.isNotBlank()) {
-                                    subHeadings.add(newSub)
-                                    newSub = ""
+                            ExposedDropdownMenu(
+                                expanded = expandedFolder,
+                                onDismissRequest = { expandedFolder = false }
+                            ) {
+                                folders.forEach { folder ->
+                                    DropdownMenuItem(
+                                        text = { Text(folder.name) },
+                                        onClick = {
+                                            selectedFolder = folder.id
+                                            path = emptyList()
+                                            expandedFolder = false
+                                        }
+                                    )
                                 }
-                            }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add sub")
                             }
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Dynamic headings
+                        val headings = folders.find { it.id == selectedFolder }?.headings ?: emptyList()
+                        var currentList = headings
+                        for (level in 0..path.size) {
+                            val options = currentList
+                            if (options.isEmpty()) break
+                            var expanded by remember(level, path) { mutableStateOf(false) }
+                            val selectedIdx = path.getOrNull(level)
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = !expanded }
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Başlık ${level + 1}") },
+                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                                    modifier = Modifier
+                                        .menuAnchor()
+                                        .fillMaxWidth()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    options.forEachIndexed { index, h ->
+                                        DropdownMenuItem(
+                                            text = { Text(h.name) },
+                                            onClick = {
+                                                path = path.take(level) + index
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            selectedIdx?.let { idx -> currentList = options[idx].children } ?: run { currentList = emptyList() }
+                        }
+
+                        OutlinedTextField(
+                            value = questionText,
+                            onValueChange = { questionText = it },
+                            label = { Text("Soru") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        OutlinedTextField(
+                            value = answerText,
+                            onValueChange = { answerText = it },
+                            label = { Text("Cevap") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
                     }
                 }
             )
         }
 
-        if (showFolderSelect) {
-            var selected by remember { mutableStateOf(folders.firstOrNull()?.id) }
-            AlertDialog(
-                onDismissRequest = { showFolderSelect = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        onCreate(createName, createCount.toInt(), subHeadings.toList(), selected)
-                        showFolderSelect = false
-                        createName = ""
-                        createCount = 4f
-                        subHeadings.clear()
-                        newSub = ""
-                    }) { Text("Oluştur") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showFolderSelect = false }) { Text("İptal") }
-                },
-                title = { Text("Klasör Seç") },
-                text = {
-                    if (folders.isEmpty()) {
-                        Text("Önce klasör oluşturun")
-                    } else {
-                        Column {
-                            folders.forEach { folder ->
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable { selected = folder.id }
-                                        .padding(4.dp)
-                                ) {
-                                    RadioButton(
-                                        selected = selected == folder.id,
-                                        onClick = { selected = folder.id }
-                                    )
-                                    Text(folder.name, modifier = Modifier.padding(start = 8.dp))
-                                }
-                            }
-                        }
-                    }
-                }
-            )
-        }
 
         if (showWarning) {
             AlertDialog(
