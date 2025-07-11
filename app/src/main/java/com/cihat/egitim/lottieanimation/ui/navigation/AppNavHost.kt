@@ -162,6 +162,10 @@ fun AppNavHost(
                 onCreateWithQuestion = { name, count, folderId, topic, sub, q, a ->
                     quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a)
                 },
+                onQuickAdd = { qIdx, topic, sub, q, a ->
+                    quizViewModel.setCurrentQuiz(qIdx)
+                    quizViewModel.addQuestion(q, a, topic, sub, 0)
+                },
                 onLogout = {
                     authViewModel.logout()
                     navController.navigate(Screen.Auth.route) {
