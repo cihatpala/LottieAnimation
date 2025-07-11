@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.data.PublicQuiz
 import com.cihat.egitim.lottieanimation.data.UserQuiz
+import com.cihat.egitim.lottieanimation.data.UserFolder
 import kotlin.math.min
 
 /**
@@ -15,6 +16,12 @@ import kotlin.math.min
  * questions. Also manages quiz progress state.
  */
 class QuizViewModel : ViewModel() {
+
+    /** Folders created by the user */
+    var folders = mutableStateListOf<UserFolder>()
+        private set
+
+    private var nextFolderId = 0
 
     /** Quizzes created or imported by the user */
     var quizzes = mutableStateListOf<UserQuiz>()
@@ -58,6 +65,35 @@ class QuizViewModel : ViewModel() {
 
     var isAnswerVisible by mutableStateOf(false)
         private set
+
+    /** Renames the folder at the given index */
+    fun renameFolder(index: Int, newName: String) {
+        val folder = folders.getOrNull(index) ?: return
+        if (newName.isNotBlank()) {
+            folders[index] = folder.copy(name = newName)
+        }
+    }
+
+    /** Deletes the folder at the given index */
+    fun deleteFolder(index: Int) {
+        if (index in folders.indices) {
+            folders.removeAt(index)
+        }
+    }
+
+    /** Creates a new folder with optional sub headings */
+    fun createFolder(name: String, subHeadings: List<String> = emptyList()) {
+        if (name.isBlank()) return
+        val exists = folders.any { it.name == name }
+        if (exists) return
+        folders.add(
+            UserFolder(
+                id = nextFolderId++,
+                name = name,
+                subHeadings = subHeadings.toMutableList()
+            )
+        )
+    }
 
     /** Renames the quiz at the given index */
     fun renameQuiz(index: Int, newName: String) {

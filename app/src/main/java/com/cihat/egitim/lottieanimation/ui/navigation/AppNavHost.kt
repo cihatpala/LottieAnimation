@@ -14,6 +14,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
+import com.cihat.egitim.lottieanimation.ui.screens.FolderListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
@@ -27,6 +28,7 @@ sealed class Screen(val route: String) {
     data object Auth : Screen("auth")
     data object Settings : Screen("settings")
     data object QuizList : Screen("quizList")
+    data object FolderList : Screen("folderList")
     data object Profile : Screen("profile")
     data object BoxList : Screen("boxList")
     data object AddQuestion : Screen("addQuestion")
@@ -80,7 +82,7 @@ fun AppNavHost(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
                 onSettings = { navController.navigate(Screen.Settings.route) },
-                onFolders = { navController.navigate(Screen.QuizList.route) },
+                onFolders = { navController.navigate(Screen.FolderList.route) },
                 onSupport = {},
                 onRate = {},
                 showBack = canPop,
@@ -88,7 +90,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.HOME -> navController.navigate(Screen.FolderList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -101,6 +103,28 @@ fun AppNavHost(
                     navController.navigate(Screen.QuizList.route)
                 },
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.FolderList.route) {
+            FolderListScreen(
+                folders = quizViewModel.folders,
+                onRename = { index, name -> quizViewModel.renameFolder(index, name) },
+                onDelete = { index -> quizViewModel.deleteFolder(index) },
+                onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.FolderList.route) { inclusive = true }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.FolderList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    }
+                }
             )
         }
         composable(Screen.QuizList.route) {
@@ -141,7 +165,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.HOME -> navController.navigate(Screen.FolderList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -174,7 +198,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.HOME -> navController.navigate(Screen.FolderList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
@@ -208,7 +232,7 @@ fun AppNavHost(
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.HOME -> navController.navigate(Screen.FolderList.route)
                         BottomTab.EXPLORE -> {}
                     }
                 }
