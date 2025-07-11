@@ -11,6 +11,8 @@ import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
+import com.cihat.egitim.lottieanimation.ui.screens.AddQuizScreen
+import com.cihat.egitim.lottieanimation.ui.screens.FolderScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
@@ -29,6 +31,8 @@ sealed class Screen(val route: String) {
     data object QuizList : Screen("quizList")
     data object Profile : Screen("profile")
     data object BoxList : Screen("boxList")
+    data object Folders : Screen("folders")
+    data object AddQuiz : Screen("addQuiz")
     data object AddQuestion : Screen("addQuestion")
     data object HomeFeed : Screen("homeFeed")
     data object Quiz : Screen("quiz")
@@ -80,7 +84,7 @@ fun AppNavHost(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
                 onSettings = { navController.navigate(Screen.Settings.route) },
-                onFolders = { navController.navigate(Screen.QuizList.route) },
+                onFolders = { navController.navigate(Screen.Folders.route) },
                 onSupport = {},
                 onRate = {},
                 showBack = canPop,
@@ -97,7 +101,11 @@ fun AppNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onCreateQuiz = { count ->
-                    quizViewModel.createQuiz("Quiz ${quizViewModel.quizzes.size + 1}", count)
+                    quizViewModel.createQuiz(
+                        "Quiz ${quizViewModel.quizzes.size + 1}",
+                        count,
+                        emptyList()
+                    )
                     navController.navigate(Screen.QuizList.route)
                 },
                 onBack = { navController.popBackStack() }
@@ -126,6 +134,7 @@ fun AppNavHost(
                     quizViewModel.setCurrentQuiz(quizIdx)
                     navController.navigate(Screen.AddQuestion.route)
                 },
+                onAddQuiz = { navController.navigate(Screen.AddQuiz.route) },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
                 onLogout = {
@@ -142,6 +151,12 @@ fun AppNavHost(
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
+            )
+        }
+        composable(Screen.Folders.route) {
+            FolderScreen(
+                quizzes = quizViewModel.quizzes,
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.BoxList.route) {
@@ -185,6 +200,15 @@ fun AppNavHost(
                 },
                 onBack = { navController.popBackStack() },
                 onDone = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.AddQuiz.route) {
+            AddQuizScreen(
+                onCreate = { name, count, categories ->
+                    quizViewModel.createQuiz(name, count, categories)
+                    navController.popBackStack()
+                },
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.HomeFeed.route) {

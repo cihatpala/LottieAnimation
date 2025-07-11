@@ -65,6 +65,7 @@ fun QuizListScreen(
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
     onAdd: (Int) -> Unit,
+    onAddQuiz: () -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
     onLogout: () -> Unit,
@@ -86,6 +87,8 @@ fun QuizListScreen(
         ) {
             if (quizzes.isEmpty()) {
                 Text("Henüz quiziniz yok")
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(onClick = onAddQuiz) { Text("Add Quiz") }
             } else {
                 LazyColumn(modifier = Modifier.weight(1f)) {
                     // Use a stable key so Compose properly disposes state when
@@ -268,6 +271,9 @@ fun QuizListScreen(
                         }
                     }
                     }
+                }
+                Button(onClick = onAddQuiz, modifier = Modifier.padding(top = 8.dp)) {
+                    Text("Add Quiz")
                 }
                 Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
                     Text("Logout")

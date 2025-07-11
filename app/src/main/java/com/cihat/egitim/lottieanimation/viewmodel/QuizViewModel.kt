@@ -75,10 +75,17 @@ class QuizViewModel : ViewModel() {
         }
     }
 
-    /** Creates a new quiz with the given name and box count */
-    fun createQuiz(name: String, count: Int) {
+    /** Creates a new quiz with the given name, box count and optional categories */
+    fun createQuiz(name: String, count: Int, categories: List<String> = emptyList()) {
         if (count <= 0) return
-        quizzes.add(UserQuiz(nextQuizId++, name, MutableList(count) { mutableListOf() }))
+        quizzes.add(
+            UserQuiz(
+                id = nextQuizId++,
+                name = name,
+                boxes = MutableList(count) { mutableListOf() },
+                categories = categories
+            )
+        )
         currentQuizIndex = quizzes.lastIndex
     }
 
@@ -96,7 +103,14 @@ class QuizViewModel : ViewModel() {
         if (exists) return
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
-        quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
+        quizzes.add(
+            UserQuiz(
+                id = nextQuizId++,
+                name = quiz.name,
+                boxes = newBoxes,
+                categories = emptyList()
+            )
+        )
     }
 
     /** Returns the current question in quiz mode */

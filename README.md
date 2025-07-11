@@ -21,3 +21,8 @@ lottie-ver = "6.6.6"
 # Lottie Compose dependency
 lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie-ver" }
 ```
+
+## 🆕 Quiz Features
+- Quizzes can have an optional category hierarchy when created.
+- The profile "Folders" section now lists quizzes by their category path.
+- You can create a quiz from the "My Quizzes" screen.

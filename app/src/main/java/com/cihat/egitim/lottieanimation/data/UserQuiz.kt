@@ -6,5 +6,6 @@ package com.cihat.egitim.lottieanimation.data
 data class UserQuiz(
     val id: Int,
     val name: String,
-    val boxes: MutableList<MutableList<Question>>
+    val boxes: MutableList<MutableList<Question>>,
+    val categories: List<String> = emptyList()
 )
