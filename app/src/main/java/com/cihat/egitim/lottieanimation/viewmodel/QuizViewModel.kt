@@ -75,10 +75,20 @@ class QuizViewModel : ViewModel() {
         }
     }
 
-    /** Creates a new quiz with the given name and box count */
-    fun createQuiz(name: String, count: Int) {
+    /** Creates a new quiz with the given name, box count and optional sub headings */
+    fun createQuiz(name: String, count: Int, subHeadings: List<String> = emptyList()) {
         if (count <= 0) return
-        quizzes.add(UserQuiz(nextQuizId++, name, MutableList(count) { mutableListOf() }))
+        // Prevent creating multiple quizzes with the same name
+        val exists = quizzes.any { it.name == name }
+        if (exists) return
+        quizzes.add(
+            UserQuiz(
+                id = nextQuizId++,
+                name = name,
+                boxes = MutableList(count) { mutableListOf() },
+                subHeadings = subHeadings.toMutableList()
+            )
+        )
         currentQuizIndex = quizzes.lastIndex
     }
 

@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -32,26 +31,35 @@ import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.filled.Add
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
@@ -67,6 +75,7 @@ fun QuizListScreen(
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
+    onCreate: (String, Int, List<String>) -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -78,6 +87,13 @@ fun QuizListScreen(
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
+        var showCreate by remember { mutableStateOf(false) }
+        var createName by remember { mutableStateOf("") }
+        var createCount by remember { mutableFloatStateOf(4f) }
+        val subHeadings = remember { mutableStateListOf<String>() }
+        var newSub by remember { mutableStateOf("") }
+
+        Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -273,6 +289,88 @@ fun QuizListScreen(
                     Text("Logout")
                 }
             }
+            ExtendedFloatingActionButton(
+                onClick = { showCreate = true },
+                icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
+                text = { Text("Klasör Oluştur") },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .shadow(8.dp, RoundedCornerShape(12.dp))
+                    .height(56.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+
+
+
+        if (showCreate) {
+            AlertDialog(
+                onDismissRequest = { showCreate = false },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onCreate(createName, createCount.toInt(), subHeadings.toList())
+                        showCreate = false
+                        createName = ""
+                        createCount = 4f
+                        subHeadings.clear()
+                    }) { Text("Oluştur") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showCreate = false }) { Text("İptal") }
+                },
+                title = { Text("Klasör Oluştur") },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        OutlinedTextField(
+                            value = createName,
+                            onValueChange = { createName = it },
+                            label = { Text("Ad") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Slider(
+                            value = createCount,
+                            onValueChange = { createCount = it },
+                            valueRange = 1f..10f,
+                            steps = 8
+                        )
+                        Text("${createCount.toInt()} kutu")
+                        subHeadings.forEachIndexed { index, text ->
+                            OutlinedTextField(
+                                value = text,
+                                onValueChange = { subHeadings[index] = it },
+                                label = { Text("Alt Başlık ${index + 1}") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 4.dp)
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = newSub,
+                                onValueChange = { newSub = it },
+                                label = { Text("Alt Başlık Ekle") },
+                                modifier = Modifier.weight(1f)
+                            )
+                            IconButton(onClick = {
+                                if (newSub.isNotBlank()) {
+                                    subHeadings.add(newSub)
+                                    newSub = ""
+                                }
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add sub")
+                            }
+                        }
+                    }
+                }
+            )
+        }
         }
     }
 
