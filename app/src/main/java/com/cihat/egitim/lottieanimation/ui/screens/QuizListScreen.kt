@@ -20,6 +20,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
+import org.burnoutcrew.reorderable.ReorderableItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -109,6 +113,10 @@ fun QuizListScreen(
         var questionText by remember { mutableStateOf("") }
         var answerText by remember { mutableStateOf("") }
 
+        val reorderState = rememberReorderableLazyListState(onMove = { from, to ->
+            quizzes.add(to.index, quizzes.removeAt(from.index))
+        })
+
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -119,7 +127,13 @@ fun QuizListScreen(
             if (quizzes.isEmpty()) {
                 Text("Henüz quiziniz yok")
             } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    state = reorderState.listState,
+                    modifier = Modifier
+                        .weight(1f)
+                        .reorderable(reorderState)
+                        .detectReorderAfterLongPress(reorderState)
+                ) {
                     // Use a stable key so Compose properly disposes state when
                     // an item is removed. Without this, deleting the last item
                     // triggers an IndexOutOfBoundsException as the old state
@@ -152,6 +166,7 @@ fun QuizListScreen(
                             }
                         }
 
+                        ReorderableItem(reorderState, key = quiz.id) { isDragging ->
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
