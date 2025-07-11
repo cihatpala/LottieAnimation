@@ -31,6 +31,7 @@ import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -63,7 +64,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -87,6 +87,7 @@ fun QuizListScreen(
     onDelete: (Int) -> Unit,
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
+    onQuickAdd: (Int, String, String, String, String) -> Unit,
     onLogout: () -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
@@ -130,6 +131,10 @@ fun QuizListScreen(
                         var expanded by remember(quiz.id) { mutableStateOf(false) }
                         var showRename by remember(quiz.id) { mutableStateOf(false) }
                         var showDelete by remember(quiz.id) { mutableStateOf(false) }
+                        var showQuickAdd by remember(quiz.id) { mutableStateOf(false) }
+                        var quickQuestion by remember(quiz.id) { mutableStateOf("") }
+                        var quickAnswer by remember(quiz.id) { mutableStateOf("") }
+                        var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
                         var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                         val scope = rememberCoroutineScope()
                         val actionWidth = 72.dp
@@ -137,7 +142,8 @@ fun QuizListScreen(
                         val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
                         // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
-                        val revealProgress = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                        val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                        val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
 
                         // Collapse the item whenever it is swiped to reveal actions
                         LaunchedEffect(swipeState.offset) {
@@ -152,7 +158,7 @@ fun QuizListScreen(
                                 .clipToBounds()
                                 .swipeable(
                                     state = swipeState,
-                                    anchors = mapOf(0f to 0, -maxOffset to 1),
+                                    anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
                                     thresholds = { _, _ -> FractionalThreshold(0.3f) },
                                     orientation = Orientation.Horizontal
                                 )
@@ -161,7 +167,7 @@ fun QuizListScreen(
                                 modifier = Modifier
                                     .align(Alignment.CenterEnd)
                                     .height(72.dp)
-                                    .alpha(revealProgress)
+                                    .alpha(revealProgressEnd)
                             ) {
                                 IconButton(
                                     onClick = {
@@ -186,6 +192,26 @@ fun QuizListScreen(
                                         .size(actionWidth)
                                 ) {
                                     Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .height(72.dp)
+                                    .alpha(revealProgressStart)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        showQuickAdd = true
+                                    },
+                                    enabled = swipeState.currentValue == 2,
+                                    modifier = Modifier
+                                        .background(Color(0xFF4CAF50))
+                                        .size(actionWidth)
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
                                 }
                             }
 
@@ -295,6 +321,92 @@ fun QuizListScreen(
                                     TextButton(onClick = { showDelete = false }) { Text("Hayır") }
                                 },
                                 text = { Text("Silmek istediğinize emin misiniz?") }
+                            )
+                        }
+
+                        if (showQuickAdd) {
+                            val folderId = quiz.folderId
+                            val folderHeadings = folders.find { it.id == folderId }?.headings ?: emptyList()
+                            AlertDialog(
+                                onDismissRequest = { showQuickAdd = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        var list = folderHeadings
+                                        val names = mutableListOf<String>()
+                                        for (idx in quickPath) {
+                                            val h = list.getOrNull(idx) ?: break
+                                            names.add(h.name)
+                                            list = h.children
+                                        }
+                                        val topic = names.firstOrNull() ?: ""
+                                        val sub = names.drop(1).joinToString(" > ")
+                                        onQuickAdd(quizIndex, topic, sub, quickQuestion, quickAnswer)
+                                        showQuickAdd = false
+                                        quickQuestion = ""
+                                        quickAnswer = ""
+                                        quickPath = emptyList()
+                                    }) { Text("Soru Ekle") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showQuickAdd = false }) { Text("İptal") }
+                                },
+                                title = { Text(folderId?.let { folders.find { f -> f.id == it }?.name } ?: "") },
+                                text = {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        var currentList = folderHeadings
+                                        for (level in 0..quickPath.size) {
+                                            val options = currentList
+                                            if (options.isEmpty()) break
+                                            var expanded by remember(level, quickPath) { mutableStateOf(false) }
+                                            val selectedIdx = quickPath.getOrNull(level)
+                                            ExposedDropdownMenuBox(
+                                                expanded = expanded,
+                                                onExpandedChange = { expanded = !expanded }
+                                            ) {
+                                                OutlinedTextField(
+                                                    value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
+                                                    onValueChange = {},
+                                                    readOnly = true,
+                                                    label = { Text("Başlık ${level + 1}") },
+                                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                                                    modifier = Modifier
+                                                        .menuAnchor()
+                                                        .fillMaxWidth()
+                                                )
+                                                ExposedDropdownMenu(
+                                                    expanded = expanded,
+                                                    onDismissRequest = { expanded = false }
+                                                ) {
+                                                    options.forEachIndexed { index, h ->
+                                                        DropdownMenuItem(
+                                                            text = { Text(h.name) },
+                                                            onClick = {
+                                                                quickPath = quickPath.take(level) + index
+                                                                expanded = false
+                                                            }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            selectedIdx?.let { idx -> currentList = options[idx].children } ?: run { currentList = emptyList() }
+                                        }
+
+                                        OutlinedTextField(
+                                            value = quickQuestion,
+                                            onValueChange = { quickQuestion = it },
+                                            label = { Text("Soru") },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        OutlinedTextField(
+                                            value = quickAnswer,
+                                            onValueChange = { quickAnswer = it },
+                                            label = { Text("Cevap") },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    }
+                                }
                             )
                         }
                     }
