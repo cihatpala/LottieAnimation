@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -28,8 +29,10 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -79,18 +82,17 @@ fun QuizListScreen(
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (quizzes.isEmpty()) {
-                Text("Henüz quiziniz yok")
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = onAddQuiz) { Text("Add Quiz") }
-            } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (quizzes.isEmpty()) {
+                    Text("Henüz quiziniz yok")
+                } else {
+                    LazyColumn(modifier = Modifier.weight(1f)) {
                     // Use a stable key so Compose properly disposes state when
                     // an item is removed. Without this, deleting the last item
                     // triggers an IndexOutOfBoundsException as the old state
@@ -272,13 +274,22 @@ fun QuizListScreen(
                     }
                     }
                 }
-                Button(onClick = onAddQuiz, modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Add Quiz")
-                }
                 Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
                     Text("Logout")
                 }
             }
+        FloatingActionButton(
+            onClick = onAddQuiz,
+            shape = RectangleShape,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+                Text(text = "Add Quiz")
+            }
+        }
         }
     }
 
