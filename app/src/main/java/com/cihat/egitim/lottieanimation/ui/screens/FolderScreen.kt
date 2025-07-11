@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,9 +28,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,8 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import kotlinx.coroutines.launch
-import com.cihat.egitim.lottieanimation.data.UserQuiz
-import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import kotlin.math.roundToInt
 
 /** Simple node representing a folder */
 private data class FolderNode(
@@ -135,7 +137,7 @@ private fun FolderItem(
                 modifier = Modifier
                     .fillMaxSize()
                     .clickable(enabled = node.children.isNotEmpty()) { expanded.value = !expanded.value }
-                    .padding(start = (node.level * 16).dp, horizontal = 16.dp),
+                    .padding(start = (node.level * 16).dp, end = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (node.children.isNotEmpty()) {

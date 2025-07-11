@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -52,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -93,82 +93,82 @@ fun QuizListScreen(
                     Text("Henüz quiziniz yok")
                 } else {
                     LazyColumn(modifier = Modifier.weight(1f)) {
-                    // Use a stable key so Compose properly disposes state when
-                    // an item is removed. Without this, deleting the last item
-                    // triggers an IndexOutOfBoundsException as the old state
-                    // tries to read a missing index from the list.
-                    itemsIndexed(
-                        items = quizzes,
-                        key = { _, quiz -> quiz.id }
-                    ) { quizIndex, quiz ->
-                        var expanded by remember(quiz.id) { mutableStateOf(false) }
-                        var showRename by remember(quiz.id) { mutableStateOf(false) }
-                        var showDelete by remember(quiz.id) { mutableStateOf(false) }
-                        var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
-                        val scope = rememberCoroutineScope()
-                        val actionWidth = 72.dp
-                        val swipeState = rememberSwipeableState(0)
-                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+                        // Use a stable key so Compose properly disposes state when
+                        // an item is removed. Without this, deleting the last item
+                        // triggers an IndexOutOfBoundsException as the old state
+                        // tries to read a missing index from the list.
+                        itemsIndexed(
+                            items = quizzes,
+                            key = { _, quiz -> quiz.id }
+                        ) { quizIndex, quiz ->
+                            var expanded by remember(quiz.id) { mutableStateOf(false) }
+                            var showRename by remember(quiz.id) { mutableStateOf(false) }
+                            var showDelete by remember(quiz.id) { mutableStateOf(false) }
+                            var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
+                            val scope = rememberCoroutineScope()
+                            val actionWidth = 72.dp
+                            val swipeState = rememberSwipeableState(0)
+                            val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
-                        // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
-                        val revealProgress = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                            // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
+                            val revealProgress = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
 
-                        // Collapse the item whenever it is swiped to reveal actions
-                        LaunchedEffect(swipeState.offset) {
-                            if (swipeState.offset.value != 0f) {
-                                expanded = false
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clipToBounds()
-                                .swipeable(
-                                    state = swipeState,
-                                    anchors = mapOf(0f to 0, -maxOffset to 1),
-                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                    orientation = Orientation.Horizontal
-                                )
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .height(72.dp)
-                                    .alpha(revealProgress)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showRename = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color(0xFFFFA500))
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
-                                }
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showDelete = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color.Red)
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                            // Collapse the item whenever it is swiped to reveal actions
+                            LaunchedEffect(swipeState.offset) {
+                                if (swipeState.offset.value != 0f) {
+                                    expanded = false
                                 }
                             }
 
-                            Column(
+                            Box(
                                 modifier = Modifier
-                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
+                                    .clipToBounds()
+                                    .swipeable(
+                                        state = swipeState,
+                                        anchors = mapOf(0f to 0, -maxOffset to 1),
+                                        thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                        orientation = Orientation.Horizontal
+                                    )
                             ) {
+                                Row(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .height(72.dp)
+                                        .alpha(revealProgress)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            showRename = true
+                                        },
+                                        enabled = swipeState.currentValue == 1,
+                                        modifier = Modifier
+                                            .background(Color(0xFFFFA500))
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            showDelete = true
+                                        },
+                                        enabled = swipeState.currentValue == 1,
+                                        modifier = Modifier
+                                            .background(Color.Red)
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -233,63 +233,64 @@ fun QuizListScreen(
                             }
 
 
-                        if (showRename) {
-                            AlertDialog(
-                                onDismissRequest = { showRename = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onRename(quizIndex, newName)
-                                        showRename = false
-                                    }) { Text("Save") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showRename = false }) { Text("Cancel") }
-                                },
-                                title = { Text("Edit Quiz") },
-                                text = {
-                                    OutlinedTextField(
-                                        value = newName,
-                                        onValueChange = { newName = it },
-                                        label = { Text("Name") }
-                                    )
-                                }
-                            )
-                        }
+                            if (showRename) {
+                                AlertDialog(
+                                    onDismissRequest = { showRename = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            onRename(quizIndex, newName)
+                                            showRename = false
+                                        }) { Text("Save") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showRename = false }) { Text("Cancel") }
+                                    },
+                                    title = { Text("Edit Quiz") },
+                                    text = {
+                                        OutlinedTextField(
+                                            value = newName,
+                                            onValueChange = { newName = it },
+                                            label = { Text("Name") }
+                                        )
+                                    }
+                                )
+                            }
 
-                        if (showDelete) {
-                            AlertDialog(
-                                onDismissRequest = { showDelete = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onDelete(quizIndex)
-                                        showDelete = false
-                                    }) { Text("Evet") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showDelete = false }) { Text("Hayır") }
-                                },
-                                text = { Text("Silmek istediğinize emin misiniz?") }
-                            )
+                            if (showDelete) {
+                                AlertDialog(
+                                    onDismissRequest = { showDelete = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            onDelete(quizIndex)
+                                            showDelete = false
+                                        }) { Text("Evet") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDelete = false }) { Text("Hayır") }
+                                    },
+                                    text = { Text("Silmek istediğinize emin misiniz?") }
+                                )
+                            }
                         }
-                    }
                     }
                 }
                 Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
                     Text("Logout")
                 }
             }
-        FloatingActionButton(
-            onClick = onAddQuiz,
-            shape = RectangleShape,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-                Text(text = "Add Quiz")
+            FloatingActionButton(
+                onClick = onAddQuiz,
+                shape = RectangleShape,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
+                    Text(text = "Add Quiz")
+                }
             }
         }
-        }
     }
+}
 
