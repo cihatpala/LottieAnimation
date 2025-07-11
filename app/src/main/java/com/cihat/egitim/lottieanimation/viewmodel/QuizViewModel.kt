@@ -75,6 +75,24 @@ class QuizViewModel : ViewModel() {
         }
     }
 
+    /** Renames a category at the given level for the quiz */
+    fun renameCategory(quizIndex: Int, level: Int, newName: String) {
+        val quiz = quizzes.getOrNull(quizIndex) ?: return
+        if (newName.isBlank() || level !in quiz.categories.indices) return
+        val cats = quiz.categories.toMutableList()
+        cats[level] = newName
+        quizzes[quizIndex] = quiz.copy(categories = cats)
+    }
+
+    /** Deletes the category at the given level for the quiz */
+    fun deleteCategory(quizIndex: Int, level: Int) {
+        val quiz = quizzes.getOrNull(quizIndex) ?: return
+        if (level !in quiz.categories.indices) return
+        val cats = quiz.categories.toMutableList()
+        cats.removeAt(level)
+        quizzes[quizIndex] = quiz.copy(categories = cats)
+    }
+
     /** Creates a new quiz with the given name, box count and optional categories */
     fun createQuiz(name: String, count: Int, categories: List<String> = emptyList()) {
         if (count <= 0) return

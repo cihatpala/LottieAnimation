@@ -156,6 +156,10 @@ fun AppNavHost(
         composable(Screen.Folders.route) {
             FolderScreen(
                 quizzes = quizViewModel.quizzes,
+                onRenameQuiz = { index, name -> quizViewModel.renameQuiz(index, name) },
+                onDeleteQuiz = { index -> quizViewModel.deleteQuiz(index) },
+                onRenameCategory = { quizIdx, level, name -> quizViewModel.renameCategory(quizIdx, level, name) },
+                onDeleteCategory = { quizIdx, level -> quizViewModel.deleteCategory(quizIdx, level) },
                 onBack = { navController.popBackStack() }
             )
         }
@@ -204,6 +208,7 @@ fun AppNavHost(
         }
         composable(Screen.AddQuiz.route) {
             AddQuizScreen(
+                existingNames = quizViewModel.quizzes.map { it.name },
                 onCreate = { name, count, categories ->
                     quizViewModel.createQuiz(name, count, categories)
                     navController.popBackStack()

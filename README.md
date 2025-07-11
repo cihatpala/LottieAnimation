@@ -26,3 +26,5 @@ lottie = { group = "com.airbnb.android", name = "lottie-compose", version.ref = 
 - Quizzes can have an optional category hierarchy when created.
 - The profile "Folders" section now lists quizzes by their category path.
 - You can create a quiz from the "My Quizzes" screen.
+- Existing quiz names appear as suggestions when creating a new quiz.
+- Folder entries can be renamed or deleted with a swipe gesture.
