@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -290,20 +289,21 @@ fun QuizListScreen(
                     Text("Logout")
                 }
             }
+            ExtendedFloatingActionButton(
+                onClick = { showCreate = true },
+                icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
+                text = { Text("Klasör Oluştur") },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+                    .shadow(8.dp, RoundedCornerShape(12.dp))
+                    .height(56.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            )
         }
 
-        ExtendedFloatingActionButton(
-            onClick = { showCreate = true },
-            icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
-            text = { Text("Klasör Oluştur") },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-                .shadow(8.dp, RoundedCornerShape(12.dp))
-                .height(56.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+
 
         if (showCreate) {
             AlertDialog(
