@@ -269,9 +269,10 @@ fun AppNavHost(
             arguments = listOf(navArgument(Screen.QuestionList.boxArg) { type = NavType.IntType })
         ) { backStackEntry ->
             val index = backStackEntry.arguments?.getInt(Screen.QuestionList.boxArg) ?: 0
-            val questions = quizViewModel.boxes.getOrNull(index).orEmpty()
             QuestionListScreen(
-                questions = questions,
+                questions = quizViewModel.boxes.getOrNull(index).orEmpty(),
+                onEdit = { qIdx, q -> quizViewModel.editQuestion(index, qIdx, q) },
+                onDelete = { qIdx -> quizViewModel.deleteQuestion(index, qIdx) },
                 onBack = { navController.popBackStack() }
             )
         }

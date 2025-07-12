@@ -55,16 +55,36 @@ class QuizViewModel : ViewModel() {
             name = "Capital Cities",
             author = "Alice",
             questions = listOf(
-                Question("Capital of France?", "Paris"),
-                Question("Capital of Spain?", "Madrid")
+                Question(
+                    text = "Capital of France?",
+                    answer = "Paris",
+                    topic = "Geography",
+                    subtopic = "Europe"
+                ),
+                Question(
+                    text = "Capital of Spain?",
+                    answer = "Madrid",
+                    topic = "Geography",
+                    subtopic = "Europe"
+                )
             )
         ),
         PublicQuiz(
             name = "Math Basics",
             author = "Bob",
             questions = listOf(
-                Question("2 + 2?", "4"),
-                Question("5 * 3?", "15")
+                Question(
+                    text = "2 + 2?",
+                    answer = "4",
+                    topic = "Arithmetic",
+                    subtopic = "Addition"
+                ),
+                Question(
+                    text = "5 * 3?",
+                    answer = "15",
+                    topic = "Arithmetic",
+                    subtopic = "Multiplication"
+                )
             )
         )
     )
@@ -340,6 +360,23 @@ class QuizViewModel : ViewModel() {
         } else {
             if (currentQuestionIndex >= box.size) currentQuestionIndex = 0
             return true
+        }
+    }
+
+    /** Updates the question at the given box and index */
+    fun editQuestion(boxIndex: Int, questionIndex: Int, newQuestion: Question) {
+        val box = boxes.getOrNull(boxIndex) ?: return
+        if (questionIndex in box.indices) {
+            box[questionIndex] = newQuestion
+        }
+    }
+
+    /** Deletes the question at the specified box and index */
+    fun deleteQuestion(boxIndex: Int, questionIndex: Int) {
+        boxes.getOrNull(boxIndex)?.let { box ->
+            if (questionIndex in box.indices) {
+                box.removeAt(questionIndex)
+            }
         }
     }
 }
