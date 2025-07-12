@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.animateItemPlacement
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -115,6 +116,7 @@ fun QuizListScreen(
         var answerText by remember { mutableStateOf("") }
 
         val listState = rememberLazyListState()
+        var draggingQuizId by remember { mutableStateOf<Int?>(null) }
         var draggingIndex by remember { mutableIntStateOf(-1) }
         var dragOffset by remember { mutableFloatStateOf(0f) }
         val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
@@ -165,22 +167,25 @@ fun QuizListScreen(
                             }
                         }
 
-                        val isDragging = draggingIndex == quizIndex
+                        val isDragging = draggingQuizId == quiz.id
                         val dragModifier = Modifier
                             .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
                             .pointerInput(quiz.id) {
                                 detectDragGesturesAfterLongPress(
                                     onDragStart = {
-                                        draggingIndex = quizIndex
+                                        draggingQuizId = quiz.id
+                                        draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
                                         dragOffset = 0f
                                     },
                                     onDragCancel = {
                                         dragOffset = 0f
                                         draggingIndex = -1
+                                        draggingQuizId = null
                                     },
                                     onDragEnd = {
                                         dragOffset = 0f
                                         draggingIndex = -1
+                                        draggingQuizId = null
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
@@ -207,7 +212,7 @@ fun QuizListScreen(
                                     thresholds = { _, _ -> FractionalThreshold(0.3f) },
                                     orientation = Orientation.Horizontal
                                 )
-                                .animateItem()
+                                .animateItemPlacement()
                         ) {
                             Row(
                                 modifier = Modifier
