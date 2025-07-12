@@ -49,22 +49,58 @@ class QuizViewModel : ViewModel() {
             return folders.find { it.id == folderId }?.headings ?: emptyList()
         }
 
+    /**
+     * Heading options for the current quiz. Falls back to headings derived from
+     * existing questions if the quiz is not assigned to a folder or the folder
+     * has no headings.
+     */
+    val currentQuizHeadingOptions: List<FolderHeading>
+        get() {
+            val quiz = quizzes.getOrNull(currentQuizIndex) ?: return emptyList()
+            val folderHeadings = currentQuizFolderHeadings
+            return if (folderHeadings.isNotEmpty()) {
+                folderHeadings
+            } else {
+                buildHeadingsFromQuestions(quiz.boxes.flatten())
+            }
+        }
+
     /** Sample public quizzes that could come from a backend in a real app */
     val publicQuizzes: List<PublicQuiz> = listOf(
         PublicQuiz(
             name = "Capital Cities",
             author = "Alice",
             questions = listOf(
-                Question("Capital of France?", "Paris"),
-                Question("Capital of Spain?", "Madrid")
+                Question(
+                    text = "Capital of France?",
+                    answer = "Paris",
+                    topic = "Geography",
+                    subtopic = "Europe"
+                ),
+                Question(
+                    text = "Capital of Spain?",
+                    answer = "Madrid",
+                    topic = "Geography",
+                    subtopic = "Europe"
+                )
             )
         ),
         PublicQuiz(
             name = "Math Basics",
             author = "Bob",
             questions = listOf(
-                Question("2 + 2?", "4"),
-                Question("5 * 3?", "15")
+                Question(
+                    text = "2 + 2?",
+                    answer = "4",
+                    topic = "Arithmetic",
+                    subtopic = "Addition"
+                ),
+                Question(
+                    text = "5 * 3?",
+                    answer = "15",
+                    topic = "Arithmetic",
+                    subtopic = "Multiplication"
+                )
             )
         )
     )
@@ -293,6 +329,45 @@ class QuizViewModel : ViewModel() {
         quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
     }
 
+    /**
+     * Builds a temporary heading tree from the provided questions. This is used
+     * when a quiz has no folder headings defined.
+     */
+    private fun buildHeadingsFromQuestions(questions: List<Question>): List<FolderHeading> {
+        var nextId = -1
+        fun next() = nextId--
+
+        val roots = mutableListOf<FolderHeading>()
+        for (q in questions) {
+            val names = mutableListOf<String>()
+            if (q.topic.isNotBlank()) names.add(q.topic)
+            if (q.subtopic.isNotBlank()) {
+                names.addAll(q.subtopic.split(" > ").map { it.trim() }.filter { it.isNotBlank() })
+            }
+
+            var list = roots
+            var node: FolderHeading? = null
+            for (n in names) {
+                node = list.find { it.name == n }
+                if (node == null) {
+                    node = FolderHeading(id = next(), name = n, children = mutableListOf())
+                    list.add(node)
+                }
+                list = node.children
+            }
+        }
+        return roots
+    }
+
+    /**
+     * Returns heading options for the given quiz, using folder headings if
+     * available or deriving them from the quiz questions otherwise.
+     */
+    fun headingOptionsForQuiz(quiz: UserQuiz): List<FolderHeading> {
+        val folderHeadings = folders.find { it.id == quiz.folderId }?.headings ?: emptyList()
+        return if (folderHeadings.isNotEmpty()) folderHeadings else buildHeadingsFromQuestions(quiz.boxes.flatten())
+    }
+
     /** Returns the current question in quiz mode */
     val currentQuestion: Question?
         get() = boxes.getOrNull(currentBoxIndex)?.getOrNull(currentQuestionIndex)
@@ -340,6 +415,23 @@ class QuizViewModel : ViewModel() {
         } else {
             if (currentQuestionIndex >= box.size) currentQuestionIndex = 0
             return true
+        }
+    }
+
+    /** Updates the question at the given box and index */
+    fun editQuestion(boxIndex: Int, questionIndex: Int, newQuestion: Question) {
+        val box = boxes.getOrNull(boxIndex) ?: return
+        if (questionIndex in box.indices) {
+            box[questionIndex] = newQuestion
+        }
+    }
+
+    /** Deletes the question at the specified box and index */
+    fun deleteQuestion(boxIndex: Int, questionIndex: Int) {
+        boxes.getOrNull(boxIndex)?.let { box ->
+            if (questionIndex in box.indices) {
+                box.removeAt(questionIndex)
+            }
         }
     }
 }

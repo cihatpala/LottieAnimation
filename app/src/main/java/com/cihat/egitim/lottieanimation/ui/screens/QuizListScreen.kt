@@ -71,8 +71,37 @@ import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import com.cihat.egitim.lottieanimation.data.FolderHeading
+import com.cihat.egitim.lottieanimation.data.Question
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+/** Builds heading tree from question list when no folder headings exist */
+private fun headingsFromQuestions(questions: List<Question>): List<FolderHeading> {
+    var nextId = -1
+    fun next() = nextId--
+
+    val roots = mutableListOf<FolderHeading>()
+    for (q in questions) {
+        val names = mutableListOf<String>()
+        if (q.topic.isNotBlank()) names.add(q.topic)
+        if (q.subtopic.isNotBlank()) {
+            names.addAll(q.subtopic.split(" > ").map { it.trim() }.filter { it.isNotBlank() })
+        }
+
+        var list = roots
+        var node: FolderHeading? = null
+        for (n in names) {
+            node = list.find { it.name == n }
+            if (node == null) {
+                node = FolderHeading(id = next(), name = n, children = mutableListOf())
+                list.add(node)
+            }
+            list = node.children
+        }
+    }
+    return roots
+}
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -371,7 +400,8 @@ fun QuizListScreen(
 
                         if (showQuickAdd) {
                             val folderId = quiz.folderId
-                            val folderHeadings = folders.find { it.id == folderId }?.headings ?: emptyList()
+                            val folderHeadings = folders.find { it.id == folderId }?.headings
+                                ?: headingsFromQuestions(quiz.boxes.flatten())
                             AlertDialog(
                                 onDismissRequest = { showQuickAdd = false },
                                 confirmButton = {
