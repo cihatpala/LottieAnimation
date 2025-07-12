@@ -170,12 +170,12 @@ fun QuizListScreen(
                             .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
                             .pointerInput(quiz.id) {
                                 detectDragGesturesAfterLongPress(
-                                    onDragStart = { draggingIndex = quizIndex },
+                                    onDragStart = { draggingIndex = quizIndex; dragOffset = 0f },
                                     onDragCancel = { dragOffset = 0f; draggingIndex = -1 },
                                     onDragEnd = {
-                                        val newIndex = (quizIndex + (dragOffset / itemHeightPx).roundToInt())
+                                        val newIndex = (draggingIndex + (dragOffset / itemHeightPx).roundToInt())
                                             .coerceIn(0, quizzes.lastIndex)
-                                        if (newIndex != quizIndex) onMoveQuiz(quizIndex, newIndex)
+                                        if (newIndex != draggingIndex) onMoveQuiz(draggingIndex, newIndex)
                                         dragOffset = 0f
                                         draggingIndex = -1
                                     },
