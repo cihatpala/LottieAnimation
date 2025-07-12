@@ -89,6 +89,7 @@ fun QuizListScreen(
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
+    onMoveQuiz: (Int, Int) -> Unit,
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onQuickAdd: (Int, String, String, String, String) -> Unit,
@@ -114,7 +115,7 @@ fun QuizListScreen(
         var answerText by remember { mutableStateOf("") }
 
         val reorderState = rememberReorderableLazyListState(onMove = { from, to ->
-            quizzes.add(to.index, quizzes.removeAt(from.index))
+            onMoveQuiz(from.index, to.index)
         })
 
         Box(modifier = Modifier.fillMaxSize()) {
