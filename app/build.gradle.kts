@@ -64,5 +64,4 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.lottie)
     implementation(libs.androidx.material)
-    implementation(libs.compose.reorderable)
 }

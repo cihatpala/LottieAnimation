@@ -20,10 +20,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
-import org.burnoutcrew.reorderable.ReorderableItem
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.animateItemPlacement
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -56,6 +55,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -114,9 +114,10 @@ fun QuizListScreen(
         var questionText by remember { mutableStateOf("") }
         var answerText by remember { mutableStateOf("") }
 
-        val reorderState = rememberReorderableLazyListState(onMove = { from, to ->
-            onMoveQuiz(from.index, to.index)
-        })
+        val listState = rememberLazyListState()
+        var draggingIndex by remember { mutableIntStateOf(-1) }
+        var dragOffset by remember { mutableFloatStateOf(0f) }
+        val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
 
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -129,11 +130,8 @@ fun QuizListScreen(
                 Text("Henüz quiziniz yok")
             } else {
                 LazyColumn(
-                    state = reorderState.listState,
-                    modifier = Modifier
-                        .weight(1f)
-                        .reorderable(reorderState)
-                        .detectReorderAfterLongPress(reorderState)
+                    state = listState,
+                    modifier = Modifier.weight(1f)
                 ) {
                     // Use a stable key so Compose properly disposes state when
                     // an item is removed. Without this, deleting the last item
@@ -167,9 +165,29 @@ fun QuizListScreen(
                             }
                         }
 
-                        ReorderableItem(reorderState, key = quiz.id) { isDragging ->
+                        val isDragging = draggingIndex == quizIndex
+                        val dragModifier = Modifier
+                            .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
+                            .pointerInput(quiz.id) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = { draggingIndex = quizIndex },
+                                    onDragCancel = { dragOffset = 0f; draggingIndex = -1 },
+                                    onDragEnd = {
+                                        val newIndex = (quizIndex + (dragOffset / itemHeightPx).roundToInt())
+                                            .coerceIn(0, quizzes.lastIndex)
+                                        if (newIndex != quizIndex) onMoveQuiz(quizIndex, newIndex)
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        dragOffset += dragAmount.y
+                                    }
+                                )
+                            }
+
                         Box(
-                            modifier = Modifier
+                            modifier = dragModifier
                                 .fillMaxWidth()
                                 .clipToBounds()
                                 .swipeable(
@@ -178,6 +196,7 @@ fun QuizListScreen(
                                     thresholds = { _, _ -> FractionalThreshold(0.3f) },
                                     orientation = Orientation.Horizontal
                                 )
+                                .animateItemPlacement()
                         ) {
                             Row(
                                 modifier = Modifier
