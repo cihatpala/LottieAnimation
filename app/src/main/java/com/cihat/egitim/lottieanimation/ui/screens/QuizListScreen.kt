@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
@@ -35,10 +34,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -67,8 +64,6 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
@@ -115,6 +110,7 @@ fun QuizListScreen(
         var answerText by remember { mutableStateOf("") }
 
         val listState = rememberLazyListState()
+        var draggingQuizId by remember { mutableStateOf<Int?>(null) }
         var draggingIndex by remember { mutableIntStateOf(-1) }
         var dragOffset by remember { mutableFloatStateOf(0f) }
         val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
@@ -165,23 +161,37 @@ fun QuizListScreen(
                             }
                         }
 
-                        val isDragging = draggingIndex == quizIndex
+                        val isDragging = draggingQuizId == quiz.id
                         val dragModifier = Modifier
                             .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
                             .pointerInput(quiz.id) {
                                 detectDragGesturesAfterLongPress(
-                                    onDragStart = { draggingIndex = quizIndex },
-                                    onDragCancel = { dragOffset = 0f; draggingIndex = -1 },
-                                    onDragEnd = {
-                                        val newIndex = (quizIndex + (dragOffset / itemHeightPx).roundToInt())
-                                            .coerceIn(0, quizzes.lastIndex)
-                                        if (newIndex != quizIndex) onMoveQuiz(quizIndex, newIndex)
+                                    onDragStart = {
+                                        draggingQuizId = quiz.id
+                                        draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
+                                        dragOffset = 0f
+                                    },
+                                    onDragCancel = {
                                         dragOffset = 0f
                                         draggingIndex = -1
+                                        draggingQuizId = null
+                                    },
+                                    onDragEnd = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                        draggingQuizId = null
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
                                         dragOffset += dragAmount.y
+                                        val from = draggingIndex
+                                        val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
+                                            .coerceIn(0, quizzes.lastIndex)
+                                        if (potentialIndex != from) {
+                                            onMoveQuiz(from, potentialIndex)
+                                            draggingIndex = potentialIndex
+                                            dragOffset -= (potentialIndex - from) * itemHeightPx
+                                        }
                                     }
                                 )
                             }
