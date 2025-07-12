@@ -170,18 +170,29 @@ fun QuizListScreen(
                             .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
                             .pointerInput(quiz.id) {
                                 detectDragGesturesAfterLongPress(
-                                    onDragStart = { draggingIndex = quizIndex; dragOffset = 0f },
-                                    onDragCancel = { dragOffset = 0f; draggingIndex = -1 },
+                                    onDragStart = {
+                                        draggingIndex = quizIndex
+                                        dragOffset = 0f
+                                    },
+                                    onDragCancel = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                    },
                                     onDragEnd = {
-                                        val newIndex = (draggingIndex + (dragOffset / itemHeightPx).roundToInt())
-                                            .coerceIn(0, quizzes.lastIndex)
-                                        if (newIndex != draggingIndex) onMoveQuiz(draggingIndex, newIndex)
                                         dragOffset = 0f
                                         draggingIndex = -1
                                     },
                                     onDrag = { change, dragAmount ->
                                         change.consume()
                                         dragOffset += dragAmount.y
+                                        val from = draggingIndex
+                                        val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
+                                            .coerceIn(0, quizzes.lastIndex)
+                                        if (potentialIndex != from) {
+                                            onMoveQuiz(from, potentialIndex)
+                                            draggingIndex = potentialIndex
+                                            dragOffset -= (potentialIndex - from) * itemHeightPx
+                                        }
                                     }
                                 )
                             }
