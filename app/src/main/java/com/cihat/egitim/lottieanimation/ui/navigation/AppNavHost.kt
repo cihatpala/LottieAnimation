@@ -156,6 +156,7 @@ fun AppNavHost(
                 },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
+                onMoveQuiz = { from, to -> quizViewModel.moveQuiz(from, to) },
                 onCreate = { name, count, folderId ->
                     quizViewModel.createQuiz(name, count, emptyList(), folderId)
                 },

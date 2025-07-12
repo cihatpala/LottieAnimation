@@ -228,6 +228,15 @@ class QuizViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Reorders quizzes by moving the item at the given index to the target index.
+     */
+    fun moveQuiz(fromIndex: Int, toIndex: Int) {
+        if (fromIndex !in quizzes.indices || toIndex !in quizzes.indices) return
+        val quiz = quizzes.removeAt(fromIndex)
+        quizzes.add(toIndex, quiz)
+    }
+
     /** Creates a new quiz with the given name, box count and optional sub headings */
     fun createQuiz(
         name: String,

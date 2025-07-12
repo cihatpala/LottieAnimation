@@ -17,9 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
@@ -33,10 +34,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -52,6 +51,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -64,10 +64,9 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
@@ -85,6 +84,7 @@ fun QuizListScreen(
     onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
+    onMoveQuiz: (Int, Int) -> Unit,
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onQuickAdd: (Int, String, String, String, String) -> Unit,
@@ -109,6 +109,12 @@ fun QuizListScreen(
         var questionText by remember { mutableStateOf("") }
         var answerText by remember { mutableStateOf("") }
 
+        val listState = rememberLazyListState()
+        var draggingQuizId by remember { mutableStateOf<Int?>(null) }
+        var draggingIndex by remember { mutableIntStateOf(-1) }
+        var dragOffset by remember { mutableFloatStateOf(0f) }
+        val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
+
         Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -119,7 +125,10 @@ fun QuizListScreen(
             if (quizzes.isEmpty()) {
                 Text("Henüz quiziniz yok")
             } else {
-                LazyColumn(modifier = Modifier.weight(1f)) {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f)
+                ) {
                     // Use a stable key so Compose properly disposes state when
                     // an item is removed. Without this, deleting the last item
                     // triggers an IndexOutOfBoundsException as the old state
@@ -152,8 +161,43 @@ fun QuizListScreen(
                             }
                         }
 
+                        val isDragging = draggingQuizId == quiz.id
+                        val dragModifier = Modifier
+                            .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
+                            .pointerInput(quiz.id) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = {
+                                        draggingQuizId = quiz.id
+                                        draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
+                                        dragOffset = 0f
+                                    },
+                                    onDragCancel = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                        draggingQuizId = null
+                                    },
+                                    onDragEnd = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                        draggingQuizId = null
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        dragOffset += dragAmount.y
+                                        val from = draggingIndex
+                                        val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
+                                            .coerceIn(0, quizzes.lastIndex)
+                                        if (potentialIndex != from) {
+                                            onMoveQuiz(from, potentialIndex)
+                                            draggingIndex = potentialIndex
+                                            dragOffset -= (potentialIndex - from) * itemHeightPx
+                                        }
+                                    }
+                                )
+                            }
+
                         Box(
-                            modifier = Modifier
+                            modifier = dragModifier
                                 .fillMaxWidth()
                                 .clipToBounds()
                                 .swipeable(
@@ -162,6 +206,7 @@ fun QuizListScreen(
                                     thresholds = { _, _ -> FractionalThreshold(0.3f) },
                                     orientation = Orientation.Horizontal
                                 )
+                                .animateItem()
                         ) {
                             Row(
                                 modifier = Modifier
