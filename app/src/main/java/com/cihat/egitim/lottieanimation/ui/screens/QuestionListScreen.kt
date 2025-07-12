@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.FractionalThreshold
@@ -23,6 +24,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -39,12 +43,27 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.data.Question
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import kotlinx.coroutines.launch
+
+/** Finds heading index path for the provided names */
+private fun findPath(names: List<String>, headings: List<FolderHeading>): List<Int> {
+    val path = mutableListOf<Int>()
+    var current = headings
+    for (name in names) {
+        val idx = current.indexOfFirst { it.name == name }
+        if (idx == -1) break
+        path.add(idx)
+        current = current[idx].children
+    }
+    return path
+}
 
 @Composable
 fun QuestionListScreen(
     questions: List<Question>,
+    headings: List<FolderHeading>,
     onEdit: (Int, Question) -> Unit,
     onDelete: (Int) -> Unit,
     onBack: () -> Unit
@@ -67,6 +86,17 @@ fun QuestionListScreen(
                     var newAnswer by remember(q) { mutableStateOf(q.answer) }
                     var newTopic by remember(q) { mutableStateOf(q.topic) }
                     var newSub by remember(q) { mutableStateOf(q.subtopic) }
+                    val initialPath = remember(q) {
+                        val names = buildList {
+                            if (q.topic.isNotBlank()) add(q.topic)
+                            if (q.subtopic.isNotBlank()) {
+                                addAll(q.subtopic.split(" > ").map { it.trim() }.filter { it.isNotBlank() })
+                            }
+                        }
+                        findPath(names, headings)
+                    }
+                    var editPath by remember(q) { mutableStateOf(initialPath) }
+                    val disableTopic = headings.size == 1 && q.topic == headings.firstOrNull()?.name
 
                     val swipeState = rememberSwipeableState(0)
                     val actionWidth = 72.dp
@@ -136,7 +166,16 @@ fun QuestionListScreen(
                             onDismissRequest = { showEdit = false },
                             confirmButton = {
                                 TextButton(onClick = {
-                                    onEdit(index, Question(newQuestion, newAnswer, newTopic, newSub))
+                                    val names = mutableListOf<String>()
+                                    var list = headings
+                                    for (idx in editPath) {
+                                        val h = list.getOrNull(idx) ?: break
+                                        names.add(h.name)
+                                        list = h.children
+                                    }
+                                    val topic = if (headings.isEmpty()) newTopic else names.firstOrNull() ?: ""
+                                    val sub = if (headings.isEmpty()) newSub else names.drop(1).joinToString(" > ")
+                                    onEdit(index, Question(newQuestion, newAnswer, topic, sub))
                                     showEdit = false
                                 }) { Text("Save") }
                             },
@@ -146,18 +185,63 @@ fun QuestionListScreen(
                             title = { Text("Edit Question") },
                             text = {
                                 Column {
-                                    OutlinedTextField(
-                                        value = newTopic,
-                                        onValueChange = { newTopic = it },
-                                        label = { Text("Topic") },
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
-                                    OutlinedTextField(
-                                        value = newSub,
-                                        onValueChange = { newSub = it },
-                                        label = { Text("Subtopic") },
-                                        modifier = Modifier.fillMaxWidth()
-                                    )
+                                    if (headings.isEmpty()) {
+                                        OutlinedTextField(
+                                            value = newTopic,
+                                            onValueChange = { newTopic = it },
+                                            label = { Text("Topic") },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                        OutlinedTextField(
+                                            value = newSub,
+                                            onValueChange = { newSub = it },
+                                            label = { Text("Subtopic") },
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+                                    } else {
+                                        var currentList = headings
+                                        val startLevel = if (disableTopic) 1 else 0
+                                        for (level in startLevel..editPath.size) {
+                                            val options = currentList
+                                            if (options.isEmpty()) break
+                                            if (level > 0 || !disableTopic) {
+                                                var expanded by remember(level, editPath) { mutableStateOf(false) }
+                                                val selectedIdx = editPath.getOrNull(level)
+                                                ExposedDropdownMenuBox(
+                                                    expanded = expanded,
+                                                    onExpandedChange = { expanded = !expanded }
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
+                                                        onValueChange = {},
+                                                        readOnly = true,
+                                                        label = { Text("Başlık ${level + 1}") },
+                                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                                                        modifier = Modifier
+                                                            .menuAnchor()
+                                                            .fillMaxWidth()
+                                                    )
+                                                    ExposedDropdownMenu(
+                                                        expanded = expanded,
+                                                        onDismissRequest = { expanded = false }
+                                                    ) {
+                                                        options.forEachIndexed { i, h ->
+                                                            DropdownMenuItem(
+                                                                text = { Text(h.name) },
+                                                                onClick = {
+                                                                    editPath = editPath.take(level) + i
+                                                                    expanded = false
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                            }
+                                            val idx = editPath.getOrNull(level)
+                                            currentList = if (idx != null && idx in options.indices) options[idx].children else emptyList()
+                                        }
+                                    }
                                     OutlinedTextField(
                                         value = newQuestion,
                                         onValueChange = { newQuestion = it },

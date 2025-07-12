@@ -220,7 +220,7 @@ fun AppNavHost(
         composable(Screen.AddQuestion.route) {
             AddQuestionScreen(
                 boxCount = quizViewModel.boxes.size,
-                headings = quizViewModel.currentQuizFolderHeadings,
+                headings = quizViewModel.currentQuizHeadingOptions,
                 onAdd = { q, a, topic, sub, box ->
                     quizViewModel.addQuestion(q, a, topic, sub, box)
                 },
@@ -271,6 +271,7 @@ fun AppNavHost(
             val index = backStackEntry.arguments?.getInt(Screen.QuestionList.boxArg) ?: 0
             QuestionListScreen(
                 questions = quizViewModel.boxes.getOrNull(index).orEmpty(),
+                headings = quizViewModel.currentQuizHeadingOptions,
                 onEdit = { qIdx, q -> quizViewModel.editQuestion(index, qIdx, q) },
                 onDelete = { qIdx -> quizViewModel.deleteQuestion(index, qIdx) },
                 onBack = { navController.popBackStack() }

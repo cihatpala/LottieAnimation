@@ -49,6 +49,22 @@ class QuizViewModel : ViewModel() {
             return folders.find { it.id == folderId }?.headings ?: emptyList()
         }
 
+    /**
+     * Heading options for the current quiz. Falls back to headings derived from
+     * existing questions if the quiz is not assigned to a folder or the folder
+     * has no headings.
+     */
+    val currentQuizHeadingOptions: List<FolderHeading>
+        get() {
+            val quiz = quizzes.getOrNull(currentQuizIndex) ?: return emptyList()
+            val folderHeadings = currentQuizFolderHeadings
+            return if (folderHeadings.isNotEmpty()) {
+                folderHeadings
+            } else {
+                buildHeadingsFromQuestions(quiz.boxes.flatten())
+            }
+        }
+
     /** Sample public quizzes that could come from a backend in a real app */
     val publicQuizzes: List<PublicQuiz> = listOf(
         PublicQuiz(
@@ -311,6 +327,45 @@ class QuizViewModel : ViewModel() {
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
         quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
+    }
+
+    /**
+     * Builds a temporary heading tree from the provided questions. This is used
+     * when a quiz has no folder headings defined.
+     */
+    private fun buildHeadingsFromQuestions(questions: List<Question>): List<FolderHeading> {
+        var nextId = -1
+        fun next() = nextId--
+
+        val roots = mutableListOf<FolderHeading>()
+        for (q in questions) {
+            val names = mutableListOf<String>()
+            if (q.topic.isNotBlank()) names.add(q.topic)
+            if (q.subtopic.isNotBlank()) {
+                names.addAll(q.subtopic.split(" > ").map { it.trim() }.filter { it.isNotBlank() })
+            }
+
+            var list = roots
+            var node: FolderHeading? = null
+            for (n in names) {
+                node = list.find { it.name == n }
+                if (node == null) {
+                    node = FolderHeading(id = next(), name = n, children = mutableListOf())
+                    list.add(node)
+                }
+                list = node.children
+            }
+        }
+        return roots
+    }
+
+    /**
+     * Returns heading options for the given quiz, using folder headings if
+     * available or deriving them from the quiz questions otherwise.
+     */
+    fun headingOptionsForQuiz(quiz: UserQuiz): List<FolderHeading> {
+        val folderHeadings = folders.find { it.id == quiz.folderId }?.headings ?: emptyList()
+        return if (folderHeadings.isNotEmpty()) folderHeadings else buildHeadingsFromQuestions(quiz.boxes.flatten())
     }
 
     /** Returns the current question in quiz mode */
