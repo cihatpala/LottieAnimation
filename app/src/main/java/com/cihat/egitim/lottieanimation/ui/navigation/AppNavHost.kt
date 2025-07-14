@@ -12,6 +12,7 @@ import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
+import com.cihat.egitim.lottieanimation.ui.screens.LoginScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
 import com.cihat.egitim.lottieanimation.ui.screens.FolderListScreen
@@ -26,6 +27,7 @@ import kotlinx.coroutines.delay
 sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Auth : Screen("auth")
+    data object Login : Screen("login")
     data object Settings : Screen("settings")
     data object QuizList : Screen("quizList")
     data object FolderList : Screen("folderList")
@@ -70,6 +72,27 @@ fun AppNavHost(
                             navController.navigate(Screen.Profile.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
                             }
+                        }
+                    }
+                },
+                onBack = { navController.popBackStack() },
+                onLogin = { navController.navigate(Screen.Login.route) }
+            )
+        }
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onLogin = { email, pass ->
+                    authViewModel.login(email, pass) { success ->
+                        if (success) {
+                            navController.navigate(Screen.Profile.route) {
+                                popUpTo(Screen.Login.route) { inclusive = true }
+                            }
+                        } else {
+                            android.widget.Toast.makeText(
+                                navController.context,
+                                "Giriş başarısız",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 },

@@ -34,7 +34,8 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 @Composable
 fun AuthScreen(
     onGoogle: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogin: () -> Unit
 ) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -78,7 +79,7 @@ fun AuthScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Button(
-                    onClick = {},
+                    onClick = onLogin,
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
