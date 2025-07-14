@@ -134,9 +134,6 @@ fun QuizListScreen(
         var createName by remember { mutableStateOf("") }
         var createCount by remember { mutableFloatStateOf(4f) }
         var selectedFolder by remember { mutableStateOf(folders.firstOrNull()?.id) }
-        var path by remember { mutableStateOf<List<Int>>(emptyList()) }
-        var questionText by remember { mutableStateOf("") }
-        var answerText by remember { mutableStateOf("") }
 
         val listState = rememberLazyListState()
         var draggingQuizId by remember { mutableStateOf<Int?>(null) }
@@ -518,27 +515,14 @@ fun QuizListScreen(
                 onDismissRequest = { showCreate = false },
                 confirmButton = {
                     TextButton(onClick = {
-                        val folderId = selectedFolder
-                        if (folderId != null) {
-                            val names = mutableListOf<String>()
-                            var list = folders.find { it.id == folderId }?.headings ?: emptyList()
-                            for (idx in path) {
-                                val h = list.getOrNull(idx) ?: break
-                                names.add(h.name)
-                                list = h.children
-                            }
-                            val topic = names.firstOrNull() ?: ""
-                            val sub = names.drop(1).joinToString(" > ")
-                            onCreateWithQuestion(createName, createCount.toInt(), folderId, topic, sub, questionText, answerText)
+                        selectedFolder?.let { folderId ->
+                            onCreate(createName, createCount.toInt(), folderId)
                         }
                         showCreate = false
                         createName = ""
                         createCount = 4f
                         selectedFolder = folders.firstOrNull()?.id
-                        path = emptyList()
-                        questionText = ""
-                        answerText = ""
-                    }) { Text("Soru Ekle") }
+                    }) { Text("Oluştur") }
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreate = false }) { Text("İptal") }
@@ -583,9 +567,8 @@ fun QuizListScreen(
                                 folders.forEach { folder ->
                                     DropdownMenuItem(
                                         text = { Text(folder.name) },
-                                        onClick = {
+                                    onClick = {
                                             selectedFolder = folder.id
-                                            path = emptyList()
                                             expandedFolder = false
                                         }
                                     )
@@ -593,61 +576,6 @@ fun QuizListScreen(
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
-
-                        // Dynamic headings
-                        val headings = folders.find { it.id == selectedFolder }?.headings ?: emptyList()
-                        var currentList = headings
-                        for (level in 0..path.size) {
-                            val options = currentList
-                            if (options.isEmpty()) break
-                            var expanded by remember(level, path) { mutableStateOf(false) }
-                            val selectedIdx = path.getOrNull(level)
-                            ExposedDropdownMenuBox(
-                                expanded = expanded,
-                                onExpandedChange = { expanded = !expanded }
-                            ) {
-                                OutlinedTextField(
-                                    value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    label = { Text("Başlık ${level + 1}") },
-                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                                    modifier = Modifier
-                                        .menuAnchor()
-                                        .fillMaxWidth()
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = expanded,
-                                    onDismissRequest = { expanded = false }
-                                ) {
-                                    options.forEachIndexed { index, h ->
-                                        DropdownMenuItem(
-                                            text = { Text(h.name) },
-                                            onClick = {
-                                                path = path.take(level) + index
-                                                expanded = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(8.dp))
-                            selectedIdx?.let { idx -> currentList = options[idx].children } ?: run { currentList = emptyList() }
-                        }
-
-                        OutlinedTextField(
-                            value = questionText,
-                            onValueChange = { questionText = it },
-                            label = { Text("Soru") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        OutlinedTextField(
-                            value = answerText,
-                            onValueChange = { answerText = it },
-                            label = { Text("Cevap") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     }
                 }
             )
