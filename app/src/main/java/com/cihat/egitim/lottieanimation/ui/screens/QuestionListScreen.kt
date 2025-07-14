@@ -216,7 +216,9 @@ fun QuestionListScreen(
                                                     onExpandedChange = { expanded = !expanded }
                                                 ) {
                                                     OutlinedTextField(
-                                                        value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
+                                                        value = selectedIdx?.let { idx ->
+                                                            if (idx in options.indices) options[idx].name else ""
+                                                        } ?: "Seçiniz",
                                                         onValueChange = {},
                                                         readOnly = true,
                                                         label = { Text("Başlık ${level + 1}") },
