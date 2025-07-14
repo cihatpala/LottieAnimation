@@ -21,7 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -71,7 +73,9 @@ fun AuthScreen(
                 painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
                 modifier = Modifier.size(250.dp),
-                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primary)
+                colorFilter = ColorFilter.tint(
+                    color = if (isSystemInDarkTheme()) Color.White else Color.Black
+                )
             )
             Spacer(Modifier.height(24.dp))
             Text(
