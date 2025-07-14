@@ -96,7 +96,9 @@ fun AppNavHost(
                         }
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onForgot = {},
+                onSignup = { navController.navigate(Screen.Auth.route) }
             )
         }
         composable(Screen.Profile.route) {
