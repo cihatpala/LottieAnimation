@@ -4,9 +4,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
@@ -17,10 +20,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Login
+import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.ui.graphics.ColorFilter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.cihat.egitim.lottieanimation.R
@@ -29,7 +38,8 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 @Composable
 fun AuthScreen(
     onGoogle: (String) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogin: () -> Unit
 ) {
     val context = LocalContext.current
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -60,13 +70,46 @@ fun AuthScreen(
             Image(
                 painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
-                modifier = Modifier.size(250.dp)
+                modifier = Modifier.size(250.dp),
+                colorFilter = ColorFilter.tint(color = MaterialTheme.colors.primary)
             )
             Spacer(Modifier.height(24.dp))
             Text(
                 text = "Uygulamaya giriş yaparak farklı cihazlardan kaldığınız yerden devam edebilirsiniz.",
                 textAlign = TextAlign.Center
             )
+            Spacer(Modifier.height(24.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = onLogin,
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.Login, contentDescription = null)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Giriş Yap")
+                    }
+                }
+                Button(
+                    onClick = {},
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(Icons.Default.PersonAdd, contentDescription = null)
+                        Spacer(Modifier.height(4.dp))
+                        Text("Kaydol")
+                    }
+                }
+            }
             Spacer(Modifier.height(24.dp))
             Button(onClick = { launcher.launch(signInClient.signInIntent) }) {
                 Icon(
