@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.width
 
 @Composable
 fun LoginScreen(
