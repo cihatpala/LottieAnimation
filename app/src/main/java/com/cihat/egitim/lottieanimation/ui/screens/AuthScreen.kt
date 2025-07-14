@@ -73,10 +73,16 @@ fun AuthScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(24.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Button(
                     onClick = {},
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Login, contentDescription = null)
@@ -86,7 +92,10 @@ fun AuthScreen(
                 }
                 Button(
                     onClick = {},
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .aspectRatio(1f)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.PersonAdd, contentDescription = null)
