@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.LoginScreen
@@ -46,7 +47,9 @@ sealed class Screen(val route: String) {
 fun AppNavHost(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    quizViewModel: QuizViewModel
+    quizViewModel: QuizViewModel,
+    themeMode: ThemeMode,
+    onThemeChange: (ThemeMode) -> Unit
 ) {
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
@@ -123,6 +126,8 @@ fun AppNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
+                themeMode = themeMode,
+                onThemeChange = onThemeChange,
                 onBack = { navController.popBackStack() }
             )
         }

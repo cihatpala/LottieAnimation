@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 import androidx.navigation.compose.rememberNavController
 import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
@@ -30,8 +31,9 @@ class MainActivity : ComponentActivity() {
             val activity = this@MainActivity
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
+            var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
 
-            LottieAnimationTheme {
+            LottieAnimationTheme(themeMode = themeMode) {
                 if (showDialog) {
                     AlertDialog(
                         onDismissRequest = { showDialog = false },
@@ -49,7 +51,13 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                AppNavHost(navController, authViewModel, quizViewModel)
+                AppNavHost(
+                    navController = navController,
+                    authViewModel = authViewModel,
+                    quizViewModel = quizViewModel,
+                    themeMode = themeMode,
+                    onThemeChange = { themeMode = it }
+                )
                 BackHandler(enabled = !showDialog) {
                     if (navController.previousBackStackEntry != null) {
                         navController.popBackStack()
