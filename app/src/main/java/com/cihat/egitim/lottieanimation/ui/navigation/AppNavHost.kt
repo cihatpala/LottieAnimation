@@ -123,10 +123,6 @@ fun AppNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onCreateQuiz = { name, count, subs ->
-                    quizViewModel.createQuiz(name, count, subs)
-                    navController.navigate(Screen.QuizList.route)
-                },
                 onBack = { navController.popBackStack() }
             )
         }
