@@ -13,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Icon
@@ -29,7 +28,6 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 fun ProfileScreen(
     onPro: () -> Unit,
     onAuth: () -> Unit,
-    onSettings: () -> Unit,
     onFolders: () -> Unit,
     onSupport: () -> Unit,
     onRate: () -> Unit,
@@ -52,7 +50,6 @@ fun ProfileScreen(
         ) {
             item { ProfileItem(Icons.Default.Star, "Pro Ol", onPro) }
             item { ProfileItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }
-            item { ProfileItem(Icons.Default.Settings, "Ayarlar", onSettings) }
             item { ProfileItem(Icons.Default.Folder, "Klasörlerim", onFolders) }
             item { ProfileItem(Icons.Default.Chat, "Canlı Destek", onSupport) }
             item { ProfileItem(Icons.Default.ThumbUp, "Google Play'de Oy Ver", onRate) }

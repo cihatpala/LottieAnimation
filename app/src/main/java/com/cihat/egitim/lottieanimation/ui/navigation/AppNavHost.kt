@@ -20,7 +20,6 @@ import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
-import com.cihat.egitim.lottieanimation.ui.screens.SettingsScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SplashScreen
 import kotlinx.coroutines.delay
 
@@ -28,7 +27,6 @@ sealed class Screen(val route: String) {
     data object Splash : Screen("splash")
     data object Auth : Screen("auth")
     data object Login : Screen("login")
-    data object Settings : Screen("settings")
     data object QuizList : Screen("quizList")
     data object FolderList : Screen("folderList")
     data object Profile : Screen("profile")
@@ -106,7 +104,6 @@ fun AppNavHost(
             ProfileScreen(
                 onPro = {},
                 onAuth = { navController.navigate(Screen.Auth.route) },
-                onSettings = { navController.navigate(Screen.Settings.route) },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onSupport = {},
                 onRate = {},
@@ -119,15 +116,6 @@ fun AppNavHost(
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
-            )
-        }
-        composable(Screen.Settings.route) {
-            SettingsScreen(
-                onCreateQuiz = { name, count, subs ->
-                    quizViewModel.createQuiz(name, count, subs)
-                    navController.navigate(Screen.QuizList.route)
-                },
-                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.FolderList.route) {
