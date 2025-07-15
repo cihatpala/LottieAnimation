@@ -20,6 +20,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
@@ -46,6 +48,10 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,8 +71,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
@@ -142,156 +149,156 @@ fun QuizListScreen(
         val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
 
         Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            if (quizzes.isEmpty()) {
-                Text("Henüz quiziniz yok")
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    // Use a stable key so Compose properly disposes state when
-                    // an item is removed. Without this, deleting the last item
-                    // triggers an IndexOutOfBoundsException as the old state
-                    // tries to read a missing index from the list.
-                    itemsIndexed(
-                        items = quizzes,
-                        key = { _, quiz -> quiz.id }
-                    ) { quizIndex, quiz ->
-                        var expanded by remember(quiz.id) { mutableStateOf(false) }
-                        var showRename by remember(quiz.id) { mutableStateOf(false) }
-                        var showDelete by remember(quiz.id) { mutableStateOf(false) }
-                        var showQuickAdd by remember(quiz.id) { mutableStateOf(false) }
-                        var quickQuestion by remember(quiz.id) { mutableStateOf("") }
-                        var quickAnswer by remember(quiz.id) { mutableStateOf("") }
-                        var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
-                        var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
-                        val scope = rememberCoroutineScope()
-                        val actionWidth = 72.dp
-                        val swipeState = rememberSwipeableState(0)
-                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (quizzes.isEmpty()) {
+                    Text("Henüz quiziniz yok")
+                } else {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // Use a stable key so Compose properly disposes state when
+                        // an item is removed. Without this, deleting the last item
+                        // triggers an IndexOutOfBoundsException as the old state
+                        // tries to read a missing index from the list.
+                        itemsIndexed(
+                            items = quizzes,
+                            key = { _, quiz -> quiz.id }
+                        ) { quizIndex, quiz ->
+                            var expanded by remember(quiz.id) { mutableStateOf(false) }
+                            var showRename by remember(quiz.id) { mutableStateOf(false) }
+                            var showDelete by remember(quiz.id) { mutableStateOf(false) }
+                            var showQuickAdd by remember(quiz.id) { mutableStateOf(false) }
+                            var quickQuestion by remember(quiz.id) { mutableStateOf("") }
+                            var quickAnswer by remember(quiz.id) { mutableStateOf("") }
+                            var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
+                            var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
+                            val scope = rememberCoroutineScope()
+                            val actionWidth = 72.dp
+                            val swipeState = rememberSwipeableState(0)
+                            val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
-                        // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
-                        val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-                        val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                            // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
+                            val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                            val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
 
-                        // Collapse the item whenever it is swiped to reveal actions
-                        LaunchedEffect(swipeState.offset) {
-                            if (swipeState.offset.value != 0f) {
-                                expanded = false
+                            // Collapse the item whenever it is swiped to reveal actions
+                            LaunchedEffect(swipeState.offset) {
+                                if (swipeState.offset.value != 0f) {
+                                    expanded = false
+                                }
                             }
-                        }
 
-                        val isDragging = draggingQuizId == quiz.id
-                        val dragModifier = Modifier
-                            .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
-                            .pointerInput(quiz.id) {
-                                detectDragGesturesAfterLongPress(
-                                    onDragStart = {
-                                        draggingQuizId = quiz.id
-                                        draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
-                                        dragOffset = 0f
-                                    },
-                                    onDragCancel = {
-                                        dragOffset = 0f
-                                        draggingIndex = -1
-                                        draggingQuizId = null
-                                    },
-                                    onDragEnd = {
-                                        dragOffset = 0f
-                                        draggingIndex = -1
-                                        draggingQuizId = null
-                                    },
-                                    onDrag = { change, dragAmount ->
-                                        change.consume()
-                                        dragOffset += dragAmount.y
-                                        val from = draggingIndex
-                                        val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
-                                            .coerceIn(0, quizzes.lastIndex)
-                                        if (potentialIndex != from) {
-                                            onMoveQuiz(from, potentialIndex)
-                                            draggingIndex = potentialIndex
-                                            dragOffset -= (potentialIndex - from) * itemHeightPx
+                            val isDragging = draggingQuizId == quiz.id
+                            val dragModifier = Modifier
+                                .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
+                                .pointerInput(quiz.id) {
+                                    detectDragGesturesAfterLongPress(
+                                        onDragStart = {
+                                            draggingQuizId = quiz.id
+                                            draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
+                                            dragOffset = 0f
+                                        },
+                                        onDragCancel = {
+                                            dragOffset = 0f
+                                            draggingIndex = -1
+                                            draggingQuizId = null
+                                        },
+                                        onDragEnd = {
+                                            dragOffset = 0f
+                                            draggingIndex = -1
+                                            draggingQuizId = null
+                                        },
+                                        onDrag = { change, dragAmount ->
+                                            change.consume()
+                                            dragOffset += dragAmount.y
+                                            val from = draggingIndex
+                                            val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
+                                                .coerceIn(0, quizzes.lastIndex)
+                                            if (potentialIndex != from) {
+                                                onMoveQuiz(from, potentialIndex)
+                                                draggingIndex = potentialIndex
+                                                dragOffset -= (potentialIndex - from) * itemHeightPx
+                                            }
                                         }
-                                    }
-                                )
-                            }
-
-                        Box(
-                            modifier = dragModifier
-                                .fillMaxWidth()
-                                .clipToBounds()
-                                .swipeable(
-                                    state = swipeState,
-                                    anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
-                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                    orientation = Orientation.Horizontal
-                                )
-                                .animateItem()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .height(72.dp)
-                                    .alpha(revealProgressEnd)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showRename = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color(0xFFFFA500))
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                    )
                                 }
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showDelete = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(Color.Red)
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
-                                }
-                            }
 
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart)
-                                    .height(72.dp)
-                                    .alpha(revealProgressStart)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showQuickAdd = true
-                                    },
-                                    enabled = swipeState.currentValue == 2,
-                                    modifier = Modifier
-                                        .background(Color(0xFF4CAF50))
-                                        .size(actionWidth)
-                                ) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
-                                }
-                            }
-
-                            Column(
-                                modifier = Modifier
-                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                            Box(
+                                modifier = dragModifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
+                                    .clipToBounds()
+                                    .swipeable(
+                                        state = swipeState,
+                                        anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
+                                        thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                        orientation = Orientation.Horizontal
+                                    )
+                                    .animateItem()
                             ) {
+                                Row(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .height(72.dp)
+                                        .alpha(revealProgressEnd)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            showRename = true
+                                        },
+                                        enabled = swipeState.currentValue == 1,
+                                        modifier = Modifier
+                                            .background(Color(0xFFFFA500))
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                    }
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            showDelete = true
+                                        },
+                                        enabled = swipeState.currentValue == 1,
+                                        modifier = Modifier
+                                            .background(Color.Red)
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                    }
+                                }
+
+                                Row(
+                                    modifier = Modifier
+                                        .align(Alignment.CenterStart)
+                                        .height(72.dp)
+                                        .alpha(revealProgressStart)
+                                ) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            showQuickAdd = true
+                                        },
+                                        enabled = swipeState.currentValue == 2,
+                                        modifier = Modifier
+                                            .background(Color(0xFF4CAF50))
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                                    }
+                                }
+
+                                Column(
+                                    modifier = Modifier
+                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -356,132 +363,137 @@ fun QuizListScreen(
                             }
 
 
-                        if (showRename) {
-                            AlertDialog(
-                                onDismissRequest = { showRename = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onRename(quizIndex, newName)
-                                        showRename = false
-                                    }) { Text("Save") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showRename = false }) { Text("Cancel") }
-                                },
-                                title = { Text("Edit Quiz") },
-                                text = {
-                                    OutlinedTextField(
-                                        value = newName,
-                                        onValueChange = { newName = it },
-                                        label = { Text("Name") }
-                                    )
-                                }
-                            )
-                        }
-
-                        if (showDelete) {
-                            AlertDialog(
-                                onDismissRequest = { showDelete = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        onDelete(quizIndex)
-                                        showDelete = false
-                                    }) { Text("Evet") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showDelete = false }) { Text("Hayır") }
-                                },
-                                text = { Text("Silmek istediğinize emin misiniz?") }
-                            )
-                        }
-
-                        if (showQuickAdd) {
-                            val folderId = quiz.folderId
-                            val folderHeadings = folders.find { it.id == folderId }?.headings
-                                ?: headingsFromQuestions(quiz.boxes.flatten())
-                            AlertDialog(
-                                onDismissRequest = { showQuickAdd = false },
-                                confirmButton = {
-                                    TextButton(onClick = {
-                                        var list = folderHeadings
-                                        val names = mutableListOf<String>()
-                                        for (idx in quickPath) {
-                                            val h = list.getOrNull(idx) ?: break
-                                            names.add(h.name)
-                                            list = h.children
-                                        }
-                                        val topic = names.firstOrNull() ?: ""
-                                        val sub = names.drop(1).joinToString(" > ")
-                                        onQuickAdd(quizIndex, topic, sub, quickQuestion, quickAnswer)
-                                        showQuickAdd = false
-                                        quickQuestion = ""
-                                        quickAnswer = ""
-                                        quickPath = emptyList()
-                                    }) { Text("Soru Ekle") }
-                                },
-                                dismissButton = {
-                                    TextButton(onClick = { showQuickAdd = false }) { Text("İptal") }
-                                },
-                                title = { Text(folderId?.let { folders.find { f -> f.id == it }?.name } ?: "") },
-                                text = {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        var currentList = folderHeadings
-                                        for (level in 0..quickPath.size) {
-                                            val options = currentList
-                                            if (options.isEmpty()) break
-                                            var expanded by remember(level, quickPath) { mutableStateOf(false) }
-                                            val selectedIdx = quickPath.getOrNull(level)
-                                            ExposedDropdownMenuBox(
-                                                expanded = expanded,
-                                                onExpandedChange = { expanded = !expanded }
-                                            ) {
-                                                OutlinedTextField(
-                                                    value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
-                                                    onValueChange = {},
-                                                    readOnly = true,
-                                                    label = { Text("Başlık ${level + 1}") },
-                                                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                                                    modifier = Modifier
-                                                        .menuAnchor()
-                                                        .fillMaxWidth()
-                                                )
-                                                ExposedDropdownMenu(
-                                                    expanded = expanded,
-                                                    onDismissRequest = { expanded = false }
-                                                ) {
-                                                    options.forEachIndexed { index, h ->
-                                                        DropdownMenuItem(
-                                                            text = { Text(h.name) },
-                                                            onClick = {
-                                                                quickPath = quickPath.take(level) + index
-                                                                expanded = false
-                                                            }
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            selectedIdx?.let { idx -> currentList = options[idx].children } ?: run { currentList = emptyList() }
-                                        }
-
+                            if (showRename) {
+                                AlertDialog(
+                                    onDismissRequest = { showRename = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            onRename(quizIndex, newName)
+                                            showRename = false
+                                        }) { Text("Save") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showRename = false }) { Text("Cancel") }
+                                    },
+                                    title = { Text("Edit Quiz") },
+                                    text = {
                                         OutlinedTextField(
-                                            value = quickQuestion,
-                                            onValueChange = { quickQuestion = it },
-                                            label = { Text("Soru") },
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        OutlinedTextField(
-                                            value = quickAnswer,
-                                            onValueChange = { quickAnswer = it },
-                                            label = { Text("Cevap") },
-                                            modifier = Modifier.fillMaxWidth()
+                                            value = newName,
+                                            onValueChange = { newName = it },
+                                            label = { Text("Name") }
                                         )
                                     }
-                                }
-                            )
+                                )
+                            }
+
+                            if (showDelete) {
+                                AlertDialog(
+                                    onDismissRequest = { showDelete = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            onDelete(quizIndex)
+                                            showDelete = false
+                                        }) { Text("Evet") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showDelete = false }) { Text("Hayır") }
+                                    },
+                                    text = { Text("Silmek istediğinize emin misiniz?") }
+                                )
+                            }
+
+                            if (showQuickAdd) {
+                                val folderId = quiz.folderId
+                                val folderHeadings = folders.find { it.id == folderId }?.headings
+                                    ?: headingsFromQuestions(quiz.boxes.flatten())
+                                AlertDialog(
+                                    onDismissRequest = { showQuickAdd = false },
+                                    confirmButton = {
+                                        TextButton(onClick = {
+                                            var list = folderHeadings
+                                            val names = mutableListOf<String>()
+                                            for (idx in quickPath) {
+                                                val h = list.getOrNull(idx) ?: break
+                                                names.add(h.name)
+                                                list = h.children
+                                            }
+                                            val topic = names.firstOrNull() ?: ""
+                                            val sub = names.drop(1).joinToString(" > ")
+                                            onQuickAdd(quizIndex, topic, sub, quickQuestion, quickAnswer)
+                                            showQuickAdd = false
+                                            quickQuestion = ""
+                                            quickAnswer = ""
+                                            quickPath = emptyList()
+                                        }) { Text("Soru Ekle") }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { showQuickAdd = false }) { Text("İptal") }
+                                    },
+                                    title = {
+                                        Text(folderId?.let { folders.find { f -> f.id == it }?.name }
+                                            ?: "")
+                                    },
+                                    text = {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                            var currentList = folderHeadings
+                                            for (level in 0..quickPath.size) {
+                                                val options = currentList
+                                                if (options.isEmpty()) break
+                                                var expanded by remember(level, quickPath) { mutableStateOf(false) }
+                                                val selectedIdx = quickPath.getOrNull(level)
+                                                ExposedDropdownMenuBox(
+                                                    expanded = expanded,
+                                                    onExpandedChange = { expanded = !expanded }
+                                                ) {
+                                                    OutlinedTextField(
+                                                        value = selectedIdx?.let { options[it].name }
+                                                            ?: "Seçiniz",
+                                                        onValueChange = {},
+                                                        readOnly = true,
+                                                        label = { Text("Başlık ${level + 1}") },
+                                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+                                                        modifier = Modifier
+                                                            .menuAnchor()
+                                                            .fillMaxWidth()
+                                                    )
+                                                    ExposedDropdownMenu(
+                                                        expanded = expanded,
+                                                        onDismissRequest = { expanded = false }
+                                                    ) {
+                                                        options.forEachIndexed { index, h ->
+                                                            DropdownMenuItem(
+                                                                text = { Text(h.name) },
+                                                                onClick = {
+                                                                    quickPath = quickPath.take(level) + index
+                                                                    expanded = false
+                                                                }
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                selectedIdx?.let { idx -> currentList = options[idx].children }
+                                                    ?: run { currentList = emptyList() }
+                                            }
+
+                                            OutlinedTextField(
+                                                value = quickQuestion,
+                                                onValueChange = { quickQuestion = it },
+                                                label = { Text("Soru") },
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            OutlinedTextField(
+                                                value = quickAnswer,
+                                                onValueChange = { quickAnswer = it },
+                                                label = { Text("Cevap") },
+                                                modifier = Modifier.fillMaxWidth()
+                                            )
+                                        }
+                                    }
+                                )
+                            }
                         }
-                    }
                     }
                 }
                 Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
@@ -551,7 +563,8 @@ fun QuizListScreen(
                             onExpandedChange = { expandedFolder = !expandedFolder }
                         ) {
                             OutlinedTextField(
-                                value = folders.find { it.id == selectedFolder }?.name ?: "Klasör Seç",
+                                value = folders.find { it.id == selectedFolder }?.name
+                                    ?: "Klasör Seç",
                                 onValueChange = {},
                                 readOnly = true,
                                 label = { Text("Klasör") },
@@ -567,7 +580,7 @@ fun QuizListScreen(
                                 folders.forEach { folder ->
                                     DropdownMenuItem(
                                         text = { Text(folder.name) },
-                                    onClick = {
+                                        onClick = {
                                             selectedFolder = folder.id
                                             expandedFolder = false
                                         }
@@ -581,32 +594,132 @@ fun QuizListScreen(
             )
         }
 
-
         if (showWarning) {
-            AlertDialog(
-                onDismissRequest = { showWarning = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        showWarning = false
-                        onFolders()
-                    }) { Text("Klasör Oluştur") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showWarning = false }) { Text("Kapat") }
-                },
-                icon = {
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.knowledge_logo),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(CircleShape)
-                    )
-                },
-                title = { Text("Uyarı") },
-                text = { Text("Quiz oluşturmak için klasör oluşturunuz.") }
+            PrimaryAlert(
+                onDismiss = { showWarning = false },
+                onConfirm = {
+                    showWarning = false
+                    onFolders()
+                }
             )
         }
+        /*
+        AlertDialog(
+            onDismissRequest = { showWarning = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    showWarning = false
+                    onFolders()
+                }) { Text("Klasör Oluştur") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showWarning = false }) { Text("Kapat") }
+            },
+            icon = {
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.knowledge_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(CircleShape)
+                )
+            },
+            title = { Text("Uyarı") },
+            text = { Text("Quiz oluşturmak için klasör oluşturunuz.") }
+        )
+    }
+         */
+    }
+}
+
+@Composable
+fun PrimaryAlert(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val scheme = MaterialTheme.colorScheme
+    val isDark = isSystemInDarkTheme()
+
+    val cardBg = scheme.surface
+    val cardContent = scheme.onSurface
+
+    val badgeBg = if (isDark) scheme.primary else scheme.secondary
+    val badgeBorder = scheme.background   // 4 dp’lik kenar
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .wrapContentHeight()
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                colors = CardDefaults.cardColors(containerColor = cardBg)
+            ) {
+                Column(
+                    modifier = Modifier.padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        "Uyarı",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = cardContent
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        "Quiz oluşturmak için klasör oluşturunuz.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        color = cardContent
+                    )
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        TextButton(onClick = onDismiss) {
+                            Text("Kapat", color = cardContent)
+                        }
+                        Button(
+                            onClick = onConfirm,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Klasör Oluştur")
+                        }
+                    }
+                }
+            }
+
+            /* Üst rozeti */
+            Box(
+                modifier = Modifier
+                    .size(88.dp)
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-44).dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                    .border(4.dp, MaterialTheme.colorScheme.background, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(                                   // ister Icon yerine Image kullan
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
         }
     }
+}
 
