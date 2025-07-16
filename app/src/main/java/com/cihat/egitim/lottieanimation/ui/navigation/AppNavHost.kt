@@ -107,7 +107,7 @@ fun AppNavHost(
                 onRate = {},
                 isLoggedIn = authViewModel.currentUser != null,
                 onLogout = {
-                    authViewModel.logout()
+                    authViewModel.logout(navController.context)
                     navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.Profile.route) { inclusive = true }
                     }
@@ -147,7 +147,7 @@ fun AppNavHost(
                 onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
                 onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
                 onLogout = {
-                    authViewModel.logout()
+                    authViewModel.logout(navController.context)
                     navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.FolderList.route) { inclusive = true }
                     }
@@ -200,7 +200,7 @@ fun AppNavHost(
                     quizViewModel.addQuestion(q, a, topic, sub, 0)
                 },
                 onLogout = {
-                    authViewModel.logout()
+                    authViewModel.logout(navController.context)
                     navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.QuizList.route) { inclusive = true }
                     }
@@ -235,7 +235,7 @@ fun AppNavHost(
                 onView = { index -> navController.navigate(Screen.QuestionList.createRoute(index)) },
                 onBack = { navController.popBackStack() },
                 onLogout = {
-                    authViewModel.logout()
+                    authViewModel.logout(navController.context)
                     navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.BoxList.route) { inclusive = true }
                     }
