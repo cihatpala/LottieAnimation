@@ -12,7 +12,20 @@
           "package_name": "com.cihat.egitim.lottieanimation"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "899265147052-7icqjegj0o9i0fkhm5tp8kculs6cdelk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cihat.egitim.lottieanimation",
+            "certificate_hash": "f47c7020a0c1ef4e08965162037e5cdb633bf250"
+          }
+        },
+        {
+          "client_id": "899265147052-au8n1lldr3de3gnpto81tp4qt1vcq88e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAKlyxYdYE3SRMBlKagGf_RWF1IhtU9nnM"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "899265147052-au8n1lldr3de3gnpto81tp4qt1vcq88e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
