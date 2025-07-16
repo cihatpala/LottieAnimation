@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import com.cihat.egitim.lottieanimation.data.local.LocalRepository
 import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.data.Question
@@ -34,6 +36,8 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
 
     private var nextQuizId = 0
 
+    private val saveMutex = Mutex()
+
     /** Index of the quiz currently being viewed */
     private var currentQuizIndex by mutableStateOf(0)
 
@@ -58,8 +62,10 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
 
     private fun persistState() {
         viewModelScope.launch {
-            repository.saveFolders(folders)
-            repository.saveQuizzes(quizzes)
+            saveMutex.withLock {
+                repository.saveFolders(folders)
+                repository.saveQuizzes(quizzes)
+            }
         }
     }
 
