@@ -113,6 +113,13 @@ fun AppNavHost(
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onSupport = {},
                 onRate = {},
+                isLoggedIn = authViewModel.currentUser != null,
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.Profile.route) { inclusive = true }
+                    }
+                },
                 showBack = canPop,
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->

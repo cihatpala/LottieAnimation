@@ -18,11 +18,17 @@ import androidx.navigation.compose.rememberNavController
 import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
+import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModelFactory
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
-    private val quizViewModel: QuizViewModel by viewModels()
+    private val quizViewModel: QuizViewModel by viewModels {
+        val repo = (application as LottieApplication).repository
+        QuizViewModelFactory(repo)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +38,9 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
+            LaunchedEffect(Unit) {
+                themeMode = (application as LottieApplication).repository.getTheme()
+            }
 
             LottieAnimationTheme(themeMode = themeMode) {
                 if (showDialog) {
@@ -56,7 +65,12 @@ class MainActivity : ComponentActivity() {
                     authViewModel = authViewModel,
                     quizViewModel = quizViewModel,
                     themeMode = themeMode,
-                    onThemeChange = { themeMode = it }
+                    onThemeChange = {
+                        themeMode = it
+                        lifecycleScope.launch {
+                            (application as LottieApplication).repository.saveTheme(it)
+                        }
+                    }
                 )
                 BackHandler(enabled = !showDialog) {
                     if (navController.previousBackStackEntry != null) {
