@@ -112,7 +112,7 @@ fun AuthScreen(
                 val intent = AuthUI.getInstance()
                     .createSignInIntentBuilder()
                     .setAvailableProviders(providers)
-                    .setIsSmartLockEnabled(false)
+                    .setCredentialManagerEnabled(false)
                     .build()
                 launcher.launch(intent)
             }) {
