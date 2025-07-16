@@ -63,8 +63,17 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
     private fun persistState() {
         viewModelScope.launch {
             saveMutex.withLock {
-                repository.saveFolders(folders)
-                repository.saveQuizzes(quizzes)
+                val foldersSnapshot = folders.map { folder ->
+                    folder.copy(headings = folder.headings.toMutableList())
+                }
+                val quizzesSnapshot = quizzes.map { quiz ->
+                    quiz.copy(
+                        boxes = quiz.boxes.map { it.toMutableList() }.toMutableList(),
+                        subHeadings = quiz.subHeadings.toMutableList()
+                    )
+                }
+                repository.saveFolders(foldersSnapshot)
+                repository.saveQuizzes(quizzesSnapshot)
             }
         }
     }

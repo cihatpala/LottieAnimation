@@ -12,7 +12,9 @@ class LottieApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
-        val db = Room.databaseBuilder(this, AppDatabase::class.java, "app.db").build()
+        val db = Room.databaseBuilder(this, AppDatabase::class.java, "app.db")
+            .fallbackToDestructiveMigration()
+            .build()
         repository = LocalRepository(db)
     }
 }

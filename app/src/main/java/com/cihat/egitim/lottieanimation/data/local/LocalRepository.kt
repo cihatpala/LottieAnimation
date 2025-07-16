@@ -49,7 +49,11 @@ class LocalRepository(private val db: AppDatabase) {
         quizzes.map { quiz ->
             val qList = questions.filter { it.quizId == quiz.id }
             val sList = subs.filter { it.quizId == quiz.id }.sortedBy { it.boxIndex }
-            val boxCount = maxOf(sList.maxOfOrNull { it.boxIndex } ?: 0, qList.maxOfOrNull { it.boxIndex } ?: 0) + 1
+            val boxCount = maxOf(
+                quiz.boxCount,
+                (sList.maxOfOrNull { it.boxIndex } ?: -1) + 1,
+                (qList.maxOfOrNull { it.boxIndex } ?: -1) + 1
+            )
             val boxes = MutableList(boxCount) { mutableListOf<Question>() }
             qList.forEach { q ->
                 boxes[q.boxIndex].add(Question(q.text, q.answer, q.topic, q.subtopic))
@@ -65,12 +69,18 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun saveFolders(folders: List<UserFolder>) = withContext(Dispatchers.IO) {
+        fun copyHeading(h: FolderHeading): FolderHeading =
+            h.copy(children = h.children.map { copyHeading(it) }.toMutableList())
+
+        val snapshot = folders.map { f ->
+            f.copy(headings = f.headings.map { copyHeading(it) }.toMutableList())
+        }
         db.withTransaction {
             dao.clearFolders()
             dao.clearHeadings()
-            val folderEntities = folders.map { UserFolderEntity(it.id, it.name) }
+            val folderEntities = snapshot.map { UserFolderEntity(it.id, it.name) }
             val headingEntities = mutableListOf<FolderHeadingEntity>()
-            folders.forEach { folder ->
+            snapshot.forEach { folder ->
                 flattenHeadings(folder.id, null, folder.headings, headingEntities)
             }
             dao.insertFolders(folderEntities)
@@ -86,14 +96,20 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun saveQuizzes(quizzes: List<UserQuiz>) = withContext(Dispatchers.IO) {
+        val snapshot = quizzes.map { q ->
+            q.copy(
+                boxes = q.boxes.map { it.toMutableList() }.toMutableList(),
+                subHeadings = q.subHeadings.toMutableList()
+            )
+        }
         db.withTransaction {
             dao.clearQuizzes()
             dao.clearQuestions()
             dao.clearSubHeadings()
-            val quizEntities = quizzes.map { UserQuizEntity(it.id, it.name, it.folderId) }
+            val quizEntities = snapshot.map { UserQuizEntity(it.id, it.name, it.folderId, it.boxes.size) }
             val questionEntities = mutableListOf<QuestionEntity>()
             val subEntities = mutableListOf<SubHeadingEntity>()
-            quizzes.forEach { quiz ->
+            snapshot.forEach { quiz ->
                 quiz.boxes.forEachIndexed { index, box ->
                     box.forEach { q ->
                         questionEntities.add(
