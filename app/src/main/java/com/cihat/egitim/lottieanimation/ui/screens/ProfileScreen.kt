@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +34,8 @@ fun ProfileScreen(
     onFolders: () -> Unit,
     onSupport: () -> Unit,
     onRate: () -> Unit,
+    isLoggedIn: Boolean,
+    onLogout: () -> Unit,
     showBack: Boolean,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -51,11 +54,16 @@ fun ProfileScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { ProfileItem(Icons.Default.Star, "Pro Ol", onPro) }
-            item { ProfileItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }
+            if (!isLoggedIn) {
+                item { ProfileItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }
+            }
             item { ProfileItem(Icons.Default.Settings, "Ayarlar", onSettings) }
             item { ProfileItem(Icons.Default.Folder, "Klasörlerim", onFolders) }
             item { ProfileItem(Icons.Default.Chat, "Canlı Destek", onSupport) }
             item { ProfileItem(Icons.Default.ThumbUp, "Google Play'de Oy Ver", onRate) }
+            if (isLoggedIn) {
+                item { ProfileItem(Icons.Default.Logout, "Çıkış Yap", onLogout) }
+            }
         }
     }
 }

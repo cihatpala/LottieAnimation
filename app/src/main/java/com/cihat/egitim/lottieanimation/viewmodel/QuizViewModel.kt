@@ -5,6 +5,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cihat.egitim.lottieanimation.data.local.LocalRepository
+import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.data.PublicQuiz
 import com.cihat.egitim.lottieanimation.data.UserQuiz
@@ -16,7 +19,7 @@ import kotlin.math.min
  * ViewModel that holds quizzes, each containing its own set of boxes and
  * questions. Also manages quiz progress state.
  */
-class QuizViewModel : ViewModel() {
+class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
 
     /** Folders created by the user */
     var folders = mutableStateListOf<UserFolder>()
@@ -33,6 +36,32 @@ class QuizViewModel : ViewModel() {
 
     /** Index of the quiz currently being viewed */
     private var currentQuizIndex by mutableStateOf(0)
+
+    init {
+        viewModelScope.launch {
+            folders.addAll(repository.loadFolders())
+            quizzes.addAll(repository.loadQuizzes())
+            nextFolderId = (folders.maxOfOrNull { it.id } ?: -1) + 1
+            nextHeadingId = (folders.flatMap { collectHeadingIds(it.headings) }.maxOrNull() ?: -1) + 1
+            nextQuizId = (quizzes.maxOfOrNull { it.id } ?: -1) + 1
+        }
+    }
+
+    private fun collectHeadingIds(list: List<FolderHeading>): List<Int> {
+        val ids = mutableListOf<Int>()
+        list.forEach { h ->
+            ids.add(h.id)
+            ids.addAll(collectHeadingIds(h.children))
+        }
+        return ids
+    }
+
+    private fun persistState() {
+        viewModelScope.launch {
+            repository.saveFolders(folders)
+            repository.saveQuizzes(quizzes)
+        }
+    }
 
     /** Convenient access to boxes of the current quiz */
     val boxes: MutableList<MutableList<Question>>
@@ -139,6 +168,7 @@ class QuizViewModel : ViewModel() {
         val folder = folders.getOrNull(index) ?: return
         if (newName.isNotBlank()) {
             folders[index] = folder.copy(name = newName)
+            persistState()
         }
     }
 
@@ -146,6 +176,7 @@ class QuizViewModel : ViewModel() {
     fun deleteFolder(index: Int) {
         if (index in folders.indices) {
             folders.removeAt(index)
+            persistState()
         }
     }
 
@@ -164,6 +195,7 @@ class QuizViewModel : ViewModel() {
                 headings = headingObjs.toMutableList()
             )
         )
+        persistState()
     }
 
     /** Renames a heading specified by path */
@@ -172,6 +204,7 @@ class QuizViewModel : ViewModel() {
         val folder = folders.getOrNull(folderIndex) ?: return
         val newHeadings = renameHeadingRec(folder.headings, path, newName) ?: return
         folders[folderIndex] = folder.copy(headings = newHeadings)
+        persistState()
     }
 
     /** Deletes the heading specified by path */
@@ -179,6 +212,7 @@ class QuizViewModel : ViewModel() {
         val folder = folders.getOrNull(folderIndex) ?: return
         val newHeadings = deleteHeadingRec(folder.headings, path) ?: return
         folders[folderIndex] = folder.copy(headings = newHeadings)
+        persistState()
     }
 
     private fun deleteHeadingRec(
@@ -227,6 +261,7 @@ class QuizViewModel : ViewModel() {
             addHeadingRec(folder.headings, path, name) ?: return
         }
         folders[folderIndex] = folder.copy(headings = newHeadings)
+        persistState()
     }
 
     private fun addHeadingRec(
@@ -253,6 +288,7 @@ class QuizViewModel : ViewModel() {
         val quiz = quizzes.getOrNull(index) ?: return
         if (newName.isNotBlank()) {
             quizzes[index] = quiz.copy(name = newName)
+            persistState()
         }
     }
 
@@ -261,6 +297,7 @@ class QuizViewModel : ViewModel() {
         if (index in quizzes.indices) {
             quizzes.removeAt(index)
             if (currentQuizIndex >= quizzes.size) currentQuizIndex = quizzes.lastIndex.coerceAtLeast(0)
+            persistState()
         }
     }
 
@@ -271,6 +308,7 @@ class QuizViewModel : ViewModel() {
         if (fromIndex !in quizzes.indices || toIndex !in quizzes.indices) return
         val quiz = quizzes.removeAt(fromIndex)
         quizzes.add(toIndex, quiz)
+        persistState()
     }
 
     /** Creates a new quiz with the given name, box count and optional sub headings */
@@ -294,6 +332,7 @@ class QuizViewModel : ViewModel() {
             )
         )
         currentQuizIndex = quizzes.lastIndex
+        persistState()
     }
 
     /**
@@ -327,6 +366,7 @@ class QuizViewModel : ViewModel() {
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
         quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
+        persistState()
     }
 
     /**
@@ -381,6 +421,7 @@ class QuizViewModel : ViewModel() {
         boxIndex: Int
     ) {
         boxes.getOrNull(boxIndex)?.add(Question(text, answer, topic, subtopic))
+        persistState()
     }
 
     /**
@@ -423,6 +464,7 @@ class QuizViewModel : ViewModel() {
         val box = boxes.getOrNull(boxIndex) ?: return
         if (questionIndex in box.indices) {
             box[questionIndex] = newQuestion
+            persistState()
         }
     }
 
@@ -431,6 +473,7 @@ class QuizViewModel : ViewModel() {
         boxes.getOrNull(boxIndex)?.let { box ->
             if (questionIndex in box.indices) {
                 box.removeAt(questionIndex)
+                persistState()
             }
         }
     }

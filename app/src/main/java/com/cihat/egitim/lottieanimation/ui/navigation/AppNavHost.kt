@@ -55,14 +55,8 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             LaunchedEffect(Unit) {
                 delay(2500)
-                if (authViewModel.currentUser != null) {
-                    navController.navigate(Screen.Profile.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                } else {
-                    navController.navigate(Screen.Auth.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
+                navController.navigate(Screen.QuizList.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             }
             SplashScreen()
@@ -72,7 +66,7 @@ fun AppNavHost(
                 onGoogle = { token ->
                     authViewModel.loginWithGoogle(token) { success ->
                         if (success) {
-                            navController.navigate(Screen.Profile.route) {
+                            navController.navigate(Screen.QuizList.route) {
                                 popUpTo(Screen.Auth.route) { inclusive = true }
                             }
                         }
@@ -87,7 +81,7 @@ fun AppNavHost(
                 onLogin = { email, pass ->
                     authViewModel.login(email, pass) { success ->
                         if (success) {
-                            navController.navigate(Screen.Profile.route) {
+                            navController.navigate(Screen.QuizList.route) {
                                 popUpTo(Screen.Login.route) { inclusive = true }
                             }
                         } else {
@@ -113,6 +107,13 @@ fun AppNavHost(
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onSupport = {},
                 onRate = {},
+                isLoggedIn = authViewModel.currentUser != null,
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Screen.QuizList.route) {
+                        popUpTo(Screen.Profile.route) { inclusive = true }
+                    }
+                },
                 showBack = canPop,
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
@@ -142,7 +143,7 @@ fun AppNavHost(
                 onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
                 onLogout = {
                     authViewModel.logout()
-                    navController.navigate(Screen.Auth.route) {
+                    navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.FolderList.route) { inclusive = true }
                     }
                 },
@@ -195,7 +196,7 @@ fun AppNavHost(
                 },
                 onLogout = {
                     authViewModel.logout()
-                    navController.navigate(Screen.Auth.route) {
+                    navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.QuizList.route) { inclusive = true }
                     }
                 },
@@ -230,7 +231,7 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onLogout = {
                     authViewModel.logout()
-                    navController.navigate(Screen.Auth.route) {
+                    navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.BoxList.route) { inclusive = true }
                     }
                 },
