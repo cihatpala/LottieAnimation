@@ -18,6 +18,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
 import com.cihat.egitim.lottieanimation.ui.screens.FolderListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
+import com.cihat.egitim.lottieanimation.ui.screens.UserProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
@@ -33,6 +34,7 @@ sealed class Screen(val route: String) {
     data object QuizList : Screen("quizList")
     data object FolderList : Screen("folderList")
     data object Profile : Screen("profile")
+    data object MyProfile : Screen("myProfile")
     data object BoxList : Screen("boxList")
     data object AddQuestion : Screen("addQuestion")
     data object HomeFeed : Screen("homeFeed")
@@ -110,6 +112,7 @@ fun AppNavHost(
                         popUpTo(Screen.Profile.route) { inclusive = true }
                     }
                 },
+                onProfileInfo = { navController.navigate(Screen.MyProfile.route) },
                 showBack = canPop,
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
@@ -119,6 +122,12 @@ fun AppNavHost(
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
+            )
+        }
+        composable(Screen.MyProfile.route) {
+            UserProfileScreen(
+                user = authViewModel.currentUser,
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Screen.Settings.route) {
