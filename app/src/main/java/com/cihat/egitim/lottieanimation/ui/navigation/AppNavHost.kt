@@ -63,13 +63,9 @@ fun AppNavHost(
         }
         composable(Screen.Auth.route) {
             AuthScreen(
-                onGoogle = { token ->
-                    authViewModel.loginWithGoogle(token) { success ->
-                        if (success) {
-                            navController.navigate(Screen.QuizList.route) {
-                                popUpTo(Screen.Auth.route) { inclusive = true }
-                            }
-                        }
+                onGoogle = {
+                    navController.navigate(Screen.QuizList.route) {
+                        popUpTo(Screen.Auth.route) { inclusive = true }
                     }
                 },
                 onBack = { navController.popBackStack() },

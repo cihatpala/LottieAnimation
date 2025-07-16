@@ -1,7 +1,9 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import android.app.Activity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -32,31 +34,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.ui.graphics.ColorFilter
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 
 @Composable
 fun AuthScreen(
-    onGoogle: (String) -> Unit,
+    onGoogle: () -> Unit,
     onBack: () -> Unit,
     onLogin: () -> Unit
 ) {
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.result
-            account.idToken?.let { onGoogle(it) }
-        } catch (_: Exception) {
+    val launcher = rememberLauncherForActivityResult(FirebaseAuthUIActivityResultContract()) { res ->
+        if (res.resultCode == Activity.RESULT_OK) {
+            onGoogle()
         }
     }
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(context.getString(R.string.default_web_client_id))
-        .requestEmail()
-        .build()
-    val signInClient = GoogleSignIn.getClient(context, gso)
+    val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build())
     AppScaffold(
         title = "Auth",
         showBack = true,
@@ -115,7 +108,13 @@ fun AuthScreen(
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Button(onClick = { launcher.launch(signInClient.signInIntent) }) {
+            Button(onClick = {
+                val intent = AuthUI.getInstance()
+                    .createSignInIntentBuilder()
+                    .setAvailableProviders(providers)
+                    .build()
+                launcher.launch(intent)
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google"

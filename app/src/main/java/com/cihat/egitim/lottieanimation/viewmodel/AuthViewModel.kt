@@ -3,8 +3,6 @@ package com.cihat.egitim.lottieanimation.viewmodel
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
-import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.AuthCredential
 import com.google.firebase.ktx.Firebase
 
 class AuthViewModel : ViewModel() {
@@ -27,9 +25,4 @@ class AuthViewModel : ViewModel() {
         auth.signOut()
     }
 
-    fun loginWithGoogle(token: String, onResult: (Boolean) -> Unit) {
-        val credential: AuthCredential = GoogleAuthProvider.getCredential(token, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener { onResult(it.isSuccessful) }
-    }
 }
