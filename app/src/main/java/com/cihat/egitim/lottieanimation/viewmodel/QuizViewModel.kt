@@ -21,6 +21,22 @@ import kotlin.math.min
  */
 class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
 
+    /** Folders created by the user */
+    var folders = mutableStateListOf<UserFolder>()
+        private set
+
+    private var nextFolderId = 0
+    private var nextHeadingId = 0
+
+    /** Quizzes created or imported by the user */
+    var quizzes = mutableStateListOf<UserQuiz>()
+        private set
+
+    private var nextQuizId = 0
+
+    /** Index of the quiz currently being viewed */
+    private var currentQuizIndex by mutableStateOf(0)
+
     init {
         viewModelScope.launch {
             folders.addAll(repository.loadFolders())
@@ -39,22 +55,6 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         }
         return ids
     }
-
-    /** Folders created by the user */
-    var folders = mutableStateListOf<UserFolder>()
-        private set
-
-    private var nextFolderId = 0
-    private var nextHeadingId = 0
-
-    /** Quizzes created or imported by the user */
-    var quizzes = mutableStateListOf<UserQuiz>()
-        private set
-
-    private var nextQuizId = 0
-
-    /** Index of the quiz currently being viewed */
-    private var currentQuizIndex by mutableStateOf(0)
 
     private fun persistState() {
         viewModelScope.launch {
