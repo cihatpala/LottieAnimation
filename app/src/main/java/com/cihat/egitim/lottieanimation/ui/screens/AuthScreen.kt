@@ -32,8 +32,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.ui.graphics.ColorFilter
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import androidx.activity.result.IntentSenderRequest
+import com.google.android.gms.auth.api.identity.AuthorizationClient
+import com.google.android.gms.auth.api.identity.AuthorizationRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.common.Scopes
+import com.google.android.gms.common.api.Scope
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 
@@ -44,19 +48,22 @@ fun AuthScreen(
     onLogin: () -> Unit
 ) {
     val context = LocalContext.current
-    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.result
-            account.idToken?.let { onGoogle(it) }
-        } catch (_: Exception) {
+    val authorizationClient = remember { Identity.getAuthorizationClient(context) }
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        result.data?.let { intent ->
+            try {
+                val authResult = authorizationClient.getAuthorizationResultFromIntent(intent)
+                authResult.toGoogleSignInAccount()?.idToken?.let(onGoogle)
+            } catch (_: Exception) {
+            }
         }
     }
-    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestIdToken(context.getString(R.string.default_web_client_id))
-        .requestEmail()
-        .build()
-    val signInClient = GoogleSignIn.getClient(context, gso)
+    val authorizationRequest = remember {
+        AuthorizationRequest.Builder()
+            .setRequestedScopes(listOf(Scope(Scopes.EMAIL), Scope(Scopes.PROFILE)))
+            .requestOfflineAccess(context.getString(R.string.default_web_client_id))
+            .build()
+    }
     AppScaffold(
         title = "Auth",
         showBack = true,
@@ -115,7 +122,20 @@ fun AuthScreen(
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Button(onClick = { launcher.launch(signInClient.signInIntent) }) {
+            Button(onClick = {
+                authorizationClient.authorize(authorizationRequest)
+                    .addOnSuccessListener { result ->
+                        if (result.hasResolution()) {
+                            result.pendingIntent?.let { pendingIntent ->
+                                launcher.launch(
+                                    IntentSenderRequest.Builder(pendingIntent).build()
+                                )
+                            }
+                        } else {
+                            result.toGoogleSignInAccount()?.idToken?.let(onGoogle)
+                        }
+                    }
+            }) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google"
