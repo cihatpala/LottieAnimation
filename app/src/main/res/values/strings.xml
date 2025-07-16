@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">LottieAnimation</string>
     <!-- Used for Google sign-in. Replace with the OAuth client ID when available -->
-    <string name="default_web_client_id">REPLACE_WITH_CLIENT_ID</string>
+    <string name="default_web_client_id">AIzaSyDCRgdb67AF1LB_zRtfkOYR1dlSHljWAPw</string>
 </resources>
