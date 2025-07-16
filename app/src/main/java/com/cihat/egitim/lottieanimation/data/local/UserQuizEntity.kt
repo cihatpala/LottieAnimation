@@ -20,5 +20,6 @@ import androidx.room.PrimaryKey
 data class UserQuizEntity(
     @PrimaryKey val id: Int,
     val name: String,
-    val folderId: Int? = null
+    val folderId: Int? = null,
+    val boxCount: Int
 )

@@ -17,6 +17,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +38,7 @@ fun ProfileScreen(
     onRate: () -> Unit,
     isLoggedIn: Boolean,
     onLogout: () -> Unit,
+    onProfileInfo: () -> Unit,
     showBack: Boolean,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -45,7 +48,14 @@ fun ProfileScreen(
         showBack = showBack,
         onBack = onBack,
         bottomTab = BottomTab.PROFILE,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        actions = {
+            if (isLoggedIn) {
+                IconButton(onClick = onProfileInfo) {
+                    Icon(Icons.Default.Person, contentDescription = "Profilim")
+                }
+            }
+        }
     ) {
         LazyColumn(
             modifier = Modifier

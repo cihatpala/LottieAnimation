@@ -7,6 +7,7 @@ import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.room.withTransaction
 
 class LocalRepository(private val db: AppDatabase) {
     private val dao = db.dao()
@@ -48,7 +49,11 @@ class LocalRepository(private val db: AppDatabase) {
         quizzes.map { quiz ->
             val qList = questions.filter { it.quizId == quiz.id }
             val sList = subs.filter { it.quizId == quiz.id }.sortedBy { it.boxIndex }
-            val boxCount = maxOf(sList.maxOfOrNull { it.boxIndex } ?: 0, qList.maxOfOrNull { it.boxIndex } ?: 0) + 1
+            val boxCount = maxOf(
+                quiz.boxCount,
+                (sList.maxOfOrNull { it.boxIndex } ?: -1) + 1,
+                (qList.maxOfOrNull { it.boxIndex } ?: -1) + 1
+            )
             val boxes = MutableList(boxCount) { mutableListOf<Question>() }
             qList.forEach { q ->
                 boxes[q.boxIndex].add(Question(q.text, q.answer, q.topic, q.subtopic))
@@ -64,15 +69,23 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun saveFolders(folders: List<UserFolder>) = withContext(Dispatchers.IO) {
-        dao.clearFolders()
-        dao.clearHeadings()
-        val folderEntities = folders.map { UserFolderEntity(it.id, it.name) }
-        val headingEntities = mutableListOf<FolderHeadingEntity>()
-        folders.forEach { folder ->
-            flattenHeadings(folder.id, null, folder.headings, headingEntities)
+        fun copyHeading(h: FolderHeading): FolderHeading =
+            h.copy(children = h.children.map { copyHeading(it) }.toMutableList())
+
+        val snapshot = folders.map { f ->
+            f.copy(headings = f.headings.map { copyHeading(it) }.toMutableList())
         }
-        dao.insertFolders(folderEntities)
-        dao.insertHeadings(headingEntities)
+        db.withTransaction {
+            dao.clearFolders()
+            dao.clearHeadings()
+            val folderEntities = snapshot.map { UserFolderEntity(it.id, it.name) }
+            val headingEntities = mutableListOf<FolderHeadingEntity>()
+            snapshot.forEach { folder ->
+                flattenHeadings(folder.id, null, folder.headings, headingEntities)
+            }
+            dao.insertFolders(folderEntities)
+            dao.insertHeadings(headingEntities)
+        }
     }
 
     private fun flattenHeadings(folderId: Int, parentId: Int?, list: List<FolderHeading>, dest: MutableList<FolderHeadingEntity>) {
@@ -83,34 +96,42 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun saveQuizzes(quizzes: List<UserQuiz>) = withContext(Dispatchers.IO) {
-        dao.clearQuizzes()
-        dao.clearQuestions()
-        dao.clearSubHeadings()
-        val quizEntities = quizzes.map { UserQuizEntity(it.id, it.name, it.folderId) }
-        val questionEntities = mutableListOf<QuestionEntity>()
-        val subEntities = mutableListOf<SubHeadingEntity>()
-        quizzes.forEach { quiz ->
-            quiz.boxes.forEachIndexed { index, box ->
-                box.forEach { q ->
-                    questionEntities.add(
-                        QuestionEntity(
-                            quizId = quiz.id,
-                            boxIndex = index,
-                            text = q.text,
-                            answer = q.answer,
-                            topic = q.topic,
-                            subtopic = q.subtopic
+        val snapshot = quizzes.map { q ->
+            q.copy(
+                boxes = q.boxes.map { it.toMutableList() }.toMutableList(),
+                subHeadings = q.subHeadings.toMutableList()
+            )
+        }
+        db.withTransaction {
+            dao.clearQuizzes()
+            dao.clearQuestions()
+            dao.clearSubHeadings()
+            val quizEntities = snapshot.map { UserQuizEntity(it.id, it.name, it.folderId, it.boxes.size) }
+            val questionEntities = mutableListOf<QuestionEntity>()
+            val subEntities = mutableListOf<SubHeadingEntity>()
+            snapshot.forEach { quiz ->
+                quiz.boxes.forEachIndexed { index, box ->
+                    box.forEach { q ->
+                        questionEntities.add(
+                            QuestionEntity(
+                                quizId = quiz.id,
+                                boxIndex = index,
+                                text = q.text,
+                                answer = q.answer,
+                                topic = q.topic,
+                                subtopic = q.subtopic
+                            )
                         )
-                    )
+                    }
+                }
+                quiz.subHeadings.forEachIndexed { idx, name ->
+                    subEntities.add(SubHeadingEntity(quizId = quiz.id, name = name, boxIndex = idx))
                 }
             }
-            quiz.subHeadings.forEachIndexed { idx, name ->
-                subEntities.add(SubHeadingEntity(quizId = quiz.id, name = name, boxIndex = idx))
-            }
+            dao.insertQuizzes(quizEntities)
+            dao.insertQuestions(questionEntities)
+            dao.insertSubHeadings(subEntities)
         }
-        dao.insertQuizzes(quizEntities)
-        dao.insertQuestions(questionEntities)
-        dao.insertSubHeadings(subEntities)
     }
 
     suspend fun getTheme(): ThemeMode = withContext(Dispatchers.IO) {

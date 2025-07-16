@@ -15,7 +15,9 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.Modifier
 
 enum class BottomTab { PROFILE, HOME, EXPLORE }
@@ -28,6 +30,7 @@ fun AppScaffold(
     onBack: () -> Unit,
     bottomTab: BottomTab? = null,
     onTabSelected: (BottomTab) -> Unit = {},
+    actions: @Composable RowScope.() -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Scaffold(
@@ -40,7 +43,8 @@ fun AppScaffold(
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     }
-                }
+                },
+                actions = actions
             )
         },
         bottomBar = {

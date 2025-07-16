@@ -1,6 +1,8 @@
 package com.cihat.egitim.lottieanimation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -21,8 +23,8 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { onResult(it.isSuccessful) }
     }
 
-    fun logout() {
-        auth.signOut()
+    fun logout(context: Context) {
+        AuthUI.getInstance().signOut(context)
     }
 
 }
