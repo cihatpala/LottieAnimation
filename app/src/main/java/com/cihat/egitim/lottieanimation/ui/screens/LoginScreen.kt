@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
@@ -28,16 +29,22 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.platform.LocalContext
+import com.cihat.egitim.lottieanimation.utils.NetworkUtils
+import com.cihat.egitim.lottieanimation.ui.components.ConnectionAlert
 
 @Composable
 fun LoginScreen(
-    onLogin: (String, String) -> Unit,
+    onLogin: (String, String, (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit,
     onForgot: () -> Unit,
     onSignup: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     AppScaffold(
         title = "Giriş Yap",
@@ -69,7 +76,17 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { onLogin(email, password) },
+                onClick = {
+                    if (!NetworkUtils.isConnected(context)) {
+                        showError = true
+                    } else {
+                        isLoading = true
+                        onLogin(email, password) { success ->
+                            isLoading = false
+                            if (!success) showError = true
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Giriş Yap")
@@ -83,17 +100,26 @@ fun LoginScreen(
                     .padding(4.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Henüz hesabınız yok mu?")
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    text = "Kaydol",
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .clickable(onClick = onSignup)
-                        .padding(4.dp)
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Henüz hesabınız yok mu?")
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = "Kaydol",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .clickable(onClick = onSignup)
+                    .padding(4.dp)
+            )
+        }
+
+        if (isLoading) {
+            Spacer(modifier = Modifier.height(16.dp))
+            CircularProgressIndicator()
+        }
+
+        if (showError) {
+            ConnectionAlert("İnternet bağlantınızı kontrol ediniz", onDismiss = { showError = false })
         }
     }
+}
 }

@@ -76,8 +76,9 @@ fun AppNavHost(
         }
         composable(Screen.Login.route) {
             LoginScreen(
-                onLogin = { email, pass ->
+                onLogin = { email, pass, result ->
                     authViewModel.login(email, pass) { success ->
+                        result(success)
                         if (success) {
                             navController.navigate(Screen.QuizList.route) {
                                 popUpTo(Screen.Login.route) { inclusive = true }

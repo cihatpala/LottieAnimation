@@ -1,6 +1,7 @@
 package com.cihat.egitim.lottieanimation.viewmodel
 
 import android.content.Context
+import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
@@ -18,7 +19,11 @@ class AuthViewModel : ViewModel() {
             .addOnCompleteListener { onResult(it.isSuccessful) }
     }
 
-    fun register(email: String, password: String, onResult: (Boolean) -> Unit) {
+    fun register(context: Context, email: String, password: String, onResult: (Boolean) -> Unit) {
+        if (!NetworkUtils.isConnected(context)) {
+            onResult(false)
+            return
+        }
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { onResult(it.isSuccessful) }
     }
