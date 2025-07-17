@@ -65,13 +65,14 @@ fun AuthScreen(
         showBack = true,
         onBack = onBack
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(32.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
             Image(
                 painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
@@ -139,9 +140,10 @@ fun AuthScreen(
                 Text("Google ile Giriş Yap")
             }
 
-            if (isLoading) {
-                Spacer(Modifier.height(16.dp))
-                CircularProgressIndicator()
+                if (isLoading) {
+                    Spacer(Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
             }
 
             if (showError) {

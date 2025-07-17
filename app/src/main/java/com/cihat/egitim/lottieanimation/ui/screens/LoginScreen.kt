@@ -51,13 +51,14 @@ fun LoginScreen(
         showBack = true,
         onBack = onBack
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -112,18 +113,19 @@ fun LoginScreen(
             )
         }
 
-        if (isLoading) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator()
-        }
+                if (isLoading) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    CircularProgressIndicator()
+                }
+            }
 
-        if (showError) {
-            PrimaryAlert(
-                title = "Uyarı",
-                message = "İnternet bağlantınızı kontrol ediniz",
-                onDismiss = { showError = false }
-            )
+            if (showError) {
+                PrimaryAlert(
+                    title = "Uyarı",
+                    message = "İnternet bağlantınızı kontrol ediniz",
+                    onDismiss = { showError = false }
+                )
+            }
         }
     }
-}
 }
