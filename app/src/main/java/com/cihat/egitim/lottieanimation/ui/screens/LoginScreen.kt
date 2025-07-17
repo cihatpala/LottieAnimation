@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 
 @Composable
 fun LoginScreen(
