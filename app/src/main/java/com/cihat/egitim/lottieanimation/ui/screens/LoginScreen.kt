@@ -110,31 +110,35 @@ fun LoginScreen(
                     .padding(4.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Henüz hesabınız yok mu?")
-            Spacer(Modifier.width(4.dp))
-            Text(
-                text = "Kaydol",
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clickable(onClick = onSignup)
-                    .padding(4.dp)
-            )
-        }
-
-                if (isLoading) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    CircularProgressIndicator()
-                }
-            }
-
-            if (showError) {
-                PrimaryAlert(
-                    title = "Uyarı",
-                    message = "İnternet bağlantınızı kontrol ediniz",
-                    onDismiss = { showError = false }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Henüz hesabınız yok mu?")
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "Kaydol",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clickable(onClick = onSignup)
+                        .padding(4.dp)
                 )
             }
+        }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        if (showError) {
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "İnternet bağlantınızı kontrol ediniz",
+                onDismiss = { showError = false }
+            )
+        }
         }
     }
 }

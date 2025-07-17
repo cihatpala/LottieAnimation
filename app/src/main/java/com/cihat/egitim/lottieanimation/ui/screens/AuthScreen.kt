@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -140,19 +141,24 @@ fun AuthScreen(
                 Text("Google ile Giriş Yap")
             }
 
-                if (isLoading) {
-                    Spacer(Modifier.height(16.dp))
-                    CircularProgressIndicator()
-                }
-            }
+        }
 
-            if (showError) {
-                PrimaryAlert(
-                    title = "Uyarı",
-                    message = "İnternet bağlantınızı kontrol ediniz",
-                    onDismiss = { showError = false }
-                )
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
+        }
+
+        if (showError) {
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "İnternet bağlantınızı kontrol ediniz",
+                onDismiss = { showError = false }
+            )
+        }
         }
     }
 }
