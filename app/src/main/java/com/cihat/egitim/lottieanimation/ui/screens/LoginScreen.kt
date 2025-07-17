@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalContext
 import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
+import android.widget.Toast
 
 @Composable
 fun LoginScreen(
@@ -78,7 +79,13 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    if (!NetworkUtils.isConnected(context)) {
+                    if (email.isBlank() || password.isBlank()) {
+                        android.widget.Toast.makeText(
+                            context,
+                            "Lütfen e-posta ve şifre giriniz",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (!NetworkUtils.isConnected(context)) {
                         showError = true
                     } else {
                         isLoading = true

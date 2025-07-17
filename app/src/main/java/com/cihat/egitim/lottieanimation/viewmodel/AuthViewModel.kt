@@ -15,6 +15,10 @@ class AuthViewModel : ViewModel() {
         get() = auth.currentUser
 
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
+        if (email.isBlank() || password.isBlank()) {
+            onResult(false)
+            return
+        }
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { onResult(it.isSuccessful) }
     }
