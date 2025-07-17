@@ -84,7 +84,9 @@ fun LoginScreen(
                         isLoading = true
                         onLogin(email, password) { success ->
                             isLoading = false
-                            if (!success) showError = true
+                            // Only show the connection error when login failed
+                            // due to missing network rather than auth issues
+                            showError = !success && !NetworkUtils.isConnected(context)
                         }
                     }
                 },
