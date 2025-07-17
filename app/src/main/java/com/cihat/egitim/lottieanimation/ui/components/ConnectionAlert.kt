@@ -29,12 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.isSystemInDarkTheme
+
 
 @Composable
 fun ConnectionAlert(message: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
     val scheme = MaterialTheme.colorScheme
-    val isDark = isSystemInDarkTheme()
 
     val cardBg = scheme.surface
     val cardContent = scheme.onSurface
@@ -66,14 +65,14 @@ fun ConnectionAlert(message: String, onDismiss: () -> Unit, modifier: Modifier =
                         fontWeight = FontWeight.Bold,
                         color = cardContent
                     )
-                    Spacer(Modifier.size(12.dp))
+                    Spacer(Modifier.height(12.dp))
                     Text(
                         message,
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = cardContent
                     )
-                    Spacer(Modifier.size(24.dp))
+                    Spacer(Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
