@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
@@ -28,29 +29,38 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
+import androidx.compose.ui.platform.LocalContext
+import com.cihat.egitim.lottieanimation.utils.NetworkUtils
+import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
+import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 
 @Composable
 fun LoginScreen(
-    onLogin: (String, String) -> Unit,
+    onLogin: (String, String, (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit,
     onForgot: () -> Unit,
     onSignup: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
+    var showError by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     AppScaffold(
         title = "Giriş Yap",
         showBack = true,
         onBack = onBack
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
@@ -69,7 +79,25 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { onLogin(email, password) },
+                onClick = {
+                    if (email.isBlank() || password.isBlank()) {
+                        android.widget.Toast.makeText(
+                            context,
+                            "Lütfen e-posta ve şifre giriniz",
+                            android.widget.Toast.LENGTH_SHORT
+                        ).show()
+                    } else if (!NetworkUtils.isConnected(context)) {
+                        showError = true
+                    } else {
+                        isLoading = true
+                        onLogin(email, password) { success ->
+                            isLoading = false
+                            // Only show the connection error when login failed
+                            // due to missing network rather than auth issues
+                            showError = !success && !NetworkUtils.isConnected(context)
+                        }
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Giriş Yap")
@@ -94,6 +122,24 @@ fun LoginScreen(
                         .padding(4.dp)
                 )
             }
+        }
+
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        if (showError) {
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "İnternet bağlantınızı kontrol ediniz",
+                onDismiss = { showError = false }
+            )
+        }
         }
     }
 }
