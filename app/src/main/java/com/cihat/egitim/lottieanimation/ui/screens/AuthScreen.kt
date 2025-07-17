@@ -41,7 +41,7 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.ui.graphics.ColorFilter
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
-import com.cihat.egitim.lottieanimation.ui.components.ConnectionAlert
+import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 
 @Composable
@@ -145,7 +145,11 @@ fun AuthScreen(
             }
 
             if (showError) {
-                ConnectionAlert("İnternet bağlantınızı kontrol ediniz", onDismiss = { showError = false })
+                PrimaryAlert(
+                    title = "Uyarı",
+                    message = "İnternet bağlantınızı kontrol ediniz",
+                    onDismiss = { showError = false }
+                )
             }
         }
     }

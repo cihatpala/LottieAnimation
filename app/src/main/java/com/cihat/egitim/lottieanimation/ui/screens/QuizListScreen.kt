@@ -78,6 +78,7 @@ import com.cihat.egitim.lottieanimation.data.UserQuiz
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.data.Question
 import kotlinx.coroutines.launch
@@ -596,7 +597,10 @@ fun QuizListScreen(
 
         if (showWarning) {
             PrimaryAlert(
+                title = "Uyarı",
+                message = "Quiz oluşturmak için klasör oluşturunuz.",
                 onDismiss = { showWarning = false },
+                confirmText = "Klasör Oluştur",
                 onConfirm = {
                     showWarning = false
                     onFolders()
@@ -632,94 +636,4 @@ fun QuizListScreen(
     }
 }
 
-@Composable
-fun PrimaryAlert(
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val scheme = MaterialTheme.colorScheme
-    val isDark = isSystemInDarkTheme()
-
-    val cardBg = scheme.surface
-    val cardContent = scheme.onSurface
-
-    val badgeBg = if (isDark) scheme.primary else scheme.secondary
-    val badgeBorder = scheme.background   // 4 dp’lik kenar
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .wrapContentHeight()
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-                colors = CardDefaults.cardColors(containerColor = cardBg)
-            ) {
-                Column(
-                    modifier = Modifier.padding(top = 48.dp, bottom = 24.dp, start = 24.dp, end = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        "Uyarı",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = cardContent
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Text(
-                        "Quiz oluşturmak için klasör oluşturunuz.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        color = cardContent
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        TextButton(onClick = onDismiss) {
-                            Text("Kapat", color = cardContent)
-                        }
-                        Button(
-                            onClick = onConfirm,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Text("Klasör Oluştur")
-                        }
-                    }
-                }
-            }
-
-            /* Üst rozeti */
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-44).dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-                    .border(4.dp, MaterialTheme.colorScheme.background, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(                                   // ister Icon yerine Image kullan
-                    imageVector = Icons.Default.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-        }
-    }
-}
 

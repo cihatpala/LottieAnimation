@@ -18,6 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,9 +32,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-
 @Composable
-fun ConnectionAlert(message: String, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+fun PrimaryAlert(
+    title: String,
+    message: String,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    confirmText: String? = null,
+    onConfirm: (() -> Unit)? = null,
+) {
     val scheme = MaterialTheme.colorScheme
 
     val cardBg = scheme.surface
@@ -60,7 +68,7 @@ fun ConnectionAlert(message: String, onDismiss: () -> Unit, modifier: Modifier =
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        "Uyarı",
+                        title,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = cardContent
@@ -75,10 +83,21 @@ fun ConnectionAlert(message: String, onDismiss: () -> Unit, modifier: Modifier =
                     Spacer(Modifier.height(24.dp))
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                        horizontalArrangement = if (onConfirm != null) Arrangement.SpaceBetween else Arrangement.Center
                     ) {
                         TextButton(onClick = onDismiss) {
                             Text("Kapat", color = cardContent)
+                        }
+                        if (onConfirm != null && confirmText != null) {
+                            Button(
+                                onClick = onConfirm,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                )
+                            ) {
+                                Text(confirmText)
+                            }
                         }
                     }
                 }

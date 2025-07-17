@@ -31,7 +31,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.width
 import androidx.compose.ui.platform.LocalContext
 import com.cihat.egitim.lottieanimation.utils.NetworkUtils
-import com.cihat.egitim.lottieanimation.ui.components.ConnectionAlert
+import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 
 @Composable
 fun LoginScreen(
@@ -118,7 +118,11 @@ fun LoginScreen(
         }
 
         if (showError) {
-            ConnectionAlert("İnternet bağlantınızı kontrol ediniz", onDismiss = { showError = false })
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "İnternet bağlantınızı kontrol ediniz",
+                onDismiss = { showError = false }
+            )
         }
     }
 }
