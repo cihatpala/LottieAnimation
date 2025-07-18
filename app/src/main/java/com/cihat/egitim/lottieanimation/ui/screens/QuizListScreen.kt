@@ -66,9 +66,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
@@ -149,7 +153,22 @@ fun QuizListScreen(
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
 
+        // State for draggable FAB
+        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val density = LocalDensity.current
+        val screenWidthPx = with(density) { screenWidth.toPx() }
+        var fabWidthPx by remember { mutableStateOf(0f) }
+        var fabInit by remember { mutableStateOf(false) }
+        val fabOffsetX = remember { Animatable(0f) }
+        val fabScope = rememberCoroutineScope()
+
         Box(modifier = Modifier.fillMaxSize()) {
+            LaunchedEffect(fabWidthPx) {
+                if (!fabInit && fabWidthPx > 0f) {
+                    fabOffsetX.snapTo(screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() })
+                    fabInit = true
+                }
+            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -547,8 +566,29 @@ fun QuizListScreen(
                 icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
                 text = { Text("Quiz Ekle") },
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(start = 16.dp, bottom = 16.dp)
+                    .offset { IntOffset(fabOffsetX.value.roundToInt(), 0) }
+                    .onGloballyPositioned { fabWidthPx = it.size.width.toFloat() }
+                    .pointerInput(Unit) {
+                        detectDragGesturesAfterLongPress(
+                            onDragEnd = {
+                                fabScope.launch {
+                                    val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
+                                    val target = if (fabOffsetX.value < max / 2f) 0f else max
+                                    fabOffsetX.animateTo(target, animationSpec = tween(300))
+                                }
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                fabScope.launch {
+                                    val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
+                                    val newOffset = (fabOffsetX.value + dragAmount.x).coerceIn(0f, max)
+                                    fabOffsetX.snapTo(newOffset)
+                                }
+                            }
+                        )
+                    }
                     .shadow(8.dp, RoundedCornerShape(12.dp))
                     .height(56.dp),
                 containerColor = MaterialTheme.colorScheme.primary,
