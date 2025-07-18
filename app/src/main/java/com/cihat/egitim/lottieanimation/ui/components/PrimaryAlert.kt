@@ -44,12 +44,13 @@ fun PrimaryAlert(
 ) {
     val scheme = MaterialTheme.colorScheme
 
-    val cardBg = scheme.surface
-    val cardContent = scheme.onSurface
+    val cardBg = scheme.secondaryContainer
+    val cardContent = scheme.onSecondaryContainer
 
     Box(
         modifier = modifier
             .fillMaxSize()
+            .background(scheme.scrim.copy(alpha = 0.5f))
             .clickable(onClick = onDismiss),
         contentAlignment = Alignment.Center
     ) {
