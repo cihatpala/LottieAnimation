@@ -116,13 +116,13 @@ fun AppNavHost(
                 onProfileInfo = { navController.navigate(Screen.MyProfile.route) },
                 showBack = canPop,
                 onBack = { navController.popBackStack() },
-                onTab = { tab ->
-                    when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
-                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                    onTab = { tab ->
+                        when (tab) {
+                            BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                            BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                            BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        }
                     }
-                }
             )
         }
         composable(Screen.MyProfile.route) {
@@ -140,27 +140,21 @@ fun AppNavHost(
         }
         composable(Screen.FolderList.route) {
                 FolderListScreen(
-                folders = quizViewModel.folders,
-                onRename = { index, name -> quizViewModel.renameFolder(index, name) },
-                onDelete = { index -> quizViewModel.deleteFolder(index) },
-                onRenameHeading = { f, path, n -> quizViewModel.renameHeading(f, path, n) },
-                onDeleteHeading = { f, path -> quizViewModel.deleteHeading(f, path) },
-                onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
-                onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
-                onLogout = {
-                    authViewModel.logout(navController.context)
-                    navController.navigate(Screen.QuizList.route) {
-                        popUpTo(Screen.FolderList.route) { inclusive = true }
+                    folders = quizViewModel.folders,
+                    onRename = { index, name -> quizViewModel.renameFolder(index, name) },
+                    onDelete = { index -> quizViewModel.deleteFolder(index) },
+                    onRenameHeading = { f, path, n -> quizViewModel.renameHeading(f, path, n) },
+                    onDeleteHeading = { f, path -> quizViewModel.deleteHeading(f, path) },
+                    onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
+                    onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
+                    onBack = { navController.popBackStack() },
+                    onTab = { tab ->
+                        when (tab) {
+                            BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                            BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                            BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        }
                     }
-                },
-                onBack = { navController.popBackStack() },
-                onTab = { tab ->
-                    when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
-                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
-                    }
-                }
             )
         }
         composable(Screen.QuizList.route) {
@@ -183,10 +177,6 @@ fun AppNavHost(
                     quizViewModel.setCurrentQuiz(quizIdx)
                     navController.navigate(Screen.QuestionList.createRoute(boxIdx))
                 },
-                onAdd = { quizIdx ->
-                    quizViewModel.setCurrentQuiz(quizIdx)
-                    navController.navigate(Screen.AddQuestion.route)
-                },
                 onRename = { index, name -> quizViewModel.renameQuiz(index, name) },
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
                 onMoveQuiz = { from, to -> quizViewModel.moveQuiz(from, to) },
@@ -199,12 +189,6 @@ fun AppNavHost(
                 onQuickAdd = { qIdx, topic, sub, q, a ->
                     quizViewModel.setCurrentQuiz(qIdx)
                     quizViewModel.addQuestion(q, a, topic, sub, 0)
-                },
-                onLogout = {
-                    authViewModel.logout(navController.context)
-                    navController.navigate(Screen.QuizList.route) {
-                        popUpTo(Screen.QuizList.route) { inclusive = true }
-                    }
                 },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },

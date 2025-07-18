@@ -7,14 +7,15 @@ import com.cihat.egitim.lottieanimation.data.local.LocalRepository
 import com.google.firebase.FirebaseApp
 
 class LottieApplication : Application() {
-    lateinit var repository: LocalRepository
-        private set
-    override fun onCreate() {
-        super.onCreate()
-        FirebaseApp.initializeApp(this)
+    val repository: LocalRepository by lazy {
         val db = Room.databaseBuilder(this, AppDatabase::class.java, "app.db")
             .fallbackToDestructiveMigration()
             .build()
-        repository = LocalRepository(db)
+        LocalRepository(db)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
     }
 }

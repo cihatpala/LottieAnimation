@@ -68,7 +68,6 @@ fun FolderListScreen(
     onDeleteHeading: (Int, List<Int>) -> Unit,
     onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
-    onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
@@ -106,9 +105,6 @@ fun FolderListScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                }
-                Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Logout")
                 }
             }
             ExtendedFloatingActionButton(
@@ -231,9 +227,15 @@ private fun FolderItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color(0xFFFFA500))
+                    .background(MaterialTheme.colorScheme.tertiary)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
             IconButton(
                 onClick = {
                     scope.launch { swipeState.animateTo(0) }
@@ -241,9 +243,15 @@ private fun FolderItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color.Red)
+                    .background(MaterialTheme.colorScheme.error)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onError
+                )
+            }
         }
 
         Column(
@@ -390,9 +398,15 @@ private fun HeadingItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color(0xFFFFA500))
+                    .background(MaterialTheme.colorScheme.tertiary)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
             IconButton(
                 onClick = {
                     scope.launch { swipeState.animateTo(0) }
@@ -400,9 +414,15 @@ private fun HeadingItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color.Red)
+                    .background(MaterialTheme.colorScheme.error)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onError
+                )
+            }
         }
 
         Column(

@@ -40,7 +40,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -131,11 +131,15 @@ fun QuestionListScreen(
                                 },
                                 enabled = swipeState.currentValue == 1,
                                 modifier = Modifier
-                                    .background(Color(0xFFFFA500))
+                                    .background(MaterialTheme.colorScheme.tertiary)
                                     .height(72.dp)
                                     .padding(horizontal = 12.dp)
                             ) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = MaterialTheme.colorScheme.onTertiary
+                                )
                             }
                             IconButton(
                                 onClick = {
@@ -144,11 +148,15 @@ fun QuestionListScreen(
                                 },
                                 enabled = swipeState.currentValue == 1,
                                 modifier = Modifier
-                                    .background(Color.Red)
+                                    .background(MaterialTheme.colorScheme.error)
                                     .height(72.dp)
                                     .padding(horizontal = 12.dp)
                             ) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = MaterialTheme.colorScheme.onError
+                                )
                             }
                         }
 

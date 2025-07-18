@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -13,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 import androidx.navigation.compose.rememberNavController
@@ -20,7 +20,6 @@ import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModelFactory
-import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 
@@ -33,14 +32,15 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             val activity = this@MainActivity
+            val repository = (application as LottieApplication).repository
             val navController = rememberNavController()
             var showDialog by remember { mutableStateOf(false) }
             var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
+            val coroutineScope = rememberCoroutineScope()
             LaunchedEffect(Unit) {
-                themeMode = (application as LottieApplication).repository.getTheme()
+                themeMode = repository.getTheme()
             }
 
             LottieAnimationTheme(themeMode = themeMode) {
@@ -68,9 +68,7 @@ class MainActivity : ComponentActivity() {
                     themeMode = themeMode,
                     onThemeChange = {
                         themeMode = it
-                        lifecycleScope.launch {
-                            (application as LottieApplication).repository.saveTheme(it)
-                        }
+                        coroutineScope.launch { repository.saveTheme(it) }
                     }
                 )
                 BackHandler(enabled = !showDialog) {

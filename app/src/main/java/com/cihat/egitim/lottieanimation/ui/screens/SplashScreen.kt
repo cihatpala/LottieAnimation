@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,9 +20,7 @@ fun SplashScreen() {
             painter = painterResource(id = R.drawable.knowledge_logo),
             contentDescription = "Knowledge Logo",
             modifier = Modifier.size(350.dp),
-            colorFilter = ColorFilter.tint(
-                color = if (isSystemInDarkTheme()) Color.White else Color.Black
-            )
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
         )
     }
 }

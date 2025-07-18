@@ -1,8 +1,6 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -64,7 +61,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalDensity
@@ -118,14 +114,12 @@ fun QuizListScreen(
     folders: List<UserFolder>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
-    onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
     onMoveQuiz: (Int, Int) -> Unit,
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onQuickAdd: (Int, String, String, String, String) -> Unit,
-    onLogout: () -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -255,10 +249,14 @@ fun QuizListScreen(
                                         },
                                         enabled = swipeState.currentValue == 1,
                                         modifier = Modifier
-                                            .background(Color(0xFFFFA500))
+                                            .background(MaterialTheme.colorScheme.tertiary)
                                             .size(actionWidth)
                                     ) {
-                                        Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
+                                        Icon(
+                                            Icons.Default.Edit,
+                                            contentDescription = "Edit",
+                                            tint = MaterialTheme.colorScheme.onTertiary
+                                        )
                                     }
                                     IconButton(
                                         onClick = {
@@ -267,10 +265,14 @@ fun QuizListScreen(
                                         },
                                         enabled = swipeState.currentValue == 1,
                                         modifier = Modifier
-                                            .background(Color.Red)
+                                            .background(MaterialTheme.colorScheme.error)
                                             .size(actionWidth)
                                     ) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White)
+                                        Icon(
+                                            Icons.Default.Delete,
+                                            contentDescription = "Delete",
+                                            tint = MaterialTheme.colorScheme.onError
+                                        )
                                     }
                                 }
 
@@ -287,10 +289,14 @@ fun QuizListScreen(
                                         },
                                         enabled = swipeState.currentValue == 2,
                                         modifier = Modifier
-                                            .background(Color(0xFF4CAF50))
+                                            .background(MaterialTheme.colorScheme.primary)
                                             .size(actionWidth)
                                     ) {
-                                        Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = "Add",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
                                     }
                                 }
 
@@ -329,16 +335,24 @@ fun QuizListScreen(
                                                 ) {
                                                     pair.forEachIndexed { colIndex, box ->
                                                         val boxIndex = rowIndex * 2 + colIndex
-                                                        Box(
+                                                        Card(
                                                             modifier = Modifier
                                                                 .weight(1f)
                                                                 .aspectRatio(1f)
-                                                                .clickable { onView(quizIndex, boxIndex) }
-                                                                .padding(4.dp)
-                                                                .border(BorderStroke(1.dp, Color.Gray), RoundedCornerShape(4.dp)),
-                                                            contentAlignment = Alignment.Center
+                                                                .clickable { onView(quizIndex, boxIndex) },
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                                            colors = CardDefaults.cardColors(
+                                                                containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                            )
                                                         ) {
-                                                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                                            Column(
+                                                                modifier = Modifier
+                                                                    .fillMaxSize()
+                                                                    .padding(8.dp),
+                                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                                verticalArrangement = Arrangement.Center
+                                                            ) {
                                                                 Text(text = "Box ${boxIndex + 1}")
                                                                 Text(text = "${box.size} soru")
                                                                 Spacer(modifier = Modifier.height(4.dp))
@@ -353,12 +367,6 @@ fun QuizListScreen(
                                                 Spacer(modifier = Modifier.height(8.dp))
                                             }
                                         }
-                                        Button(
-                                            onClick = { onAdd(quizIndex) },
-                                            modifier = Modifier
-                                                .padding(top = 8.dp)
-                                                .align(Alignment.CenterHorizontally)
-                                        ) { Text("Add Question") }
                                     }
                                 }
                             }
@@ -496,9 +504,6 @@ fun QuizListScreen(
                             }
                         }
                     }
-                }
-                Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Logout")
                 }
             }
             ExtendedFloatingActionButton(
