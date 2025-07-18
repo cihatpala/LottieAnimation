@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
@@ -34,6 +35,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -317,30 +320,35 @@ fun QuizListScreen(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(text = quiz.name, modifier = Modifier.weight(1f))
-                                        if (swipeState.offset.value == 0f) {
-                                            IconButton(onClick = { expanded = !expanded }) {
-                                                Icon(Icons.Default.Info, contentDescription = "Detay")
-                                            }
-                                            Box {
-                                                IconButton(
-                                                    onClick = {
-                                                        if (quiz.boxes.flatten().isEmpty()) {
-                                                            showEmptyAlert = true
-                                                        } else {
-                                                            showStartDialog = true
-                                                        }
+                                        FilledIconButton(
+                                            onClick = { expanded = !expanded },
+                                            enabled = swipeState.offset.value == 0f,
+                                            colors = IconButtonDefaults.filledIconButtonColors()
+                                        ) {
+                                            Icon(Icons.Default.Description, contentDescription = "Detay")
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Box {
+                                            FilledIconButton(
+                                                onClick = {
+                                                    if (quiz.boxes.flatten().isEmpty()) {
+                                                        showEmptyAlert = true
+                                                    } else {
+                                                        showStartDialog = true
                                                     }
-                                                ) {
-                                                    Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
-                                                }
-                                                if (quiz.boxes.flatten().isEmpty()) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(8.dp)
-                                                            .background(Color.Red, CircleShape)
-                                                            .align(Alignment.TopEnd)
-                                                    )
-                                                }
+                                                },
+                                                enabled = swipeState.offset.value == 0f,
+                                                colors = IconButtonDefaults.filledIconButtonColors()
+                                            ) {
+                                                Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
+                                            }
+                                            if (quiz.boxes.flatten().isEmpty()) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(8.dp)
+                                                        .background(Color.Red, CircleShape)
+                                                        .align(Alignment.TopEnd)
+                                                )
                                             }
                                         }
                                     }
@@ -526,11 +534,13 @@ fun QuizListScreen(
                             if (showStartDialog) {
                                 AlertDialog(
                                     onDismissRequest = { showStartDialog = false },
-                                    confirmButton = {},
+                                    confirmButton = {
+                                        TextButton(onClick = { showStartDialog = false }) { Text("Kapat") }
+                                    },
                                     dismissButton = {},
                                     title = { Text("Kutuyu Seç") },
                                     text = {
-                                        Column {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                             quiz.boxes.chunked(3).forEachIndexed { rowIndex, row ->
                                                 Row(
                                                     modifier = Modifier.fillMaxWidth(),
@@ -538,7 +548,7 @@ fun QuizListScreen(
                                                 ) {
                                                     row.forEachIndexed { colIndex, box ->
                                                         val boxIndex = rowIndex * 3 + colIndex
-                                                        Card(
+                                                        Box(
                                                             modifier = Modifier
                                                                 .weight(1f)
                                                                 .aspectRatio(1f)
@@ -546,19 +556,32 @@ fun QuizListScreen(
                                                                     showStartDialog = false
                                                                     onQuiz(quizIndex, boxIndex)
                                                                 },
-                                                            shape = RoundedCornerShape(8.dp),
-                                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                                                            contentAlignment = Alignment.Center
                                                         ) {
-                                                            Column(
+                                                            Box(
                                                                 modifier = Modifier
-                                                                    .fillMaxSize()
-                                                                    .padding(8.dp),
-                                                                verticalArrangement = Arrangement.Center,
-                                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                                    .size(56.dp)
+                                                                    .background(
+                                                                        MaterialTheme.colorScheme.secondaryContainer,
+                                                                        CircleShape
+                                                                    ),
+                                                                contentAlignment = Alignment.Center
                                                             ) {
-                                                                Text("Box ${boxIndex + 1}")
-                                                                Text("${box.size} soru")
+                                                                Text("${box.size}")
+                                                            }
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .align(Alignment.TopCenter)
+                                                                    .offset(y = (-8).dp)
+                                                                    .size(24.dp)
+                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                                                contentAlignment = Alignment.Center
+                                                            ) {
+                                                                Text(
+                                                                    text = "${boxIndex + 1}",
+                                                                    style = MaterialTheme.typography.labelSmall,
+                                                                    color = MaterialTheme.colorScheme.onPrimary
+                                                                )
                                                             }
                                                         }
                                                     }
