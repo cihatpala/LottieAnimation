@@ -583,7 +583,6 @@ fun QuizListScreen(
                 text = { Text("Quiz Ekle") },
                 modifier = Modifier
                     .align(Alignment.TopStart)
-                    .padding(start = 16.dp, top = 16.dp)
                     .offset { IntOffset(fabOffsetX.value.roundToInt(), fabOffsetY.value.roundToInt()) }
                     .onGloballyPositioned {
                         fabWidthPx = it.size.width.toFloat()
@@ -594,19 +593,26 @@ fun QuizListScreen(
                             onDragEnd = {
                                 fabScope.launch {
                                     val margin = with(density) { 16.dp.toPx() }
-                                    val max = containerWidthPx - fabWidthPx - margin
-                                    val targetX = if (fabOffsetX.value < max / 2f) 0f else max
+                                    val left = margin
+                                    val right = containerWidthPx - fabWidthPx - margin
+                                    val top = margin
+                                    val bottom = containerHeightPx - fabHeightPx - margin
+                                    val targetX = if (fabOffsetX.value < (containerWidthPx - fabWidthPx) / 2f) left else right
+                                    val targetY = if (fabOffsetY.value < (containerHeightPx - fabHeightPx) / 2f) top else bottom
                                     fabOffsetX.animateTo(targetX, animationSpec = tween(300))
+                                    fabOffsetY.animateTo(targetY, animationSpec = tween(300))
                                 }
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
                                 fabScope.launch {
                                     val margin = with(density) { 16.dp.toPx() }
-                                    val maxX = containerWidthPx - fabWidthPx - margin
-                                    val maxY = containerHeightPx - fabHeightPx - margin
-                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(0f, maxX)
-                                    val newY = (fabOffsetY.value + dragAmount.y).coerceIn(0f, maxY)
+                                    val left = margin
+                                    val right = containerWidthPx - fabWidthPx - margin
+                                    val top = margin
+                                    val bottom = containerHeightPx - fabHeightPx - margin
+                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(left, right)
+                                    val newY = (fabOffsetY.value + dragAmount.y).coerceIn(top, bottom)
                                     fabOffsetX.snapTo(newX)
                                     fabOffsetY.snapTo(newY)
                                 }
