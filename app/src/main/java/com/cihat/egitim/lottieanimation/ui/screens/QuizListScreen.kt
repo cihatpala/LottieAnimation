@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -146,6 +145,8 @@ fun QuizListScreen(
         var draggingIndex by remember { mutableIntStateOf(-1) }
         var dragOffset by remember { mutableFloatStateOf(0f) }
         val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
+        var startDialogFor by remember { mutableStateOf<Int?>(null) }
+        var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -177,8 +178,6 @@ fun QuizListScreen(
                             var quickAnswer by remember(quiz.id) { mutableStateOf("") }
                             var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
                             var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
-                            var showStartDialog by remember(quiz.id) { mutableStateOf(false) }
-                            var showEmptyAlert by remember(quiz.id) { mutableStateOf(false) }
                             val scope = rememberCoroutineScope()
                             val actionWidth = 72.dp
                             val swipeState = rememberSwipeableState(0)
@@ -190,7 +189,7 @@ fun QuizListScreen(
 
                             // Collapse the item whenever it is swiped to reveal actions
                             LaunchedEffect(swipeState.offset) {
-                                if (swipeState.offset.value != 0f) {
+                                if (kotlin.math.abs(swipeState.offset.value) > 1f) {
                                     expanded = false
                                 }
                             }
@@ -322,7 +321,7 @@ fun QuizListScreen(
                                         Text(text = quiz.name, modifier = Modifier.weight(1f))
                                         FilledIconButton(
                                             onClick = { expanded = !expanded },
-                                            enabled = swipeState.offset.value == 0f,
+                                            enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
                                             colors = IconButtonDefaults.filledIconButtonColors()
                                         ) {
                                             Icon(Icons.Default.Description, contentDescription = "Detay")
@@ -332,12 +331,12 @@ fun QuizListScreen(
                                             FilledIconButton(
                                                 onClick = {
                                                     if (quiz.boxes.flatten().isEmpty()) {
-                                                        showEmptyAlert = true
+                                                        emptyAlertFor = quizIndex
                                                     } else {
-                                                        showStartDialog = true
+                                                        startDialogFor = quizIndex
                                                     }
                                                 },
-                                                enabled = swipeState.offset.value == 0f,
+                                                enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
                                                 colors = IconButtonDefaults.filledIconButtonColors()
                                             ) {
                                                 Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
@@ -531,83 +530,7 @@ fun QuizListScreen(
                                 )
                             }
 
-                            if (showStartDialog) {
-                                AlertDialog(
-                                    onDismissRequest = { showStartDialog = false },
-                                    confirmButton = {
-                                        TextButton(onClick = { showStartDialog = false }) { Text("Kapat") }
-                                    },
-                                    dismissButton = {},
-                                    title = { Text("Kutuyu Seç") },
-                                    text = {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            quiz.boxes.chunked(3).forEachIndexed { rowIndex, row ->
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
-                                                    row.forEachIndexed { colIndex, box ->
-                                                        val boxIndex = rowIndex * 3 + colIndex
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .weight(1f)
-                                                                .aspectRatio(1f)
-                                                                .clickable {
-                                                                    showStartDialog = false
-                                                                    onQuiz(quizIndex, boxIndex)
-                                                                },
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .size(56.dp)
-                                                                    .background(
-                                                                        MaterialTheme.colorScheme.secondaryContainer,
-                                                                        CircleShape
-                                                                    ),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Text("${box.size}")
-                                                            }
-                                                            Box(
-                                                                modifier = Modifier
-                                                                    .align(Alignment.TopCenter)
-                                                                    .offset(y = (-8).dp)
-                                                                    .size(24.dp)
-                                                                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-                                                                contentAlignment = Alignment.Center
-                                                            ) {
-                                                                Text(
-                                                                    text = "${boxIndex + 1}",
-                                                                    style = MaterialTheme.typography.labelSmall,
-                                                                    color = MaterialTheme.colorScheme.onPrimary
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                    if (row.size < 3) {
-                                                        repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                            }
-                                        }
-                                    }
-                                )
-                            }
 
-                            if (showEmptyAlert) {
-                                PrimaryAlert(
-                                    title = "Uyarı",
-                                    message = "Quizde henüz soru yok",
-                                    onDismiss = { showEmptyAlert = false },
-                                    confirmText = "Soru Ekle",
-                                    onConfirm = {
-                                        showEmptyAlert = false
-                                        onAddQuestion(quizIndex)
-                                    }
-                                )
-                            }
                         }
                     }
                 }
@@ -633,6 +556,89 @@ fun QuizListScreen(
         }
 
 
+
+        startDialogFor?.let { idx ->
+            val quiz = quizzes.getOrNull(idx)
+            if (quiz != null) {
+                AlertDialog(
+                    onDismissRequest = { startDialogFor = null },
+                    confirmButton = {
+                        TextButton(onClick = { startDialogFor = null }) { Text("Kapat") }
+                    },
+                    dismissButton = {},
+                    title = { Text("Kutuyu Seç") },
+                    text = {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            val big = 72.dp
+                            val small = 24.dp
+                            quiz.boxes.chunked(3).forEachIndexed { rowIndex, row ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    row.forEachIndexed { colIndex, box ->
+                                        val boxIndex = rowIndex * 3 + colIndex
+                                        Box(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .aspectRatio(1f)
+                                                .clickable {
+                                                    startDialogFor = null
+                                                    onQuiz(idx, boxIndex)
+                                                },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(big)
+                                                    .background(
+                                                        MaterialTheme.colorScheme.secondaryContainer,
+                                                        CircleShape
+                                                    ),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text("${box.size} soru", textAlign = TextAlign.Center)
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .offset(y = -(big / 2 + small / 2))
+                                                    .size(small)
+                                                    .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                                    .align(Alignment.Center),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = "${boxIndex + 1}",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onPrimary
+                                                )
+                                            }
+                                        }
+                                    }
+                                    if (row.size < 3) {
+                                        repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
+                    }
+                )
+            }
+        }
+
+        emptyAlertFor?.let { idx ->
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "Quizde henüz soru yok",
+                onDismiss = { emptyAlertFor = null },
+                confirmText = "Soru Ekle",
+                onConfirm = {
+                    emptyAlertFor = null
+                    onAddQuestion(idx)
+                }
+            )
+        }
 
         if (showCreate) {
             AlertDialog(
