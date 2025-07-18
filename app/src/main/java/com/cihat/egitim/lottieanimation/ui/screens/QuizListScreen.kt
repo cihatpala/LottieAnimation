@@ -154,18 +154,22 @@ fun QuizListScreen(
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
 
         // State for draggable FAB
-        val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+        val configuration = LocalConfiguration.current
         val density = LocalDensity.current
-        val screenWidthPx = with(density) { screenWidth.toPx() }
+        val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
+        val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
         var fabWidthPx by remember { mutableStateOf(0f) }
+        var fabHeightPx by remember { mutableStateOf(0f) }
         var fabInit by remember { mutableStateOf(false) }
         val fabOffsetX = remember { Animatable(0f) }
+        val fabOffsetY = remember { Animatable(0f) }
         val fabScope = rememberCoroutineScope()
 
         Box(modifier = Modifier.fillMaxSize()) {
-            LaunchedEffect(fabWidthPx) {
-                if (!fabInit && fabWidthPx > 0f) {
+            LaunchedEffect(fabWidthPx, fabHeightPx) {
+                if (!fabInit && fabWidthPx > 0f && fabHeightPx > 0f) {
                     fabOffsetX.snapTo(screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() })
+                    fabOffsetY.snapTo(screenHeightPx - fabHeightPx - with(density) { 32.dp.toPx() })
                     fabInit = true
                 }
             }
@@ -566,25 +570,31 @@ fun QuizListScreen(
                 icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
                 text = { Text("Quiz Ekle") },
                 modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 16.dp, bottom = 16.dp)
-                    .offset { IntOffset(fabOffsetX.value.roundToInt(), 0) }
-                    .onGloballyPositioned { fabWidthPx = it.size.width.toFloat() }
+                    .align(Alignment.TopStart)
+                    .padding(start = 16.dp, top = 16.dp)
+                    .offset { IntOffset(fabOffsetX.value.roundToInt(), fabOffsetY.value.roundToInt()) }
+                    .onGloballyPositioned {
+                        fabWidthPx = it.size.width.toFloat()
+                        fabHeightPx = it.size.height.toFloat()
+                    }
                     .pointerInput(Unit) {
                         detectDragGesturesAfterLongPress(
                             onDragEnd = {
                                 fabScope.launch {
                                     val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
-                                    val target = if (fabOffsetX.value < max / 2f) 0f else max
-                                    fabOffsetX.animateTo(target, animationSpec = tween(300))
+                                    val targetX = if (fabOffsetX.value < max / 2f) 0f else max
+                                    fabOffsetX.animateTo(targetX, animationSpec = tween(300))
                                 }
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
                                 fabScope.launch {
                                     val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
-                                    val newOffset = (fabOffsetX.value + dragAmount.x).coerceIn(0f, max)
-                                    fabOffsetX.snapTo(newOffset)
+                                    val maxY = screenHeightPx - fabHeightPx - with(density) { 32.dp.toPx() }
+                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(0f, max)
+                                    val newY = (fabOffsetY.value + dragAmount.y).coerceIn(0f, maxY)
+                                    fabOffsetX.snapTo(newX)
+                                    fabOffsetY.snapTo(newY)
                                 }
                             }
                         )
