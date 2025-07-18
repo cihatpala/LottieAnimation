@@ -114,7 +114,6 @@ fun QuizListScreen(
     folders: List<UserFolder>,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
-    onAdd: (Int) -> Unit,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
     onMoveQuiz: (Int, Int) -> Unit,
@@ -368,12 +367,6 @@ fun QuizListScreen(
                                                 Spacer(modifier = Modifier.height(8.dp))
                                             }
                                         }
-                                        Button(
-                                            onClick = { onAdd(quizIndex) },
-                                            modifier = Modifier
-                                                .padding(top = 8.dp)
-                                                .align(Alignment.CenterHorizontally)
-                                        ) { Text("Add Question") }
                                     }
                                 }
                             }
