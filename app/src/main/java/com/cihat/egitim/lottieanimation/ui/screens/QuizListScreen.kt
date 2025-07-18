@@ -599,8 +599,8 @@ fun QuizListScreen(
                                     val bottom = containerHeightPx - fabHeightPx - margin
                                     val targetX = if (fabOffsetX.value < (containerWidthPx - fabWidthPx) / 2f) left else right
                                     val targetY = if (fabOffsetY.value < (containerHeightPx - fabHeightPx) / 2f) top else bottom
-                                    fabOffsetX.animateTo(targetX, animationSpec = tween(300))
-                                    fabOffsetY.animateTo(targetY, animationSpec = tween(300))
+                                    launch { fabOffsetX.animateTo(targetX, animationSpec = tween(150)) }
+                                    launch { fabOffsetY.animateTo(targetY, animationSpec = tween(150)) }
                                 }
                             },
                             onDrag = { change, dragAmount ->
