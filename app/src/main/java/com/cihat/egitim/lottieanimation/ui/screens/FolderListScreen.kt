@@ -231,9 +231,15 @@ private fun FolderItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color(0xFFFFA500))
+                    .background(MaterialTheme.colorScheme.tertiary)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
             IconButton(
                 onClick = {
                     scope.launch { swipeState.animateTo(0) }
@@ -241,9 +247,15 @@ private fun FolderItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color.Red)
+                    .background(MaterialTheme.colorScheme.error)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onError
+                )
+            }
         }
 
         Column(
@@ -390,9 +402,15 @@ private fun HeadingItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color(0xFFFFA500))
+                    .background(MaterialTheme.colorScheme.tertiary)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.onTertiary
+                )
+            }
             IconButton(
                 onClick = {
                     scope.launch { swipeState.animateTo(0) }
@@ -400,9 +418,15 @@ private fun HeadingItem(
                 },
                 enabled = swipeState.currentValue == 1,
                 modifier = Modifier
-                    .background(Color.Red)
+                    .background(MaterialTheme.colorScheme.error)
                     .size(actionWidth)
-            ) { Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.White) }
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onError
+                )
+            }
         }
 
         Column(
