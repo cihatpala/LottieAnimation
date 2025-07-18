@@ -68,7 +68,6 @@ fun FolderListScreen(
     onDeleteHeading: (Int, List<Int>) -> Unit,
     onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
-    onLogout: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
@@ -106,9 +105,6 @@ fun FolderListScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
-                }
-                Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Logout")
                 }
             }
             ExtendedFloatingActionButton(

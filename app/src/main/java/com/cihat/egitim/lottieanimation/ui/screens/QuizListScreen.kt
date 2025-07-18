@@ -121,7 +121,6 @@ fun QuizListScreen(
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onQuickAdd: (Int, String, String, String, String) -> Unit,
-    onLogout: () -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -512,9 +511,6 @@ fun QuizListScreen(
                             }
                         }
                     }
-                }
-                Button(onClick = onLogout, modifier = Modifier.padding(top = 8.dp)) {
-                    Text("Logout")
                 }
             }
             ExtendedFloatingActionButton(
