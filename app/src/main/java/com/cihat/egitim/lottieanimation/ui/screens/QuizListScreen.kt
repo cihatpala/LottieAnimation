@@ -154,10 +154,9 @@ fun QuizListScreen(
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
 
         // State for draggable FAB
-        val configuration = LocalConfiguration.current
         val density = LocalDensity.current
-        val screenWidthPx = with(density) { configuration.screenWidthDp.dp.toPx() }
-        val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+        var containerWidthPx by remember { mutableStateOf(0f) }
+        var containerHeightPx by remember { mutableStateOf(0f) }
         var fabWidthPx by remember { mutableStateOf(0f) }
         var fabHeightPx by remember { mutableStateOf(0f) }
         var fabInit by remember { mutableStateOf(false) }
@@ -165,11 +164,24 @@ fun QuizListScreen(
         val fabOffsetY = remember { Animatable(0f) }
         val fabScope = rememberCoroutineScope()
 
-        Box(modifier = Modifier.fillMaxSize()) {
-            LaunchedEffect(fabWidthPx, fabHeightPx) {
-                if (!fabInit && fabWidthPx > 0f && fabHeightPx > 0f) {
-                    fabOffsetX.snapTo(screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() })
-                    fabOffsetY.snapTo(screenHeightPx - fabHeightPx - with(density) { 32.dp.toPx() })
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .onGloballyPositioned {
+                    containerWidthPx = it.size.width.toFloat()
+                    containerHeightPx = it.size.height.toFloat()
+                }
+        ) {
+            LaunchedEffect(containerWidthPx, containerHeightPx, fabWidthPx, fabHeightPx) {
+                if (!fabInit &&
+                    containerWidthPx > 0f &&
+                    containerHeightPx > 0f &&
+                    fabWidthPx > 0f &&
+                    fabHeightPx > 0f
+                ) {
+                    val margin = with(density) { 16.dp.toPx() }
+                    fabOffsetX.snapTo(containerWidthPx - fabWidthPx - margin)
+                    fabOffsetY.snapTo(containerHeightPx - fabHeightPx - margin)
                     fabInit = true
                 }
             }
@@ -581,7 +593,8 @@ fun QuizListScreen(
                         detectDragGesturesAfterLongPress(
                             onDragEnd = {
                                 fabScope.launch {
-                                    val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
+                                    val margin = with(density) { 16.dp.toPx() }
+                                    val max = containerWidthPx - fabWidthPx - margin
                                     val targetX = if (fabOffsetX.value < max / 2f) 0f else max
                                     fabOffsetX.animateTo(targetX, animationSpec = tween(300))
                                 }
@@ -589,9 +602,10 @@ fun QuizListScreen(
                             onDrag = { change, dragAmount ->
                                 change.consume()
                                 fabScope.launch {
-                                    val max = screenWidthPx - fabWidthPx - with(density) { 32.dp.toPx() }
-                                    val maxY = screenHeightPx - fabHeightPx - with(density) { 32.dp.toPx() }
-                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(0f, max)
+                                    val margin = with(density) { 16.dp.toPx() }
+                                    val maxX = containerWidthPx - fabWidthPx - margin
+                                    val maxY = containerHeightPx - fabHeightPx - margin
+                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(0f, maxX)
                                     val newY = (fabOffsetY.value + dragAmount.y).coerceIn(0f, maxY)
                                     fabOffsetX.snapTo(newX)
                                     fabOffsetY.snapTo(newY)
