@@ -23,10 +23,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FractionalThreshold
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
@@ -49,6 +48,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -120,6 +120,7 @@ fun QuizListScreen(
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onQuickAdd: (Int, String, String, String, String) -> Unit,
+    onAddQuestion: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -173,6 +174,8 @@ fun QuizListScreen(
                             var quickAnswer by remember(quiz.id) { mutableStateOf("") }
                             var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
                             var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
+                            var showStartDialog by remember(quiz.id) { mutableStateOf(false) }
+                            var showEmptyAlert by remember(quiz.id) { mutableStateOf(false) }
                             val scope = rememberCoroutineScope()
                             val actionWidth = 72.dp
                             val swipeState = rememberSwipeableState(0)
@@ -310,16 +313,35 @@ fun QuizListScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .height(64.dp)
-                                            .clickable { expanded = !expanded }
                                             .padding(horizontal = 8.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(text = quiz.name, modifier = Modifier.weight(1f))
                                         if (swipeState.offset.value == 0f) {
-                                            Icon(
-                                                imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                                                contentDescription = null
-                                            )
+                                            IconButton(onClick = { expanded = !expanded }) {
+                                                Icon(Icons.Default.Info, contentDescription = "Detay")
+                                            }
+                                            Box {
+                                                IconButton(
+                                                    onClick = {
+                                                        if (quiz.boxes.flatten().isEmpty()) {
+                                                            showEmptyAlert = true
+                                                        } else {
+                                                            showStartDialog = true
+                                                        }
+                                                    }
+                                                ) {
+                                                    Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
+                                                }
+                                                if (quiz.boxes.flatten().isEmpty()) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(8.dp)
+                                                            .background(Color.Red, CircleShape)
+                                                            .align(Alignment.TopEnd)
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                     if (expanded) {
@@ -355,8 +377,6 @@ fun QuizListScreen(
                                                             ) {
                                                                 Text(text = "Box ${boxIndex + 1}")
                                                                 Text(text = "${box.size} soru")
-                                                                Spacer(modifier = Modifier.height(4.dp))
-                                                                Button(onClick = { onQuiz(quizIndex, boxIndex) }) { Text("Quiz") }
                                                             }
                                                         }
                                                     }
@@ -499,6 +519,69 @@ fun QuizListScreen(
                                                 modifier = Modifier.fillMaxWidth()
                                             )
                                         }
+                                    }
+                                )
+                            }
+
+                            if (showStartDialog) {
+                                AlertDialog(
+                                    onDismissRequest = { showStartDialog = false },
+                                    confirmButton = {},
+                                    dismissButton = {},
+                                    title = { Text("Kutuyu Seç") },
+                                    text = {
+                                        Column {
+                                            quiz.boxes.chunked(3).forEachIndexed { rowIndex, row ->
+                                                Row(
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    row.forEachIndexed { colIndex, box ->
+                                                        val boxIndex = rowIndex * 3 + colIndex
+                                                        Card(
+                                                            modifier = Modifier
+                                                                .weight(1f)
+                                                                .aspectRatio(1f)
+                                                                .clickable {
+                                                                    showStartDialog = false
+                                                                    onQuiz(quizIndex, boxIndex)
+                                                                },
+                                                            shape = RoundedCornerShape(8.dp),
+                                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                                                        ) {
+                                                            Column(
+                                                                modifier = Modifier
+                                                                    .fillMaxSize()
+                                                                    .padding(8.dp),
+                                                                verticalArrangement = Arrangement.Center,
+                                                                horizontalAlignment = Alignment.CenterHorizontally
+                                                            ) {
+                                                                Text("Box ${boxIndex + 1}")
+                                                                Text("${box.size} soru")
+                                                            }
+                                                        }
+                                                    }
+                                                    if (row.size < 3) {
+                                                        repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                            }
+                                        }
+                                    }
+                                )
+                            }
+
+                            if (showEmptyAlert) {
+                                PrimaryAlert(
+                                    title = "Uyarı",
+                                    message = "Quizde henüz soru yok",
+                                    onDismiss = { showEmptyAlert = false },
+                                    confirmText = "Soru Ekle",
+                                    onConfirm = {
+                                        showEmptyAlert = false
+                                        onAddQuestion(quizIndex)
                                     }
                                 )
                             }

@@ -190,6 +190,10 @@ fun AppNavHost(
                     quizViewModel.setCurrentQuiz(qIdx)
                     quizViewModel.addQuestion(q, a, topic, sub, 0)
                 },
+                onAddQuestion = { qIdx ->
+                    quizViewModel.setCurrentQuiz(qIdx)
+                    navController.navigate(Screen.AddQuestion.route)
+                },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
