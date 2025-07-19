@@ -55,6 +55,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
@@ -154,7 +155,8 @@ fun QuizListScreen(
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
         var addDialogFor by remember { mutableStateOf<Int?>(null) }
-        var openSwipeState by remember { mutableStateOf<SwipeableState<Int>?>(null) }
+        var openSwipeId by remember { mutableStateOf<Int?>(null) }
+        val swipeStates = remember { mutableMapOf<Int, SwipeableState<Int>>() }
 
         // State for draggable FAB
         val density = LocalDensity.current
@@ -216,6 +218,10 @@ fun QuizListScreen(
                             val scope = rememberCoroutineScope()
                             val actionWidth = 72.dp
                             val swipeState = rememberSwipeableState(0)
+                            DisposableEffect(quiz.id) {
+                                swipeStates[quiz.id] = swipeState
+                                onDispose { swipeStates.remove(quiz.id) }
+                            }
                             val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
                             // Track swipe progress and close previously opened item
@@ -223,16 +229,13 @@ fun QuizListScreen(
                                 if (kotlin.math.abs(swipeState.offset.value) > 1f) {
                                     expanded = false
                                 }
-                                if (swipeState.offset.value != 0f && openSwipeState != swipeState) {
-                                    openSwipeState?.animateTo(0)
-                                    openSwipeState = swipeState
-                                }
-                            }
-
-                            // Reset reference when this item closes
-                            LaunchedEffect(swipeState.currentValue) {
-                                if (swipeState.currentValue == 0 && openSwipeState == swipeState) {
-                                    openSwipeState = null
+                                if (swipeState.offset.value != 0f && openSwipeId != quiz.id) {
+                                    openSwipeId?.let { id ->
+                                        swipeStates[id]?.animateTo(0)
+                                    }
+                                    openSwipeId = quiz.id
+                                } else if (swipeState.offset.value == 0f && openSwipeId == quiz.id) {
+                                    openSwipeId = null
                                 }
                             }
 
