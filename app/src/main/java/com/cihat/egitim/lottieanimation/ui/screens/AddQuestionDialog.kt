@@ -99,7 +99,7 @@ fun AddQuestionDialog(
                                         }
                                     }
                             ) {}
-                            Text(text = "${'$'}{i + 1}")
+                            Text(text = "${i + 1}")
                         }
                     }
                 }
@@ -119,7 +119,7 @@ fun AddQuestionDialog(
                             value = selectedIdx?.let { options[it].name } ?: "Seçiniz",
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Başlık ${'$'}{level + 1}") },
+                            label = { Text("Başlık ${level + 1}") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                             modifier = Modifier
                                 .menuAnchor()
