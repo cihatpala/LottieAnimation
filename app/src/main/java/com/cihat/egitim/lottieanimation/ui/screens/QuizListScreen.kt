@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.rememberSwipeableState
+import androidx.compose.material.SwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Add
@@ -54,6 +55,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableFloatStateOf
@@ -72,6 +74,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.input.pointer.pointerInput
@@ -126,8 +130,8 @@ fun QuizListScreen(
     onMoveQuiz: (Int, Int) -> Unit,
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
-    onQuickAdd: (Int, String, String, String, String) -> Unit,
-    onAddQuestion: (Int) -> Unit,
+    onAddQuestion: (String, String, String, String, Int) -> Unit,
+    onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
@@ -152,6 +156,18 @@ fun QuizListScreen(
         val itemHeightPx = with(LocalDensity.current) { 72.dp.toPx() }
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
+        var addDialogFor by remember { mutableStateOf<Int?>(null) }
+        var openSwipeId by remember { mutableStateOf<Int?>(null) }
+        val swipeStates = remember { mutableMapOf<Int, SwipeableState<Int>>() }
+
+        LaunchedEffect(listState.isScrollInProgress) {
+            if (listState.isScrollInProgress) {
+                openSwipeId?.let { id ->
+                    swipeStates[id]?.animateTo(0)
+                    openSwipeId = null
+                }
+            }
+        }
 
         // State for draggable FAB
         val density = LocalDensity.current
@@ -209,26 +225,37 @@ fun QuizListScreen(
                             var expanded by remember(quiz.id) { mutableStateOf(false) }
                             var showRename by remember(quiz.id) { mutableStateOf(false) }
                             var showDelete by remember(quiz.id) { mutableStateOf(false) }
-                            var showQuickAdd by remember(quiz.id) { mutableStateOf(false) }
-                            var quickQuestion by remember(quiz.id) { mutableStateOf("") }
-                            var quickAnswer by remember(quiz.id) { mutableStateOf("") }
-                            var quickPath by remember(quiz.id) { mutableStateOf<List<Int>>(emptyList()) }
                             var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                             val scope = rememberCoroutineScope()
                             val actionWidth = 72.dp
                             val swipeState = rememberSwipeableState(0)
+                            DisposableEffect(quiz.id) {
+                                swipeStates[quiz.id] = swipeState
+                                onDispose {
+                                    swipeStates.remove(quiz.id)
+                                    if (openSwipeId == quiz.id) openSwipeId = null
+                                }
+                            }
                             val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+
+// Eğer başka bir item açıksa, ben kapanmalıyım
+                            LaunchedEffect(openSwipeId) {
+                                if (openSwipeId != quiz.id && swipeState.currentValue != 0) {
+                                    swipeState.animateTo(0, tween(durationMillis = 100, easing = LinearEasing))
+                                }
+                            }
+
+// Eğer ben açılırsam, global swipe ID'yi kendime atamalıyım
+                            LaunchedEffect(swipeState.currentValue) {
+                                if (swipeState.currentValue != 0 && openSwipeId != quiz.id) {
+                                    openSwipeId = quiz.id
+                                }
+                            }
+
 
                             // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
                             val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
                             val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-
-                            // Collapse the item whenever it is swiped to reveal actions
-                            LaunchedEffect(swipeState.offset) {
-                                if (kotlin.math.abs(swipeState.offset.value) > 1f) {
-                                    expanded = false
-                                }
-                            }
 
                             val isDragging = draggingQuizId == quiz.id
                             val dragModifier = Modifier
@@ -326,7 +353,8 @@ fun QuizListScreen(
                                     IconButton(
                                         onClick = {
                                             scope.launch { swipeState.animateTo(0) }
-                                            showQuickAdd = true
+                                            onSetCurrentQuiz(quizIndex)
+                                            addDialogFor = quizIndex
                                         },
                                         enabled = swipeState.currentValue == 2,
                                         modifier = Modifier
@@ -474,95 +502,20 @@ fun QuizListScreen(
                                 )
                             }
 
-                            if (showQuickAdd) {
+                            if (addDialogFor == quizIndex) {
                                 val folderId = quiz.folderId
-                                val folderHeadings = folders.find { it.id == folderId }?.headings
+                                val folder = folders.find { it.id == folderId }
+                                val folderHeadings = folder?.headings
                                     ?: headingsFromQuestions(quiz.boxes.flatten())
-                                AlertDialog(
-                                    onDismissRequest = { showQuickAdd = false },
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            var list = folderHeadings
-                                            val names = mutableListOf<String>()
-                                            for (idx in quickPath) {
-                                                val h = list.getOrNull(idx) ?: break
-                                                names.add(h.name)
-                                                list = h.children
-                                            }
-                                            val topic = names.firstOrNull() ?: ""
-                                            val sub = names.drop(1).joinToString(" > ")
-                                            onQuickAdd(quizIndex, topic, sub, quickQuestion, quickAnswer)
-                                            showQuickAdd = false
-                                            quickQuestion = ""
-                                            quickAnswer = ""
-                                            quickPath = emptyList()
-                                        }) { Text("Soru Ekle") }
+                                AddQuestionDialog(
+                                    boxCount = quiz.boxes.size,
+                                    headings = folderHeadings,
+                                    quizName = quiz.name,
+                                    folderName = folder?.name ?: "",
+                                    onAdd = { q, a, topic, sub, box ->
+                                        onAddQuestion(q, a, topic, sub, box)
                                     },
-                                    dismissButton = {
-                                        TextButton(onClick = { showQuickAdd = false }) { Text("İptal") }
-                                    },
-                                    title = {
-                                        Text(folderId?.let { folders.find { f -> f.id == it }?.name }
-                                            ?: "")
-                                    },
-                                    text = {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                            var currentList = folderHeadings
-                                            for (level in 0..quickPath.size) {
-                                                val options = currentList
-                                                if (options.isEmpty()) break
-                                                var expanded by remember(level, quickPath) { mutableStateOf(false) }
-                                                val selectedIdx = quickPath.getOrNull(level)
-                                                ExposedDropdownMenuBox(
-                                                    expanded = expanded,
-                                                    onExpandedChange = { expanded = !expanded }
-                                                ) {
-                                                    OutlinedTextField(
-                                                        value = selectedIdx?.let { options[it].name }
-                                                            ?: "Seçiniz",
-                                                        onValueChange = {},
-                                                        readOnly = true,
-                                                        label = { Text("Başlık ${level + 1}") },
-                                                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                                                        modifier = Modifier
-                                                            .menuAnchor()
-                                                            .fillMaxWidth()
-                                                    )
-                                                    ExposedDropdownMenu(
-                                                        expanded = expanded,
-                                                        onDismissRequest = { expanded = false }
-                                                    ) {
-                                                        options.forEachIndexed { index, h ->
-                                                            DropdownMenuItem(
-                                                                text = { Text(h.name) },
-                                                                onClick = {
-                                                                    quickPath = quickPath.take(level) + index
-                                                                    expanded = false
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                                selectedIdx?.let { idx -> currentList = options[idx].children }
-                                                    ?: run { currentList = emptyList() }
-                                            }
-
-                                            OutlinedTextField(
-                                                value = quickQuestion,
-                                                onValueChange = { quickQuestion = it },
-                                                label = { Text("Soru") },
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                            Spacer(modifier = Modifier.height(8.dp))
-                                            OutlinedTextField(
-                                                value = quickAnswer,
-                                                onValueChange = { quickAnswer = it },
-                                                label = { Text("Cevap") },
-                                                modifier = Modifier.fillMaxWidth()
-                                            )
-                                        }
-                                    }
+                                    onDismiss = { addDialogFor = null }
                                 )
                             }
 
@@ -706,7 +659,8 @@ fun QuizListScreen(
                 confirmText = "Soru Ekle",
                 onConfirm = {
                     emptyAlertFor = null
-                    onAddQuestion(idx)
+                    onSetCurrentQuiz(idx)
+                    addDialogFor = idx
                 }
             )
         }

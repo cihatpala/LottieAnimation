@@ -11,7 +11,6 @@ import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
-import com.cihat.egitim.lottieanimation.ui.screens.AddQuestionScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AuthScreen
 import com.cihat.egitim.lottieanimation.ui.screens.LoginScreen
 import com.cihat.egitim.lottieanimation.ui.screens.BoxListScreen
@@ -36,7 +35,6 @@ sealed class Screen(val route: String) {
     data object Profile : Screen("profile")
     data object MyProfile : Screen("myProfile")
     data object BoxList : Screen("boxList")
-    data object AddQuestion : Screen("addQuestion")
     data object HomeFeed : Screen("homeFeed")
     data object Quiz : Screen("quiz")
     data object QuestionList : Screen("questionList/{boxIndex}") {
@@ -186,14 +184,10 @@ fun AppNavHost(
                 onCreateWithQuestion = { name, count, folderId, topic, sub, q, a ->
                     quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a)
                 },
-                onQuickAdd = { qIdx, topic, sub, q, a ->
-                    quizViewModel.setCurrentQuiz(qIdx)
-                    quizViewModel.addQuestion(q, a, topic, sub, 0)
+                onAddQuestion = { q, a, topic, sub, box ->
+                    quizViewModel.addQuestion(q, a, topic, sub, box)
                 },
-                onAddQuestion = { qIdx ->
-                    quizViewModel.setCurrentQuiz(qIdx)
-                    navController.navigate(Screen.AddQuestion.route)
-                },
+                onSetCurrentQuiz = { idx -> quizViewModel.setCurrentQuiz(idx) },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },
                 onTab = { tab ->
@@ -208,7 +202,9 @@ fun AppNavHost(
         composable(Screen.BoxList.route) {
             BoxListScreen(
                 quizName = quizViewModel.currentQuizName,
+                folderName = quizViewModel.currentQuizFolderName,
                 boxes = quizViewModel.boxes,
+                headings = quizViewModel.currentQuizHeadingOptions,
                 onQuiz = { index ->
                     if (quizViewModel.startQuiz(index)) {
                         navController.navigate(Screen.Quiz.route)
@@ -220,7 +216,9 @@ fun AppNavHost(
                         ).show()
                     }
                 },
-                onAdd = { navController.navigate(Screen.AddQuestion.route) },
+                onAddQuestion = { q, a, topic, sub, box ->
+                    quizViewModel.addQuestion(q, a, topic, sub, box)
+                },
                 onView = { index -> navController.navigate(Screen.QuestionList.createRoute(index)) },
                 onBack = { navController.popBackStack() },
                 onLogout = {
@@ -236,17 +234,6 @@ fun AppNavHost(
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
                     }
                 }
-            )
-        }
-        composable(Screen.AddQuestion.route) {
-            AddQuestionScreen(
-                boxCount = quizViewModel.boxes.size,
-                headings = quizViewModel.currentQuizHeadingOptions,
-                onAdd = { q, a, topic, sub, box ->
-                    quizViewModel.addQuestion(q, a, topic, sub, box)
-                },
-                onBack = { navController.popBackStack() },
-                onDone = { navController.popBackStack() }
             )
         }
         composable(Screen.HomeFeed.route) {
