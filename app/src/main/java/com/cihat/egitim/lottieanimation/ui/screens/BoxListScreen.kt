@@ -19,11 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
@@ -31,14 +34,16 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 fun BoxListScreen(
     quizName: String,
     boxes: List<List<*>>,
+    headings: List<FolderHeading>,
     onQuiz: (Int) -> Unit,
-    onAdd: () -> Unit,
+    onAddQuestion: (String, String, String, String, Int) -> Unit,
     onView: (Int) -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     val context = LocalContext.current
+    var showAddDialog by remember { mutableStateOf(false) }
     AppScaffold(
         title = quizName,
         showBack = true,
@@ -78,9 +83,20 @@ fun BoxListScreen(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onAdd) { Text("Add Question") }
+            Button(onClick = { showAddDialog = true }) { Text("Add Question") }
             Spacer(modifier = Modifier.height(8.dp))
             Button(onClick = onLogout) { Text("Logout") }
+
+            if (showAddDialog) {
+                AddQuestionDialog(
+                    boxCount = boxes.size,
+                    headings = headings,
+                    onAdd = { q, a, topic, sub, box ->
+                        onAddQuestion(q, a, topic, sub, box)
+                    },
+                    onDismiss = { showAddDialog = false }
+                )
+            }
         }
     }
 }
