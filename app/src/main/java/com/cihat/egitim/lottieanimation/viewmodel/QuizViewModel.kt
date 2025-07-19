@@ -218,10 +218,17 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
 
     /** Deletes the folder at the given index */
     fun deleteFolder(index: Int) {
-        if (index in folders.indices) {
-            folders.removeAt(index)
-            persistState()
+        val folder = folders.getOrNull(index) ?: return
+        if (index !in folders.indices) return
+
+        // Remove folder reference from any quizzes pointing to it to satisfy
+        // the foreign key constraint in the database.
+        quizzes.replaceAll { quiz ->
+            if (quiz.folderId == folder.id) quiz.copy(folderId = null) else quiz
         }
+
+        folders.removeAt(index)
+        persistState()
     }
 
     /** Creates a new folder with optional root headings */
