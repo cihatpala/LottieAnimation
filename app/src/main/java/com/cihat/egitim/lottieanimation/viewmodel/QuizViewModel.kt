@@ -185,6 +185,28 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         return currentList
     }
 
+    /**
+     * Generic helper to traverse a heading list and apply an operation on the
+     * target node. It copies the hierarchy along the traversed path so that the
+     * original list remains unchanged.
+     */
+    private fun modifyHeadingRec(
+        list: MutableList<FolderHeading>,
+        path: List<Int>,
+        operation: (MutableList<FolderHeading>, Int, FolderHeading) -> Unit
+    ): MutableList<FolderHeading>? {
+        val idx = path.firstOrNull() ?: return null
+        val heading = list.getOrNull(idx) ?: return null
+        val copy = list.toMutableList()
+        if (path.size == 1) {
+            operation(copy, idx, heading)
+            return copy
+        }
+        val childCopy = modifyHeadingRec(heading.children, path.drop(1), operation) ?: return null
+        copy[idx] = heading.copy(children = childCopy)
+        return copy
+    }
+
     /** Renames the folder at the given index */
     fun renameFolder(index: Int, newName: String) {
         val folder = folders.getOrNull(index) ?: return
@@ -240,36 +262,19 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
     private fun deleteHeadingRec(
         list: MutableList<FolderHeading>,
         path: List<Int>
-    ): MutableList<FolderHeading>? {
-        val idx = path.firstOrNull() ?: return null
-        val heading = list.getOrNull(idx) ?: return null
-        val copy = list.toMutableList()
-        if (path.size == 1) {
-            if (idx !in copy.indices) return null
-            copy.removeAt(idx)
-            return copy
+    ): MutableList<FolderHeading>? =
+        modifyHeadingRec(list, path) { parent, index, _ ->
+            if (index in parent.indices) parent.removeAt(index)
         }
-        val childCopy = deleteHeadingRec(heading.children, path.drop(1)) ?: return null
-        copy[idx] = heading.copy(children = childCopy)
-        return copy
-    }
 
     private fun renameHeadingRec(
         list: MutableList<FolderHeading>,
         path: List<Int>,
         newName: String
-    ): MutableList<FolderHeading>? {
-        val idx = path.firstOrNull() ?: return null
-        val heading = list.getOrNull(idx) ?: return null
-        val copy = list.toMutableList()
-        if (path.size == 1) {
-            copy[idx] = heading.copy(name = newName)
-            return copy
+    ): MutableList<FolderHeading>? =
+        modifyHeadingRec(list, path) { parent, index, heading ->
+            if (index in parent.indices) parent[index] = heading.copy(name = newName)
         }
-        val childCopy = renameHeadingRec(heading.children, path.drop(1), newName) ?: return null
-        copy[idx] = heading.copy(children = childCopy)
-        return copy
-    }
 
     /** Adds a new child heading to the node specified by path */
     fun addHeading(folderIndex: Int, path: List<Int>, name: String) {
@@ -291,18 +296,11 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         path: List<Int>,
         name: String
     ): MutableList<FolderHeading>? {
-        val idx = path.firstOrNull() ?: return null
-        val heading = list.getOrNull(idx) ?: return null
-        val copy = list.toMutableList()
-        if (path.size == 1) {
-            val childrenCopy = heading.children.toMutableList()
-            childrenCopy.add(FolderHeading(id = nextHeadingId++, name = name))
-            copy[idx] = heading.copy(children = childrenCopy)
-            return copy
+        return modifyHeadingRec(list, path) { parent, index, heading ->
+            val childList = heading.children.toMutableList()
+            childList.add(FolderHeading(id = nextHeadingId++, name = name))
+            parent[index] = heading.copy(children = childList)
         }
-        val childCopy = addHeadingRec(heading.children, path.drop(1), name) ?: return null
-        copy[idx] = heading.copy(children = childCopy)
-        return copy
     }
 
     /** Renames the quiz at the given index */
