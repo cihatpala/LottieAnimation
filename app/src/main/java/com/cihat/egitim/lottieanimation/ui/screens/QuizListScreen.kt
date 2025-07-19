@@ -74,6 +74,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.input.pointer.pointerInput
@@ -236,27 +238,20 @@ fun QuizListScreen(
                             }
                             val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
-                            // Track swipe progress and close previously opened item
-                            LaunchedEffect(swipeState.offset) {
-                                if (kotlin.math.abs(swipeState.offset.value) > 1f) {
-                                    expanded = false
-                                }
-                                if (swipeState.offset.value != 0f &&
-                                    openSwipeId != quiz.id &&
-                                    !swipeState.isAnimationRunning
-                                ) {
-                                    openSwipeId?.let { id ->
-                                        swipeStates[id]?.animateTo(0)
-                                    }
-                                    openSwipeId = quiz.id
-                                } else if (
-                                    swipeState.offset.value == 0f &&
-                                    !swipeState.isAnimationRunning &&
-                                    openSwipeId == quiz.id
-                                ) {
-                                    openSwipeId = null
+// Eğer başka bir item açıksa, ben kapanmalıyım
+                            LaunchedEffect(openSwipeId) {
+                                if (openSwipeId != quiz.id && swipeState.currentValue != 0) {
+                                    swipeState.animateTo(0, tween(durationMillis = 100, easing = LinearEasing))
                                 }
                             }
+
+// Eğer ben açılırsam, global swipe ID'yi kendime atamalıyım
+                            LaunchedEffect(swipeState.currentValue) {
+                                if (swipeState.currentValue != 0 && openSwipeId != quiz.id) {
+                                    openSwipeId = quiz.id
+                                }
+                            }
+
 
                             // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
                             val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
