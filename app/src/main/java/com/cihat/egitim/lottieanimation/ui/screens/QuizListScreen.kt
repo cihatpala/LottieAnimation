@@ -474,11 +474,14 @@ fun QuizListScreen(
 
                             if (addDialogFor == quizIndex) {
                                 val folderId = quiz.folderId
-                                val folderHeadings = folders.find { it.id == folderId }?.headings
+                                val folder = folders.find { it.id == folderId }
+                                val folderHeadings = folder?.headings
                                     ?: headingsFromQuestions(quiz.boxes.flatten())
                                 AddQuestionDialog(
                                     boxCount = quiz.boxes.size,
                                     headings = folderHeadings,
+                                    quizName = quiz.name,
+                                    folderName = folder?.name ?: "",
                                     onAdd = { q, a, topic, sub, box ->
                                         onAddQuestion(q, a, topic, sub, box)
                                     },

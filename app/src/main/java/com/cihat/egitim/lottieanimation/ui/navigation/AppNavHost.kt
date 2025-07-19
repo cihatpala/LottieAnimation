@@ -202,6 +202,7 @@ fun AppNavHost(
         composable(Screen.BoxList.route) {
             BoxListScreen(
                 quizName = quizViewModel.currentQuizName,
+                folderName = quizViewModel.currentQuizFolderName,
                 boxes = quizViewModel.boxes,
                 headings = quizViewModel.currentQuizHeadingOptions,
                 onQuiz = { index ->

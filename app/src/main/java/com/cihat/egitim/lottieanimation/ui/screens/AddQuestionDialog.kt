@@ -21,6 +21,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.data.FolderHeading
 
@@ -40,6 +42,8 @@ import com.cihat.egitim.lottieanimation.data.FolderHeading
 fun AddQuestionDialog(
     boxCount: Int,
     headings: List<FolderHeading>,
+    quizName: String,
+    folderName: String,
     onAdd: (String, String, String, String, Int) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -73,9 +77,26 @@ fun AddQuestionDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Bitti") }
         },
-        title = { Text("Soru Ekle") },
+        title = {
+            Text(
+                text = "Soru Ekle",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+        },
         text = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = quizName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = folderName,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
                     modifier = Modifier.horizontalScroll(rememberScrollState()),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -103,9 +124,9 @@ fun AddQuestionDialog(
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                var currentList = headings
+                    var currentList = headings
                 for (level in 0..path.size) {
                     val options = currentList
                     if (options.isEmpty()) break
@@ -145,19 +166,20 @@ fun AddQuestionDialog(
                         ?: run { currentList = emptyList() }
                 }
 
-                OutlinedTextField(
-                    value = questionText,
-                    onValueChange = { questionText = it },
-                    label = { Text("Soru") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = answerText,
-                    onValueChange = { answerText = it },
-                    label = { Text("Cevap") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                    OutlinedTextField(
+                        value = questionText,
+                        onValueChange = { questionText = it },
+                        label = { Text("Soru") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = answerText,
+                        onValueChange = { answerText = it },
+                        label = { Text("Cevap") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     )

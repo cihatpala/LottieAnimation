@@ -33,6 +33,7 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 @Composable
 fun BoxListScreen(
     quizName: String,
+    folderName: String,
     boxes: List<List<*>>,
     headings: List<FolderHeading>,
     onQuiz: (Int) -> Unit,
@@ -91,6 +92,8 @@ fun BoxListScreen(
                 AddQuestionDialog(
                     boxCount = boxes.size,
                     headings = headings,
+                    quizName = quizName,
+                    folderName = folderName,
                     onAdd = { q, a, topic, sub, box ->
                         onAddQuestion(q, a, topic, sub, box)
                     },

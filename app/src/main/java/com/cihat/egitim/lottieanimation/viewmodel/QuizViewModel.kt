@@ -86,6 +86,13 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
     val currentQuizName: String
         get() = quizzes.getOrNull(currentQuizIndex)?.name ?: ""
 
+    /** Folder name of the active quiz */
+    val currentQuizFolderName: String
+        get() {
+            val folderId = quizzes.getOrNull(currentQuizIndex)?.folderId
+            return folders.find { it.id == folderId }?.name ?: ""
+        }
+
     /** Headings of the folder the current quiz belongs to */
     val currentQuizFolderHeadings: List<FolderHeading>
         get() {
