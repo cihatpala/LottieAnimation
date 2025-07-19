@@ -158,6 +158,15 @@ fun QuizListScreen(
         var openSwipeId by remember { mutableStateOf<Int?>(null) }
         val swipeStates = remember { mutableMapOf<Int, SwipeableState<Int>>() }
 
+        LaunchedEffect(listState.isScrollInProgress) {
+            if (listState.isScrollInProgress) {
+                openSwipeId?.let { id ->
+                    swipeStates[id]?.animateTo(0)
+                    openSwipeId = null
+                }
+            }
+        }
+
         // State for draggable FAB
         val density = LocalDensity.current
         var containerWidthPx by remember { mutableStateOf(0f) }
@@ -220,7 +229,10 @@ fun QuizListScreen(
                             val swipeState = rememberSwipeableState(0)
                             DisposableEffect(quiz.id) {
                                 swipeStates[quiz.id] = swipeState
-                                onDispose { swipeStates.remove(quiz.id) }
+                                onDispose {
+                                    swipeStates.remove(quiz.id)
+                                    if (openSwipeId == quiz.id) openSwipeId = null
+                                }
                             }
                             val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
@@ -229,12 +241,19 @@ fun QuizListScreen(
                                 if (kotlin.math.abs(swipeState.offset.value) > 1f) {
                                     expanded = false
                                 }
-                                if (swipeState.offset.value != 0f && openSwipeId != quiz.id) {
+                                if (swipeState.offset.value != 0f &&
+                                    openSwipeId != quiz.id &&
+                                    !swipeState.isAnimationRunning
+                                ) {
                                     openSwipeId?.let { id ->
                                         swipeStates[id]?.animateTo(0)
                                     }
                                     openSwipeId = quiz.id
-                                } else if (swipeState.offset.value == 0f && openSwipeId == quiz.id) {
+                                } else if (
+                                    swipeState.offset.value == 0f &&
+                                    !swipeState.isAnimationRunning &&
+                                    openSwipeId == quiz.id
+                                ) {
                                     openSwipeId = null
                                 }
                             }
