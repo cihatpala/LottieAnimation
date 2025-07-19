@@ -69,7 +69,6 @@ fun AddQuestionDialog(
                     onAdd(questionText, answerText, topic, sub, selectedBox)
                     questionText = ""
                     answerText = ""
-                    path = emptyList()
                     selectedBox = 0
                 }
             }) { Text("Ekle") }
