@@ -153,6 +153,7 @@ fun QuizListScreen(
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
         var addDialogFor by remember { mutableStateOf<Int?>(null) }
+        var swipedQuizId by remember { mutableStateOf<Int?>(null) }
 
         // State for draggable FAB
         val density = LocalDensity.current
@@ -216,16 +217,32 @@ fun QuizListScreen(
                             val swipeState = rememberSwipeableState(0)
                             val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
-                            // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
-                            val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-                            val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                            // Track swipe start and reset when closed
+                            LaunchedEffect(swipeState.currentValue) {
+                                if (swipeState.currentValue == 0 && swipedQuizId == quiz.id) {
+                                    swipedQuizId = null
+                                }
+                            }
 
-                            // Collapse the item whenever it is swiped to reveal actions
                             LaunchedEffect(swipeState.offset) {
+                                if (swipeState.offset.value != 0f) {
+                                    swipedQuizId = quiz.id
+                                }
                                 if (kotlin.math.abs(swipeState.offset.value) > 1f) {
                                     expanded = false
                                 }
                             }
+
+                            // Close if another quiz is swiped
+                            LaunchedEffect(swipedQuizId) {
+                                if (swipedQuizId != null && swipedQuizId != quiz.id && swipeState.currentValue != 0) {
+                                    swipeState.animateTo(0)
+                                }
+                            }
+
+                            // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
+                            val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                            val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
 
                             val isDragging = draggingQuizId == quiz.id
                             val dragModifier = Modifier
