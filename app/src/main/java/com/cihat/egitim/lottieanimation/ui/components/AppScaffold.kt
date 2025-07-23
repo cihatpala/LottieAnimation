@@ -21,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.Modifier
 
-enum class BottomTab { PROFILE, HOME, EXPLORE, ACCOUNT }
+enum class BottomTab { MENU, HOME, EXPLORE, PROFILE }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,8 +52,8 @@ fun AppScaffold(
             bottomTab?.let { tab ->
                 NavigationBar {
                     NavigationBarItem(
-                        selected = tab == BottomTab.PROFILE,
-                        onClick = { onTabSelected(BottomTab.PROFILE) },
+                        selected = tab == BottomTab.MENU,
+                        onClick = { onTabSelected(BottomTab.MENU) },
                         icon = { Icon(Icons.Default.Menu, contentDescription = "Menu") },
                         label = { Text("Menu") }
                     )
@@ -70,8 +70,8 @@ fun AppScaffold(
                         label = { Text("Explore") }
                     )
                     NavigationBarItem(
-                        selected = tab == BottomTab.ACCOUNT,
-                        onClick = { onTabSelected(BottomTab.ACCOUNT) },
+                        selected = tab == BottomTab.PROFILE,
+                        onClick = { onTabSelected(BottomTab.PROFILE) },
                         icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
                         label = { Text("Profile") }
                     )

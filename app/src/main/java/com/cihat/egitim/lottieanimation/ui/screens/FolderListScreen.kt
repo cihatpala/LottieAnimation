@@ -75,7 +75,7 @@ fun FolderListScreen(
         title = "Klasörlerim",
         showBack = true,
         onBack = onBack,
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = BottomTab.MENU,
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }
