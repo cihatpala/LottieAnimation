@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -20,7 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.Modifier
 
-enum class BottomTab { PROFILE, HOME, EXPLORE }
+enum class BottomTab { PROFILE, HOME, EXPLORE, ACCOUNT }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,8 +54,8 @@ fun AppScaffold(
                     NavigationBarItem(
                         selected = tab == BottomTab.PROFILE,
                         onClick = { onTabSelected(BottomTab.PROFILE) },
-                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                        label = { Text("Profile") }
+                        icon = { Icon(Icons.Default.Menu, contentDescription = "Menu") },
+                        label = { Text("Menu") }
                     )
                     NavigationBarItem(
                         selected = tab == BottomTab.HOME,
@@ -67,6 +68,12 @@ fun AppScaffold(
                         onClick = { onTabSelected(BottomTab.EXPLORE) },
                         icon = { Icon(Icons.Default.Search, contentDescription = "Explore") },
                         label = { Text("Explore") }
+                    )
+                    NavigationBarItem(
+                        selected = tab == BottomTab.ACCOUNT,
+                        onClick = { onTabSelected(BottomTab.ACCOUNT) },
+                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                        label = { Text("Profile") }
                     )
                 }
             }

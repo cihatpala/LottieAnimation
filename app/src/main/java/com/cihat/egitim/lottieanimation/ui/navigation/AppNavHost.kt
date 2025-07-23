@@ -18,6 +18,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.HomeFeedScreen
 import com.cihat.egitim.lottieanimation.ui.screens.FolderListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.ProfileScreen
 import com.cihat.egitim.lottieanimation.ui.screens.UserProfileScreen
+import com.cihat.egitim.lottieanimation.ui.screens.AccountScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuestionListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizListScreen
 import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
@@ -34,6 +35,7 @@ sealed class Screen(val route: String) {
     data object FolderList : Screen("folderList")
     data object Profile : Screen("profile")
     data object MyProfile : Screen("myProfile")
+    data object Account : Screen("account")
     data object BoxList : Screen("boxList")
     data object HomeFeed : Screen("homeFeed")
     data object Quiz : Screen("quiz")
@@ -119,6 +121,7 @@ fun AppNavHost(
                             BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                             BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                             BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                            BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
                         }
                     }
             )
@@ -127,6 +130,21 @@ fun AppNavHost(
             UserProfileScreen(
                 user = authViewModel.currentUser,
                 onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Account.route) {
+            val canPop = navController.previousBackStackEntry != null
+            AccountScreen(
+                showBack = canPop,
+                onBack = { navController.popBackStack() },
+                onTab = { tab ->
+                    when (tab) {
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
+                    }
+                }
             )
         }
         composable(Screen.Settings.route) {
@@ -151,6 +169,7 @@ fun AppNavHost(
                             BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                             BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                             BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                            BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
                         }
                     }
             )
@@ -195,6 +214,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
                     }
                 }
             )
@@ -232,6 +252,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
                     }
                 }
             )
@@ -256,6 +277,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> {}
+                        BottomTab.ACCOUNT -> navController.navigate(Screen.Account.route)
                     }
                 }
             )
