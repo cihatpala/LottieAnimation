@@ -47,7 +47,7 @@ fun ProfileScreen(
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
-        title = "Profile",
+        title = "Menu",
         showBack = showBack,
         onBack = onBack,
         bottomTab = BottomTab.PROFILE,
