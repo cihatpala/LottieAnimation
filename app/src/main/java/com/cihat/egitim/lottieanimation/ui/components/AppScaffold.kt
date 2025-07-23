@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MenuOpen
+import androidx.compose.animation.Crossfade
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -42,11 +44,12 @@ fun AppScaffold(
     val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val bottomPadding = if (bottomTab != null) 80.dp else 0.dp
+    val topPadding = 64.dp
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.padding(bottom = bottomPadding),
+                modifier = Modifier.padding(top = topPadding, bottom = bottomPadding),
                 drawerShape = RectangleShape
             ) {
                 drawerContent { scope.launch { drawerState.close() } }
@@ -58,8 +61,10 @@ fun AppScaffold(
                 CenterAlignedTopAppBar(
                     title = { Text(title) },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Crossfade(targetState = drawerState.isClosed, label = "menuIcon") { closed ->
+                            IconButton(onClick = { scope.launch { if (closed) drawerState.open() else drawerState.close() } }) {
+                                Icon(if (closed) Icons.Default.Menu else Icons.Default.MenuOpen, contentDescription = "Menu")
+                            }
                         }
                     },
                     actions = actions

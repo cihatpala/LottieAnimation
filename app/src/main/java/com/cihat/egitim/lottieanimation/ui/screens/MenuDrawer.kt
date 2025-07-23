@@ -14,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -51,11 +51,19 @@ fun MenuDrawer(
     onClose: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        IconButton(
-            onClick = onClose,
-            modifier = Modifier.align(Alignment.TopStart)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .align(Alignment.TopCenter),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+            IconButton(onClick = onClose) {
+                Icon(Icons.Default.MenuOpen, contentDescription = "Close")
+            }
+            Text("Menu")
+            Spacer(modifier = Modifier.width(48.dp))
         }
         IconButton(
             onClick = onClose,
@@ -63,7 +71,7 @@ fun MenuDrawer(
                 .align(Alignment.CenterEnd)
                 .background(Color.LightGray, CircleShape)
         ) {
-            Icon(Icons.Default.ArrowBack, contentDescription = "Close")
+            Icon(Icons.Default.MenuOpen, contentDescription = "Close")
         }
         LazyColumn(
             modifier = Modifier
