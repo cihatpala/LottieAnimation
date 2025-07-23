@@ -20,7 +20,7 @@ fun HomeFeedScreen(
     quizzes: List<PublicQuiz>,
     onImport: (Int) -> Unit,
     onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     AppScaffold(
         title = "Explore",

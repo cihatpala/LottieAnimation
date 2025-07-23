@@ -12,7 +12,7 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 @Composable
 fun ProfileScreen(
     onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     AppScaffold(
         title = "Profile",

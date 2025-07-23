@@ -71,7 +71,7 @@ fun AppNavHost(
                 },
                 onBack = { navController.popBackStack() },
                 onLogin = { navController.navigate(Screen.Login.route) },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.Login.route) {
@@ -95,14 +95,14 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 onForgot = {},
                 onSignup = { navController.navigate(Screen.Auth.route) },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.MyProfile.route) {
             UserProfileScreen(
                 user = authViewModel.currentUser,
                 onBack = { navController.popBackStack() },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.Profile.route) {
@@ -114,7 +114,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
                 },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.Settings.route) {
@@ -122,7 +122,7 @@ fun AppNavHost(
                 themeMode = themeMode,
                 onThemeChange = onThemeChange,
                 onBack = { navController.popBackStack() },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.FolderList.route) {
@@ -142,7 +142,7 @@ fun AppNavHost(
                             BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         }
                     },
-                    drawerContent = { AppDrawer(navController, authViewModel) }
+                    drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.QuizList.route) {
@@ -187,7 +187,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
                 },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.BoxList.route) {
@@ -225,7 +225,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
                 },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.HomeFeed.route) {
@@ -247,7 +247,7 @@ fun AppNavHost(
                         BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
                 },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(Screen.Quiz.route) {
@@ -260,7 +260,7 @@ fun AppNavHost(
                     if (!more) navController.popBackStack()
                 },
                 onQuit = { navController.popBackStack() },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
         composable(
@@ -274,7 +274,7 @@ fun AppNavHost(
                 onEdit = { qIdx, q -> quizViewModel.editQuestion(index, qIdx, q) },
                 onDelete = { qIdx -> quizViewModel.deleteQuestion(index, qIdx) },
                 onBack = { navController.popBackStack() },
-                drawerContent = { AppDrawer(navController, authViewModel) }
+                drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
             )
         }
     }

@@ -70,7 +70,7 @@ fun FolderListScreen(
     onCreate: (String, List<String>) -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     AppScaffold(
         title = "Klasörlerim",

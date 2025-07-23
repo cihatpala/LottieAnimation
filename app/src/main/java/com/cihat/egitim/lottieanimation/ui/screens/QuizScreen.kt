@@ -40,7 +40,7 @@ fun QuizScreen(
     onReveal: () -> Unit,
     onAnswer: (Boolean) -> Unit,
     onQuit: () -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     if (question == null) return
 

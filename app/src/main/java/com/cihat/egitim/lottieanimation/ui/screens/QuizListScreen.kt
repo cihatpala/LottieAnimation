@@ -135,7 +135,7 @@ fun QuizListScreen(
     onFolders: () -> Unit,
     onBack: () -> Unit,
     onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     AppScaffold(
         title = "My Quizzes",

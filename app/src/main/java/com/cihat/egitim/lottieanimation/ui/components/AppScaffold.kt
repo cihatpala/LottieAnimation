@@ -19,12 +19,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.foundation.shape.RectangleShape
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.unit.dp
 
 enum class BottomTab { HOME, EXPLORE, PROFILE }
 
@@ -35,14 +37,22 @@ fun AppScaffold(
     bottomTab: BottomTab? = null,
     onTabSelected: (BottomTab) -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
-    drawerContent: @Composable () -> Unit = {},
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val drawerState = rememberDrawerState(initialValue = androidx.compose.material3.DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val bottomPadding = if (bottomTab != null) 80.dp else 0.dp
     ModalNavigationDrawer(
         drawerState = drawerState,
-        drawerContent = { ModalDrawerSheet { drawerContent() } }
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.padding(bottom = bottomPadding),
+                shape = RectangleShape
+            ) {
+                drawerContent { scope.launch { drawerState.close() } }
+            }
+        }
     ) {
         Scaffold(
             topBar = {

@@ -48,7 +48,7 @@ fun AuthScreen(
     onGoogle: () -> Unit,
     onBack: () -> Unit,
     onLogin: () -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }

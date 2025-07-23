@@ -44,7 +44,7 @@ fun BoxListScreen(
     onBack: () -> Unit,
     onLogout: () -> Unit,
     onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }

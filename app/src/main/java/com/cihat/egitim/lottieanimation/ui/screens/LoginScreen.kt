@@ -41,7 +41,7 @@ fun LoginScreen(
     onBack: () -> Unit,
     onForgot: () -> Unit,
     onSignup: () -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }

@@ -21,7 +21,7 @@ import com.google.firebase.auth.FirebaseUser
 fun UserProfileScreen(
     user: FirebaseUser?,
     onBack: () -> Unit,
-    drawerContent: @Composable () -> Unit = {}
+    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
 ) {
     AppScaffold(
         title = "Profilim",
