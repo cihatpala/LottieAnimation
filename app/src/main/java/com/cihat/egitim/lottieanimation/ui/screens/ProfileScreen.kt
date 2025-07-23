@@ -11,16 +11,13 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
 @Composable
 fun ProfileScreen(
-    showBack: Boolean,
-    onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "Profile",
-        showBack = showBack,
-        onBack = onBack,
         bottomTab = BottomTab.PROFILE,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        drawerContent = {}
     ) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Profile Page")

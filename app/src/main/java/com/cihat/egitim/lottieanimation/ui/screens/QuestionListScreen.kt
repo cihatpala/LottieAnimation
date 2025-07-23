@@ -74,8 +74,7 @@ fun QuestionListScreen(
 ) {
     AppScaffold(
         title = "Questions",
-        showBack = true,
-        onBack = onBack
+        drawerContent = {}
     ) {
         Column(
             modifier = Modifier

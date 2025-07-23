@@ -50,8 +50,7 @@ fun LoginScreen(
 
     AppScaffold(
         title = "Giriş Yap",
-        showBack = true,
-        onBack = onBack
+        drawerContent = {}
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

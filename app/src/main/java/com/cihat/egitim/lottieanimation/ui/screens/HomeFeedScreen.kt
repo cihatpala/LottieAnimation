@@ -19,16 +19,13 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 fun HomeFeedScreen(
     quizzes: List<PublicQuiz>,
     onImport: (Int) -> Unit,
-    showBack: Boolean,
-    onBack: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "Explore",
-        showBack = showBack,
-        onBack = onBack,
         bottomTab = BottomTab.EXPLORE,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        drawerContent = {}
     ) {
         Column(
             modifier = Modifier

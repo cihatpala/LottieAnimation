@@ -49,10 +49,9 @@ fun BoxListScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     AppScaffold(
         title = quizName,
-        showBack = true,
-        onBack = onBack,
         bottomTab = BottomTab.HOME,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        drawerContent = {}
     ) {
         Column(
             modifier = Modifier

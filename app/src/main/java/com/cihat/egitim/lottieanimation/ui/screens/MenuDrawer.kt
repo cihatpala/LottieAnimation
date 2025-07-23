@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.Card
@@ -28,11 +27,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
-import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import androidx.compose.material3.ModalDrawerSheet
 
 @Composable
-fun MenuScreen(
+fun MenuDrawer(
     onPro: () -> Unit,
     onAuth: () -> Unit,
     onSettings: () -> Unit,
@@ -41,31 +39,16 @@ fun MenuScreen(
     onRate: () -> Unit,
     isLoggedIn: Boolean,
     onLogout: () -> Unit,
-    onProfileInfo: () -> Unit,
-    showBack: Boolean,
-    onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onProfileInfo: () -> Unit
 ) {
-    AppScaffold(
-        title = "Menu",
-        showBack = showBack,
-        onBack = onBack,
-        bottomTab = BottomTab.MENU,
-        onTabSelected = onTab,
-        actions = {
-            if (isLoggedIn) {
-                IconButton(onClick = onProfileInfo) {
-                    Icon(Icons.Default.Person, contentDescription = "Profilim")
-                }
-            }
-        }
-    ) {
+    ModalDrawerSheet {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { MenuItem(Icons.Default.Person, "Profilim", onProfileInfo) }
             item { MenuItem(Icons.Default.Star, "Pro Ol", onPro) }
             if (!isLoggedIn) {
                 item { MenuItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }

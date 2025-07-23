@@ -21,8 +21,7 @@ import com.google.firebase.auth.FirebaseUser
 fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit) {
     AppScaffold(
         title = "Profilim",
-        showBack = true,
-        onBack = onBack
+        drawerContent = {},
     ) {
         if (user == null) {
             Column(

@@ -32,8 +32,7 @@ fun SettingsScreen(
 ) {
     AppScaffold(
         title = "Settings",
-        showBack = true,
-        onBack = onBack
+        drawerContent = {}
     ) {
         Column(
             modifier = Modifier

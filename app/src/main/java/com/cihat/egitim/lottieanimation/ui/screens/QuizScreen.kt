@@ -62,8 +62,7 @@ fun QuizScreen(
 
     AppScaffold(
         title = "Quiz",
-        showBack = true,
-        onBack = onQuit
+        drawerContent = {},
     ) {
         Column(
             modifier = Modifier

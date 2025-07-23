@@ -73,10 +73,21 @@ fun FolderListScreen(
 ) {
     AppScaffold(
         title = "Klasörlerim",
-        showBack = true,
-        onBack = onBack,
-        bottomTab = BottomTab.MENU,
-        onTabSelected = onTab
+        bottomTab = BottomTab.HOME,
+        onTabSelected = onTab,
+        drawerContent = {
+            MenuDrawer(
+                onPro = {},
+                onAuth = {},
+                onSettings = {},
+                onFolders = {},
+                onSupport = {},
+                onRate = {},
+                isLoggedIn = true,
+                onLogout = {},
+                onProfileInfo = {}
+            )
+        }
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }

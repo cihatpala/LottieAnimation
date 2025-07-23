@@ -138,10 +138,9 @@ fun QuizListScreen(
 ) {
     AppScaffold(
         title = "My Quizzes",
-        showBack = true,
-        onBack = onBack,
         bottomTab = BottomTab.HOME,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        drawerContent = {}
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var showWarning by remember { mutableStateOf(false) }

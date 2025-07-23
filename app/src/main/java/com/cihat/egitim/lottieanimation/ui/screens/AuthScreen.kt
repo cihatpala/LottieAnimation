@@ -61,8 +61,7 @@ fun AuthScreen(
     val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build())
     AppScaffold(
         title = "Auth",
-        showBack = true,
-        onBack = onBack
+        drawerContent = {}
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
