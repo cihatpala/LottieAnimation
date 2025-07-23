@@ -23,12 +23,13 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 @Composable
 fun SetupScreen(
     onStart: (Int) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     var text by remember { mutableStateOf("4") }
     AppScaffold(
         title = "Setup",
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Column(
             modifier = Modifier

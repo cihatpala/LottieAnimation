@@ -27,7 +27,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material3.ModalDrawerSheet
+import androidx.navigation.NavHostController
+import com.cihat.egitim.lottieanimation.ui.navigation.Screen
+import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
 
 @Composable
 fun MenuDrawer(
@@ -41,27 +43,45 @@ fun MenuDrawer(
     onLogout: () -> Unit,
     onProfileInfo: () -> Unit
 ) {
-    ModalDrawerSheet {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item { MenuItem(Icons.Default.Person, "Profilim", onProfileInfo) }
-            item { MenuItem(Icons.Default.Star, "Pro Ol", onPro) }
-            if (!isLoggedIn) {
-                item { MenuItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }
-            }
-            item { MenuItem(Icons.Default.Settings, "Ayarlar", onSettings) }
-            item { MenuItem(Icons.Default.Folder, "Klasörlerim", onFolders) }
-            item { MenuItem(Icons.Default.Chat, "Canlı Destek", onSupport) }
-            item { MenuItem(Icons.Default.ThumbUp, "Google Play'de Oy Ver", onRate) }
-            if (isLoggedIn) {
-                item { MenuItem(Icons.Default.Logout, "Çıkış Yap", onLogout) }
-            }
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item { MenuItem(Icons.Default.Person, "Profilim", onProfileInfo) }
+        item { MenuItem(Icons.Default.Star, "Pro Ol", onPro) }
+        if (!isLoggedIn) {
+            item { MenuItem(Icons.Default.AccountCircle, "Giriş/Kayıt", onAuth) }
+        }
+        item { MenuItem(Icons.Default.Settings, "Ayarlar", onSettings) }
+        item { MenuItem(Icons.Default.Folder, "Klasörlerim", onFolders) }
+        item { MenuItem(Icons.Default.Chat, "Canlı Destek", onSupport) }
+        item { MenuItem(Icons.Default.ThumbUp, "Google Play'de Oy Ver", onRate) }
+        if (isLoggedIn) {
+            item { MenuItem(Icons.Default.Logout, "Çıkış Yap", onLogout) }
         }
     }
+}
+
+@Composable
+fun AppDrawer(navController: NavHostController, authViewModel: AuthViewModel) {
+    MenuDrawer(
+        onPro = {},
+        onAuth = { navController.navigate(Screen.Auth.route) },
+        onSettings = { navController.navigate(Screen.Settings.route) },
+        onFolders = { navController.navigate(Screen.FolderList.route) },
+        onSupport = {},
+        onRate = {},
+        isLoggedIn = authViewModel.currentUser != null,
+        onLogout = {
+            authViewModel.logout(navController.context)
+            navController.navigate(Screen.QuizList.route) {
+                popUpTo(Screen.QuizList.route) { inclusive = true }
+            }
+        },
+        onProfileInfo = { navController.navigate(Screen.MyProfile.route) }
+    )
 }
 
 @Composable

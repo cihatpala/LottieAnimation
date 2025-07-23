@@ -47,7 +47,8 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 fun AuthScreen(
     onGoogle: () -> Unit,
     onBack: () -> Unit,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
@@ -61,7 +62,7 @@ fun AuthScreen(
     val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build())
     AppScaffold(
         title = "Auth",
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

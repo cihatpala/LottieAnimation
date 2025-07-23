@@ -69,25 +69,14 @@ fun FolderListScreen(
     onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
     onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onTab: (BottomTab) -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     AppScaffold(
         title = "Klasörlerim",
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
-        drawerContent = {
-            MenuDrawer(
-                onPro = {},
-                onAuth = {},
-                onSettings = {},
-                onFolders = {},
-                onSupport = {},
-                onRate = {},
-                isLoggedIn = true,
-                onLogout = {},
-                onProfileInfo = {}
-            )
-        }
+        drawerContent = drawerContent
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }

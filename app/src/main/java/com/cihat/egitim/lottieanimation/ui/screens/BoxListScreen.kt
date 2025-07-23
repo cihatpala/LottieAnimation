@@ -43,7 +43,8 @@ fun BoxListScreen(
     onView: (Int) -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onTab: (BottomTab) -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -51,7 +52,7 @@ fun BoxListScreen(
         title = quizName,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Column(
             modifier = Modifier

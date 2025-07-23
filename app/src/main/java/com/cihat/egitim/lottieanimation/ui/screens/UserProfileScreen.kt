@@ -18,10 +18,14 @@ import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit) {
+fun UserProfileScreen(
+    user: FirebaseUser?,
+    onBack: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
+) {
     AppScaffold(
         title = "Profilim",
-        drawerContent = {},
+        drawerContent = drawerContent,
     ) {
         if (user == null) {
             Column(

@@ -28,11 +28,12 @@ import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 fun SettingsScreen(
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     AppScaffold(
         title = "Settings",
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Column(
             modifier = Modifier

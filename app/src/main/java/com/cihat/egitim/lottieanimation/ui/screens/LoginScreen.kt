@@ -40,7 +40,8 @@ fun LoginScreen(
     onLogin: (String, String, (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit,
     onForgot: () -> Unit,
-    onSignup: () -> Unit
+    onSignup: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -50,7 +51,7 @@ fun LoginScreen(
 
     AppScaffold(
         title = "Giriş Yap",
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

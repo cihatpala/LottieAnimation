@@ -70,11 +70,12 @@ fun QuestionListScreen(
     headings: List<FolderHeading>,
     onEdit: (Int, Question) -> Unit,
     onDelete: (Int) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     AppScaffold(
         title = "Questions",
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         Column(
             modifier = Modifier

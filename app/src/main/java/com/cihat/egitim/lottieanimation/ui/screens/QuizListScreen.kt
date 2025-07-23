@@ -134,13 +134,14 @@ fun QuizListScreen(
     onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onTab: (BottomTab) -> Unit,
+    drawerContent: @Composable () -> Unit = {}
 ) {
     AppScaffold(
         title = "My Quizzes",
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
-        drawerContent = {}
+        drawerContent = drawerContent
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var showWarning by remember { mutableStateOf(false) }
