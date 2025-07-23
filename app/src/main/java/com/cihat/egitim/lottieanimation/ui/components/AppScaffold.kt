@@ -16,7 +16,6 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.foundation.shape.RectangleShape
@@ -48,7 +47,7 @@ fun AppScaffold(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.padding(bottom = bottomPadding),
-                shape = RectangleShape
+                drawerShape = RectangleShape
             ) {
                 drawerContent { scope.launch { drawerState.close() } }
             }
