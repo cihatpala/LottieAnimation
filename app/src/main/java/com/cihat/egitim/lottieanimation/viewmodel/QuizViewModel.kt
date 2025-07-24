@@ -134,7 +134,6 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                     topic = "Geography",
                     subtopic = "Europe"
                 )
-            )
             ),
             authorPhotoUrl = "https://example.com/alice.png",
             folderName = "Geography"
