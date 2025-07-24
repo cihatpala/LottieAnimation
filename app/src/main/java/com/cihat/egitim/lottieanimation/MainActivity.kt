@@ -22,6 +22,9 @@ import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModelFactory
 import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 
 class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
             val activity = this@MainActivity
             val repository = (application as LottieApplication).repository
             val navController = rememberNavController()
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
             var showDialog by remember { mutableStateOf(false) }
             var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
             val coroutineScope = rememberCoroutineScope()
@@ -69,7 +73,8 @@ class MainActivity : ComponentActivity() {
                     onThemeChange = {
                         themeMode = it
                         coroutineScope.launch { repository.saveTheme(it) }
-                    }
+                    },
+                    drawerState = drawerState
                 )
                 BackHandler(enabled = !showDialog) {
                     if (navController.previousBackStackEntry != null) {

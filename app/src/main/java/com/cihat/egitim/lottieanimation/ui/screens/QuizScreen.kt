@@ -32,9 +32,11 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import androidx.compose.material3.DrawerState
 
 @Composable
 fun QuizScreen(
+    drawerState: DrawerState,
     question: Question?,
     isAnswerVisible: Boolean,
     onReveal: () -> Unit,
@@ -63,6 +65,7 @@ fun QuizScreen(
 
     AppScaffold(
         title = "Quiz",
+        drawerState = drawerState,
         drawerContent = drawerContent,
     ) {
         Column(

@@ -24,6 +24,7 @@ import com.cihat.egitim.lottieanimation.ui.screens.QuizScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SettingsScreen
 import com.cihat.egitim.lottieanimation.ui.screens.SplashScreen
 import com.cihat.egitim.lottieanimation.ui.screens.AppDrawer
+import androidx.compose.material3.DrawerState
 import kotlinx.coroutines.delay
 
 sealed class Screen(val route: String) {
@@ -50,7 +51,8 @@ fun AppNavHost(
     authViewModel: AuthViewModel,
     quizViewModel: QuizViewModel,
     themeMode: ThemeMode,
-    onThemeChange: (ThemeMode) -> Unit
+    onThemeChange: (ThemeMode) -> Unit,
+    drawerState: DrawerState
 ) {
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
@@ -64,6 +66,7 @@ fun AppNavHost(
         }
         composable(Screen.Auth.route) {
             AuthScreen(
+                drawerState = drawerState,
                 onGoogle = {
                     navController.navigate(Screen.QuizList.route) {
                         popUpTo(Screen.Auth.route) { inclusive = true }
@@ -76,6 +79,7 @@ fun AppNavHost(
         }
         composable(Screen.Login.route) {
             LoginScreen(
+                drawerState = drawerState,
                 onLogin = { email, pass, result ->
                     authViewModel.login(email, pass) { success ->
                         result(success)
@@ -100,6 +104,7 @@ fun AppNavHost(
         }
         composable(Screen.MyProfile.route) {
             UserProfileScreen(
+                drawerState = drawerState,
                 user = authViewModel.currentUser,
                 onBack = { navController.popBackStack() },
                 drawerContent = { close -> AppDrawer(navController, authViewModel, close) }
@@ -107,6 +112,7 @@ fun AppNavHost(
         }
         composable(Screen.Profile.route) {
             ProfileScreen(
+                drawerState = drawerState,
                 onTab = { tab ->
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -119,6 +125,7 @@ fun AppNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
+                drawerState = drawerState,
                 themeMode = themeMode,
                 onThemeChange = onThemeChange,
                 onBack = { navController.popBackStack() },
@@ -127,6 +134,7 @@ fun AppNavHost(
         }
         composable(Screen.FolderList.route) {
                 FolderListScreen(
+                    drawerState = drawerState,
                     folders = quizViewModel.folders,
                     onRename = { index, name -> quizViewModel.renameFolder(index, name) },
                     onDelete = { index -> quizViewModel.deleteFolder(index) },
@@ -147,6 +155,7 @@ fun AppNavHost(
         }
         composable(Screen.QuizList.route) {
             QuizListScreen(
+                drawerState = drawerState,
                 quizzes = quizViewModel.quizzes,
                 folders = quizViewModel.folders,
                 onQuiz = { quizIdx, boxIdx ->
@@ -192,6 +201,7 @@ fun AppNavHost(
         }
         composable(Screen.BoxList.route) {
             BoxListScreen(
+                drawerState = drawerState,
                 quizName = quizViewModel.currentQuizName,
                 folderName = quizViewModel.currentQuizFolderName,
                 boxes = quizViewModel.boxes,
@@ -230,6 +240,7 @@ fun AppNavHost(
         }
         composable(Screen.HomeFeed.route) {
             HomeFeedScreen(
+                drawerState = drawerState,
                 quizzes = quizViewModel.publicQuizzes,
                 onImport = { index ->
                     quizViewModel.importQuiz(quizViewModel.publicQuizzes[index])
@@ -252,6 +263,7 @@ fun AppNavHost(
         }
         composable(Screen.Quiz.route) {
             QuizScreen(
+                drawerState = drawerState,
                 question = quizViewModel.currentQuestion,
                 isAnswerVisible = quizViewModel.isAnswerVisible,
                 onReveal = { quizViewModel.revealAnswer() },
@@ -269,6 +281,7 @@ fun AppNavHost(
         ) { backStackEntry ->
             val index = backStackEntry.arguments?.getInt(Screen.QuestionList.boxArg) ?: 0
             QuestionListScreen(
+                drawerState = drawerState,
                 questions = quizViewModel.boxes.getOrNull(index).orEmpty(),
                 headings = quizViewModel.currentQuizHeadingOptions,
                 onEdit = { qIdx, q -> quizViewModel.editQuestion(index, qIdx, q) },

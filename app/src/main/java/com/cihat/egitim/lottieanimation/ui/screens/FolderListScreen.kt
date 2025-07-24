@@ -35,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +62,7 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun FolderListScreen(
+    drawerState: DrawerState,
     folders: List<UserFolder>,
     onRename: (Int, String) -> Unit,
     onDelete: (Int) -> Unit,
@@ -74,6 +76,7 @@ fun FolderListScreen(
 ) {
     AppScaffold(
         title = "Klasörlerim",
+        drawerState = drawerState,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
         drawerContent = drawerContent

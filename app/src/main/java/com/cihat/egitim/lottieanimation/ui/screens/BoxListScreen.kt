@@ -28,12 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.DrawerState
 import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
 @Composable
 fun BoxListScreen(
+    drawerState: DrawerState,
     quizName: String,
     folderName: String,
     boxes: List<List<*>>,
@@ -50,6 +52,7 @@ fun BoxListScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     AppScaffold(
         title = quizName,
+        drawerState = drawerState,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
         drawerContent = drawerContent

@@ -42,6 +42,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
@@ -121,6 +122,7 @@ private fun headingsFromQuestions(questions: List<Question>): List<FolderHeading
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun QuizListScreen(
+    drawerState: DrawerState,
     quizzes: List<UserQuiz>,
     folders: List<UserFolder>,
     onQuiz: (Int, Int) -> Unit,
@@ -139,6 +141,7 @@ fun QuizListScreen(
 ) {
     AppScaffold(
         title = "My Quizzes",
+        drawerState = drawerState,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab,
         drawerContent = drawerContent
