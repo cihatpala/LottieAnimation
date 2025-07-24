@@ -54,7 +54,8 @@ fun AppNavHost(
     quizViewModel: QuizViewModel,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
-    openDrawer: () -> Unit
+    openDrawer: () -> Unit,
+    closeDrawer: () -> Unit
 ) {
     var currentTab by rememberSaveable { mutableStateOf(BottomTab.HOME) }
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
@@ -79,6 +80,7 @@ fun AppNavHost(
                 bottomTab = currentTab,
                 onMenu = openDrawer,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -112,6 +114,7 @@ fun AppNavHost(
                 bottomTab = currentTab,
                 onMenu = openDrawer,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -126,6 +129,7 @@ fun AppNavHost(
                 bottomTab = currentTab,
                 onMenu = openDrawer,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -142,6 +146,7 @@ fun AppNavHost(
                 bottomTab = currentTab,
                 onMenu = openDrawer,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -159,6 +164,7 @@ fun AppNavHost(
                 bottomTab = currentTab,
                 onMenu = openDrawer,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -180,6 +186,7 @@ fun AppNavHost(
                     onBack = { navController.popBackStack() },
                     bottomTab = currentTab,
                     onTab = { tab ->
+                        closeDrawer()
                         currentTab = tab
                         when (tab) {
                             BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -227,6 +234,7 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -267,6 +275,7 @@ fun AppNavHost(
                 },
                 bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
@@ -294,6 +303,7 @@ fun AppNavHost(
                 onBack = { navController.popBackStack() },
                 bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
                     currentTab = tab
                     when (tab) {
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)

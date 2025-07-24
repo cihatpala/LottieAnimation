@@ -97,7 +97,8 @@ class MainActivity : ComponentActivity() {
                             themeMode = it
                             coroutineScope.launch { repository.saveTheme(it) }
                         },
-                        openDrawer = { isDrawerOpen = true }
+                        openDrawer = { isDrawerOpen = true },
+                        closeDrawer = { isDrawerOpen = false }
                     )
 
                     val width = LocalConfiguration.current.screenWidthDp.dp
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
                             .offset { androidx.compose.ui.unit.IntOffset(offsetX.roundToPx(), 0) }
                             .fillMaxHeight()
                             .fillMaxWidth()
-                            .padding(top = 56.dp, bottom = 80.dp)
+                            .padding(bottom = 80.dp)
                             .background(MaterialTheme.colorScheme.surface)
                             .pointerInput(isDrawerOpen) {
                                 detectHorizontalDragGestures { _, dragAmount ->
