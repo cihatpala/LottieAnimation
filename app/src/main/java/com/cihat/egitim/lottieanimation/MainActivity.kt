@@ -152,7 +152,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 BackHandler(enabled = !showDialog) {
-                    if (navController.previousBackStackEntry != null) {
+                    if (isDrawerOpen) {
+                        isDrawerOpen = false
+                    } else if (navController.previousBackStackEntry != null) {
                         navController.popBackStack()
                     } else {
                         showDialog = true
