@@ -27,6 +27,9 @@ class AuthViewModel(private val repository: LocalRepository) : ViewModel() {
     var storedUser: StoredUser? by mutableStateOf(null)
         private set
 
+    var isSessionLoaded by mutableStateOf(false)
+        private set
+
     private val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         currentUser = firebaseAuth.currentUser
         viewModelScope.launch {
@@ -40,15 +43,15 @@ class AuthViewModel(private val repository: LocalRepository) : ViewModel() {
                 )
                 repository.saveUserSession(stored)
                 storedUser = stored
-            } else {
-                repository.saveUserSession(null)
-                storedUser = null
             }
         }
     }
 
     init {
-        viewModelScope.launch { storedUser = repository.loadUserSession() }
+        viewModelScope.launch {
+            storedUser = repository.loadUserSession()
+            isSessionLoaded = true
+        }
         auth.addAuthStateListener(listener)
     }
 
