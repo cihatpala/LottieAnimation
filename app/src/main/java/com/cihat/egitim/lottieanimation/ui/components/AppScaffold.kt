@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Menu
@@ -32,6 +33,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -55,8 +59,26 @@ fun AppScaffold(
     val scope = rememberCoroutineScope()
     val bottomPadding = if (bottomTab != null) 80.dp else 0.dp
     val isDrawerVisible by remember { derivedStateOf { drawerState.targetValue == DrawerValue.Open } }
+    var dragStart by remember { mutableFloatStateOf(-1f) }
 
-    Box {
+    Box(
+        modifier = Modifier.pointerInput(isDrawerVisible.value) {
+            detectHorizontalDragGestures(
+                onDragStart = { dragStart = it.x },
+                onDragEnd = { dragStart = -1f },
+                onHorizontalDrag = { _, dragAmount ->
+                    if (dragStart in 0f..40f && dragAmount > 10 && drawerState.isClosed) {
+                        scope.launch { drawerState.open() }
+                        dragStart = -1f
+                    }
+                    if (dragAmount < -10 && drawerState.isOpen) {
+                        scope.launch { drawerState.close() }
+                        dragStart = -1f
+                    }
+                }
+            )
+        }
+    ) {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -76,19 +98,28 @@ fun AppScaffold(
                     NavigationBar {
                         NavigationBarItem(
                             selected = tab == BottomTab.HOME,
-                            onClick = { onTabSelected(BottomTab.HOME) },
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onTabSelected(BottomTab.HOME)
+                            },
                             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
                             label = { Text("Home") }
                         )
                         NavigationBarItem(
                             selected = tab == BottomTab.EXPLORE,
-                            onClick = { onTabSelected(BottomTab.EXPLORE) },
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onTabSelected(BottomTab.EXPLORE)
+                            },
                             icon = { Icon(Icons.Default.Search, contentDescription = "Explore") },
                             label = { Text("Explore") }
                         )
                         NavigationBarItem(
                             selected = tab == BottomTab.PROFILE,
-                            onClick = { onTabSelected(BottomTab.PROFILE) },
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                onTabSelected(BottomTab.PROFILE)
+                            },
                             icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
                             label = { Text("Profile") }
                         )
