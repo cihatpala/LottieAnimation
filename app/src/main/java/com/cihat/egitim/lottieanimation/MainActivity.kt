@@ -8,11 +8,13 @@ import androidx.activity.viewModels
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.foundation.shape.RectangleShape
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
@@ -48,7 +50,7 @@ class MainActivity : ComponentActivity() {
             var showDialog by remember { mutableStateOf(false) }
             var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
            val coroutineScope = rememberCoroutineScope()
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            var isDrawerOpen by remember { mutableStateOf(false) }
             LaunchedEffect(Unit) {
                 themeMode = repository.getTheme()
             }
@@ -71,46 +73,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                ModalNavigationDrawer(
-                    drawerState = drawerState,
-                    drawerContent = {
-                        ModalDrawerSheet(
-                            modifier = Modifier.padding(bottom = 80.dp),
-                            drawerShape = RectangleShape
-                        ) {
-                            val closeDrawer: () -> Unit = {
-                                coroutineScope.launch { drawerState.close() }
-                            }
-                            AppDrawer(
-                                isLoggedIn = authViewModel.currentUser != null,
-                                onClose = closeDrawer,
-                                onProfileInfo = {
-                                    navController.navigate(Screen.MyProfile.route)
-                                    closeDrawer()
-                                },
-                                onPro = {},
-                                onAuth = {
-                                    navController.navigate(Screen.Auth.route)
-                                    closeDrawer()
-                                },
-                                onSettings = {
-                                    navController.navigate(Screen.Settings.route)
-                                    closeDrawer()
-                                },
-                                onFolders = {
-                                    navController.navigate(Screen.FolderList.route)
-                                    closeDrawer()
-                                },
-                                onSupport = {},
-                                onRate = {},
-                                onLogout = {
-                                    authViewModel.logout(navController.context)
-                                    closeDrawer()
-                                }
-                            )
-                        }
-                    }
-                ) {
+                Box {
                     AppNavHost(
                         navController = navController,
                         authViewModel = authViewModel,
@@ -120,8 +83,51 @@ class MainActivity : ComponentActivity() {
                             themeMode = it
                             coroutineScope.launch { repository.saveTheme(it) }
                         },
-                        openDrawer = { coroutineScope.launch { drawerState.open() } }
+                        openDrawer = { isDrawerOpen = true }
                     )
+
+                    val drawerWidth = 300.dp
+                    val offsetX by animateDpAsState(
+                        targetValue = if (isDrawerOpen) 0.dp else -drawerWidth,
+                        label = "drawer"
+                    )
+                    Box(
+                        modifier = Modifier
+                            .offset { androidx.compose.ui.unit.IntOffset(offsetX.roundToPx(), 0) }
+                            .fillMaxHeight()
+                            .width(drawerWidth)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(bottom = 80.dp)
+                    ) {
+                        val closeDrawer: () -> Unit = { isDrawerOpen = false }
+                        AppDrawer(
+                            isLoggedIn = authViewModel.currentUser != null,
+                            onClose = closeDrawer,
+                            onProfileInfo = {
+                                navController.navigate(Screen.MyProfile.route)
+                                closeDrawer()
+                            },
+                            onPro = {},
+                            onAuth = {
+                                navController.navigate(Screen.Auth.route)
+                                closeDrawer()
+                            },
+                            onSettings = {
+                                navController.navigate(Screen.Settings.route)
+                                closeDrawer()
+                            },
+                            onFolders = {
+                                navController.navigate(Screen.FolderList.route)
+                                closeDrawer()
+                            },
+                            onSupport = {},
+                            onRate = {},
+                            onLogout = {
+                                authViewModel.logout(navController.context)
+                                closeDrawer()
+                            }
+                        )
+                    }
                 }
                 BackHandler(enabled = !showDialog) {
                     if (navController.previousBackStackEntry != null) {
