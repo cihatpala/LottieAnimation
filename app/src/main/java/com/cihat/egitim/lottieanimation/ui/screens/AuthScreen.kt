@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.DrawerState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,11 +45,9 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 
 @Composable
 fun AuthScreen(
-    drawerState: DrawerState,
     onGoogle: () -> Unit,
     onBack: () -> Unit,
-    onLogin: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    onLogin: () -> Unit
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
@@ -64,8 +61,9 @@ fun AuthScreen(
     val providers = listOf(AuthUI.IdpConfig.GoogleBuilder().build())
     AppScaffold(
         title = "Auth",
-        drawerState = drawerState,
-        drawerContent = drawerContent
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

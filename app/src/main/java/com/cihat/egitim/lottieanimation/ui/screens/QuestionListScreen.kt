@@ -30,7 +30,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -67,18 +66,17 @@ private fun findPath(names: List<String>, headings: List<FolderHeading>): List<I
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun QuestionListScreen(
-    drawerState: DrawerState,
     questions: List<Question>,
     headings: List<FolderHeading>,
     onEdit: (Int, Question) -> Unit,
     onDelete: (Int) -> Unit,
-    onBack: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    onBack: () -> Unit
 ) {
     AppScaffold(
         title = "Questions",
-        drawerState = drawerState,
-        drawerContent = drawerContent
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         Column(
             modifier = Modifier

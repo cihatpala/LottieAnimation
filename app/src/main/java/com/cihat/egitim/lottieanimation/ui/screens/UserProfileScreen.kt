@@ -16,19 +16,14 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.google.firebase.auth.FirebaseUser
-import androidx.compose.material3.DrawerState
 
 @Composable
-fun UserProfileScreen(
-    drawerState: DrawerState,
-    user: FirebaseUser?,
-    onBack: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
-) {
+fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit) {
     AppScaffold(
         title = "Profilim",
-        drawerState = drawerState,
-        drawerContent = drawerContent,
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         if (user == null) {
             Column(

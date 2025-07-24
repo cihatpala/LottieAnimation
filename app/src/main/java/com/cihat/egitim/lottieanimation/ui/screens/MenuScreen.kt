@@ -1,7 +1,6 @@
 package com.cihat.egitim.lottieanimation.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -14,31 +13,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.MenuOpen
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.cihat.egitim.lottieanimation.ui.navigation.Screen
-import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
+import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
 @Composable
-fun MenuDrawer(
+fun MenuScreen(
     onPro: () -> Unit,
     onAuth: () -> Unit,
     onSettings: () -> Unit,
@@ -48,35 +43,20 @@ fun MenuDrawer(
     isLoggedIn: Boolean,
     onLogout: () -> Unit,
     onProfileInfo: () -> Unit,
+    onTab: (BottomTab) -> Unit,
     onClose: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .align(Alignment.TopCenter),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = onClose) {
-                Icon(Icons.Default.MenuOpen, contentDescription = "Close")
-            }
-            Text("Menu")
-            Spacer(modifier = Modifier.width(48.dp))
-        }
-        IconButton(
-            onClick = onClose,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .background(Color.LightGray, CircleShape)
-        ) {
-            Icon(Icons.Default.MenuOpen, contentDescription = "Close")
-        }
+    AppScaffold(
+        title = "Menu",
+        showBack = true,
+        onBack = onClose,
+        bottomTab = BottomTab.MENU,
+        onTabSelected = onTab
+    ) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, top = 56.dp, bottom = 16.dp),
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { MenuItem(Icons.Default.Person, "Profilim", onProfileInfo) }
@@ -93,27 +73,6 @@ fun MenuDrawer(
             }
         }
     }
-}
-
-@Composable
-fun AppDrawer(navController: NavHostController, authViewModel: AuthViewModel, onClose: () -> Unit) {
-    MenuDrawer(
-        onPro = {},
-        onAuth = { navController.navigate(Screen.Auth.route) },
-        onSettings = { navController.navigate(Screen.Settings.route) },
-        onFolders = { navController.navigate(Screen.FolderList.route) },
-        onSupport = {},
-        onRate = {},
-        isLoggedIn = authViewModel.currentUser != null,
-        onLogout = {
-            authViewModel.logout(navController.context)
-            navController.navigate(Screen.QuizList.route) {
-                popUpTo(Screen.QuizList.route) { inclusive = true }
-            }
-        },
-        onProfileInfo = { navController.navigate(Screen.MyProfile.route) },
-        onClose = onClose
-    )
 }
 
 @Composable

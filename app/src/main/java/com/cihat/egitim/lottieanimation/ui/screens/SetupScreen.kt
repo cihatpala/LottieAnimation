@@ -19,20 +19,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
-import androidx.compose.material3.DrawerState
 
 @Composable
 fun SetupScreen(
-    drawerState: DrawerState,
     onStart: (Int) -> Unit,
-    onBack: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    onBack: () -> Unit
 ) {
     var text by remember { mutableStateOf("4") }
     AppScaffold(
         title = "Setup",
-        drawerState = drawerState,
-        drawerContent = drawerContent
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         Column(
             modifier = Modifier

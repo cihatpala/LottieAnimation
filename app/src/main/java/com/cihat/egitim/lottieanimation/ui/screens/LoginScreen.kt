@@ -34,16 +34,13 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.DrawerState
 
 @Composable
 fun LoginScreen(
-    drawerState: DrawerState,
     onLogin: (String, String, (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit,
     onForgot: () -> Unit,
-    onSignup: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    onSignup: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -53,8 +50,9 @@ fun LoginScreen(
 
     AppScaffold(
         title = "Giriş Yap",
-        drawerState = drawerState,
-        drawerContent = drawerContent
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

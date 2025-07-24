@@ -14,22 +14,22 @@ import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.data.PublicQuiz
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
-import androidx.compose.material3.DrawerState
 
 @Composable
 fun HomeFeedScreen(
-    drawerState: DrawerState,
     quizzes: List<PublicQuiz>,
     onImport: (Int) -> Unit,
-    onTab: (BottomTab) -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    showBack: Boolean,
+    onBack: () -> Unit,
+    onTab: (BottomTab) -> Unit
 ) {
     AppScaffold(
         title = "Explore",
-        drawerState = drawerState,
+        showBack = showBack,
+        onBack = onBack,
+        onMenu = { onTab(BottomTab.MENU) },
         bottomTab = BottomTab.EXPLORE,
-        onTabSelected = onTab,
-        drawerContent = drawerContent
+        onTabSelected = onTab
     ) {
         Column(
             modifier = Modifier

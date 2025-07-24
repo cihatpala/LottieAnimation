@@ -23,20 +23,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
-import androidx.compose.material3.DrawerState
 
 @Composable
 fun SettingsScreen(
-    drawerState: DrawerState,
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
-    onBack: () -> Unit,
-    drawerContent: @Composable (closeDrawer: () -> Unit) -> Unit = {}
+    onBack: () -> Unit
 ) {
     AppScaffold(
         title = "Settings",
-        drawerState = drawerState,
-        drawerContent = drawerContent
+        showBack = true,
+        onBack = onBack,
+        onMenu = { }
     ) {
         Column(
             modifier = Modifier
