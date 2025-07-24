@@ -21,6 +21,7 @@ fun HomeFeedScreen(
     onImport: (Int) -> Unit,
     showBack: Boolean,
     onBack: () -> Unit,
+    bottomTab: BottomTab,
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
@@ -29,7 +30,7 @@ fun HomeFeedScreen(
         showBack = showBack,
         onBack = onBack,
         onMenu = onMenu,
-        bottomTab = BottomTab.EXPLORE,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         Column(

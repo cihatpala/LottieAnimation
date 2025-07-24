@@ -43,6 +43,7 @@ fun BoxListScreen(
     onView: (Int) -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit,
+    bottomTab: BottomTab,
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
@@ -53,7 +54,7 @@ fun BoxListScreen(
         showBack = true,
         onBack = onBack,
         onMenu = onMenu,
-        bottomTab = BottomTab.HOME,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         Column(

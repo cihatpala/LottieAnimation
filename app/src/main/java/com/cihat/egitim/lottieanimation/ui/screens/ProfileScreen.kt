@@ -11,6 +11,7 @@ import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
 @Composable
 fun ProfileScreen(
+    bottomTab: BottomTab,
     onMenu: () -> Unit,
     onTab: (BottomTab) -> Unit
 ) {
@@ -19,7 +20,7 @@ fun ProfileScreen(
         showBack = false,
         onBack = {},
         onMenu = onMenu,
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

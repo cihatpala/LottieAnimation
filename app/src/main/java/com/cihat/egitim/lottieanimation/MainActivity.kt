@@ -10,13 +10,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,7 +77,17 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                Box {
+                Box(
+                    modifier = Modifier.pointerInput(isDrawerOpen) {
+                        detectHorizontalDragGestures { change, dragAmount ->
+                            if (!isDrawerOpen && change.position.x < 40 && dragAmount > 10) {
+                                isDrawerOpen = true
+                            } else if (isDrawerOpen && dragAmount < -10) {
+                                isDrawerOpen = false
+                            }
+                        }
+                    }
+                ) {
                     AppNavHost(
                         navController = navController,
                         authViewModel = authViewModel,
@@ -86,18 +100,25 @@ class MainActivity : ComponentActivity() {
                         openDrawer = { isDrawerOpen = true }
                     )
 
-                    val drawerWidth = 300.dp
+                    val width = LocalConfiguration.current.screenWidthDp.dp
                     val offsetX by animateDpAsState(
-                        targetValue = if (isDrawerOpen) 0.dp else -drawerWidth,
+                        targetValue = if (isDrawerOpen) 0.dp else -width,
                         label = "drawer"
                     )
                     Box(
                         modifier = Modifier
                             .offset { androidx.compose.ui.unit.IntOffset(offsetX.roundToPx(), 0) }
                             .fillMaxHeight()
-                            .width(drawerWidth)
+                            .fillMaxWidth()
+                            .padding(top = 56.dp, bottom = 80.dp)
                             .background(MaterialTheme.colorScheme.surface)
-                            .padding(bottom = 80.dp)
+                            .pointerInput(isDrawerOpen) {
+                                detectHorizontalDragGestures { _, dragAmount ->
+                                    if (isDrawerOpen && dragAmount < -10) {
+                                        isDrawerOpen = false
+                                    }
+                                }
+                            }
                     ) {
                         val closeDrawer: () -> Unit = { isDrawerOpen = false }
                         AppDrawer(

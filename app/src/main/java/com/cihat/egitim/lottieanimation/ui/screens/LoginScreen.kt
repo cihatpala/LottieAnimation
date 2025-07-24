@@ -34,6 +34,7 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 
 @Composable
 fun LoginScreen(
@@ -41,7 +42,9 @@ fun LoginScreen(
     onBack: () -> Unit,
     onForgot: () -> Unit,
     onSignup: () -> Unit,
-    onMenu: () -> Unit
+    bottomTab: BottomTab,
+    onMenu: () -> Unit,
+    onTab: (BottomTab) -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -53,7 +56,9 @@ fun LoginScreen(
         title = "Giriş Yap",
         showBack = true,
         onBack = onBack,
-        onMenu = onMenu
+        onMenu = onMenu,
+        bottomTab = bottomTab,
+        onTabSelected = onTab
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

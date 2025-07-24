@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 
 @Composable
@@ -29,13 +30,17 @@ fun SettingsScreen(
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
     onBack: () -> Unit,
-    onMenu: () -> Unit
+    bottomTab: BottomTab,
+    onMenu: () -> Unit,
+    onTab: (BottomTab) -> Unit = {}
 ) {
     AppScaffold(
         title = "Settings",
         showBack = true,
         onBack = onBack,
-        onMenu = onMenu
+        onMenu = onMenu,
+        bottomTab = bottomTab,
+        onTabSelected = onTab
     ) {
         Column(
             modifier = Modifier

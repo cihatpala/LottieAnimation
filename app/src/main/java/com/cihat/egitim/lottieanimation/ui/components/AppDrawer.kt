@@ -52,7 +52,7 @@ fun AppDrawer(
                 Icon(Icons.Default.Close, contentDescription = "Kapat")
             }
         }
-        Spacer(modifier = Modifier.width(0.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         DrawerItem(Icons.Default.Person, "Profilim", onProfileInfo)
         DrawerItem(Icons.Default.Star, "Pro Ol", onPro)
         if (!isLoggedIn) {
@@ -77,9 +77,9 @@ private fun DrawerItem(icon: ImageVector, text: String, onClick: () -> Unit) {
             .padding(vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, contentDescription = null)
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
         Spacer(Modifier.width(16.dp))
-        Text(text)
+        Text(text, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 

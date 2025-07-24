@@ -134,6 +134,7 @@ fun QuizListScreen(
     onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
+    bottomTab: BottomTab,
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
@@ -142,7 +143,7 @@ fun QuizListScreen(
         showBack = false,
         onBack = onBack,
         onMenu = onMenu,
-        bottomTab = BottomTab.HOME,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }

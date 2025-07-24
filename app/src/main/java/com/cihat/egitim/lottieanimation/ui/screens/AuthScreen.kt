@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.ui.graphics.ColorFilter
 import com.cihat.egitim.lottieanimation.R
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
 import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 
@@ -48,7 +49,9 @@ fun AuthScreen(
     onGoogle: () -> Unit,
     onBack: () -> Unit,
     onLogin: () -> Unit,
-    onMenu: () -> Unit
+    bottomTab: BottomTab,
+    onMenu: () -> Unit,
+    onTab: (BottomTab) -> Unit
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
@@ -64,7 +67,9 @@ fun AuthScreen(
         title = "Auth",
         showBack = true,
         onBack = onBack,
-        onMenu = onMenu
+        onMenu = onMenu,
+        bottomTab = bottomTab,
+        onTabSelected = onTab
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

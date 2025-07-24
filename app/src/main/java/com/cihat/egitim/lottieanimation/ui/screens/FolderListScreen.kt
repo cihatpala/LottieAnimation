@@ -69,6 +69,7 @@ fun FolderListScreen(
     onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
     onBack: () -> Unit,
+    bottomTab: BottomTab,
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
@@ -77,7 +78,7 @@ fun FolderListScreen(
         showBack = true,
         onBack = onBack,
         onMenu = onMenu,
-        bottomTab = BottomTab.PROFILE,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }
