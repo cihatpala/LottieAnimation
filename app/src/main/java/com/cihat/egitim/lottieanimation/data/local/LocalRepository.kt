@@ -4,6 +4,7 @@ import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.data.Question
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.data.UserQuiz
+import com.cihat.egitim.lottieanimation.data.StoredUser
 import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -144,5 +145,25 @@ class LocalRepository(private val db: AppDatabase) {
 
     suspend fun saveTheme(mode: ThemeMode) = withContext(Dispatchers.IO) {
         dao.putSetting(SettingEntity("theme", mode.name))
+    }
+
+    suspend fun loadUserSession(): StoredUser? = withContext(Dispatchers.IO) {
+        dao.getUserSession()?.let {
+            StoredUser(it.uid, it.name, it.email, it.photoUrl)
+        }
+    }
+
+    suspend fun saveUserSession(user: StoredUser?) = withContext(Dispatchers.IO) {
+        dao.clearUserSession()
+        user?.let {
+            dao.insertUserSession(
+                UserSessionEntity(
+                    uid = it.uid,
+                    name = it.name,
+                    email = it.email,
+                    photoUrl = it.photoUrl
+                )
+            )
+        }
     }
 }

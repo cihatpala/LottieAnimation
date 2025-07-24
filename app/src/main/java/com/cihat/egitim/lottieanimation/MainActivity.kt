@@ -33,13 +33,17 @@ import com.cihat.egitim.lottieanimation.ui.navigation.AppNavHost
 import com.cihat.egitim.lottieanimation.ui.navigation.Screen
 import com.cihat.egitim.lottieanimation.ui.components.AppDrawer
 import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModel
+import com.cihat.egitim.lottieanimation.viewmodel.AuthViewModelFactory
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModel
 import com.cihat.egitim.lottieanimation.viewmodel.QuizViewModelFactory
 import kotlinx.coroutines.launch
 import com.cihat.egitim.lottieanimation.ui.theme.LottieAnimationTheme
 
 class MainActivity : ComponentActivity() {
-    private val authViewModel: AuthViewModel by viewModels()
+    private val authViewModel: AuthViewModel by viewModels {
+        val repo = (application as LottieApplication).repository
+        AuthViewModelFactory(repo)
+    }
     private val quizViewModel: QuizViewModel by viewModels {
         val repo = (application as LottieApplication).repository
         QuizViewModelFactory(repo)
@@ -123,7 +127,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val closeDrawer: () -> Unit = { isDrawerOpen = false }
                         AppDrawer(
-                            isLoggedIn = authViewModel.currentUser != null,
+                            isLoggedIn = authViewModel.currentUser != null || authViewModel.storedUser != null,
                             onClose = closeDrawer,
                             onProfileInfo = {
                                 navController.navigate(Screen.MyProfile.route)

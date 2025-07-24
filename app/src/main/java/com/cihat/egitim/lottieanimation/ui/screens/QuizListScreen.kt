@@ -50,6 +50,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import coil.compose.AsyncImage
 import com.google.firebase.auth.FirebaseUser
+import com.cihat.egitim.lottieanimation.data.StoredUser
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -117,6 +118,7 @@ fun QuizListScreen(
     quizzes: List<UserQuiz>,
     folders: List<UserFolder>,
     currentUser: FirebaseUser?,
+    storedUser: StoredUser?,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
     onRename: (Int, String) -> Unit,
@@ -364,7 +366,8 @@ fun QuizListScreen(
                                         modifier = Modifier.weight(1f),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        currentUser?.photoUrl?.let { url ->
+                                        val photo = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
+                                        photo?.let { url ->
                                             AsyncImage(
                                                 model = url,
                                                 contentDescription = null,
@@ -375,7 +378,8 @@ fun QuizListScreen(
                                             Spacer(Modifier.width(8.dp))
                                         }
                                         Column {
-                                            Text(currentUser?.displayName ?: "")
+                                            val name = currentUser?.displayName ?: storedUser?.name ?: ""
+                                            Text(name)
                                             Text(folderName)
                                             Text(quiz.name)
                                         }

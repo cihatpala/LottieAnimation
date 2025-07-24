@@ -62,7 +62,7 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             LaunchedEffect(Unit) {
                 delay(2500)
-                val target = if (authViewModel.currentUser != null) {
+                val target = if (authViewModel.currentUser != null || authViewModel.storedUser != null) {
                     Screen.QuizList.route
                 } else {
                     Screen.Auth.route
@@ -147,6 +147,7 @@ fun AppNavHost(
         composable(Screen.MyProfile.route) {
             UserProfileScreen(
                 user = authViewModel.currentUser,
+                storedUser = authViewModel.storedUser,
                 onBack = { navController.popBackStack() },
                 bottomTab = currentTab,
                 onMenu = openDrawer,
@@ -207,6 +208,7 @@ fun AppNavHost(
                 quizzes = quizViewModel.quizzes,
                 folders = quizViewModel.folders,
                 currentUser = authViewModel.currentUser,
+                storedUser = authViewModel.storedUser,
                 onQuiz = { quizIdx, boxIdx ->
                     quizViewModel.setCurrentQuiz(quizIdx)
                     if (quizViewModel.startQuiz(boxIdx)) {

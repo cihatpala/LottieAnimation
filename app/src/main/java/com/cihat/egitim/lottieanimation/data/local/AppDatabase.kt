@@ -10,9 +10,10 @@ import androidx.room.RoomDatabase
         UserQuizEntity::class,
         QuestionEntity::class,
         SubHeadingEntity::class,
-        SettingEntity::class
+        SettingEntity::class,
+        UserSessionEntity::class
     ],
-    version = 2
+    version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dao(): AppDao

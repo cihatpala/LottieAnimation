@@ -17,9 +17,17 @@ import coil.compose.AsyncImage
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.google.firebase.auth.FirebaseUser
+import com.cihat.egitim.lottieanimation.data.StoredUser
 
 @Composable
-fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit, bottomTab: BottomTab, onMenu: () -> Unit, onTab: (BottomTab) -> Unit = {}) {
+fun UserProfileScreen(
+    user: FirebaseUser?,
+    storedUser: StoredUser?,
+    onBack: () -> Unit,
+    bottomTab: BottomTab,
+    onMenu: () -> Unit,
+    onTab: (BottomTab) -> Unit = {}
+) {
     AppScaffold(
         title = "Profilim",
         showBack = true,
@@ -28,7 +36,11 @@ fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit, bottomTab: Bottom
         bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
-        if (user == null) {
+        val infoName = user?.displayName ?: storedUser?.name
+        val infoEmail = user?.email ?: storedUser?.email
+        val infoPhoto = user?.photoUrl?.toString() ?: storedUser?.photoUrl
+
+        if (infoName == null && infoEmail == null && infoPhoto == null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -46,7 +58,7 @@ fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit, bottomTab: Bottom
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                user.photoUrl?.let { url ->
+                infoPhoto?.let { url ->
                     AsyncImage(
                         model = url,
                         contentDescription = null,
@@ -56,8 +68,8 @@ fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit, bottomTab: Bottom
                     )
                     Spacer(Modifier.size(16.dp))
                 }
-                user.displayName?.let { Text(it) }
-                user.email?.let { Text(it) }
+                infoName?.let { Text(it) }
+                infoEmail?.let { Text(it) }
             }
         }
     }
