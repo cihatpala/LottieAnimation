@@ -62,12 +62,7 @@ fun AppNavHost(
         composable(Screen.Splash.route) {
             LaunchedEffect(Unit) {
                 delay(2500)
-                val target = if (authViewModel.currentUser != null || authViewModel.storedUser != null) {
-                    Screen.QuizList.route
-                } else {
-                    Screen.Auth.route
-                }
-                navController.navigate(target) {
+                navController.navigate(Screen.QuizList.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             }
