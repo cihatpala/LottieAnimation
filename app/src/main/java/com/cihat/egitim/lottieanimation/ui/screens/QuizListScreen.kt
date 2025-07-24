@@ -134,13 +134,14 @@ fun QuizListScreen(
     onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onTab: (BottomTab) -> Unit,
+    onMenu: () -> Unit
 ) {
     AppScaffold(
         title = "My Quizzes",
         showBack = false,
         onBack = onBack,
-        onMenu = { onTab(BottomTab.MENU) },
+        onMenu = onMenu,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {

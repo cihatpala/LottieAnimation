@@ -47,7 +47,8 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 fun AuthScreen(
     onGoogle: () -> Unit,
     onBack: () -> Unit,
-    onLogin: () -> Unit
+    onLogin: () -> Unit,
+    onMenu: () -> Unit
 ) {
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
@@ -63,7 +64,7 @@ fun AuthScreen(
         title = "Auth",
         showBack = true,
         onBack = onBack,
-        onMenu = { }
+        onMenu = onMenu
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

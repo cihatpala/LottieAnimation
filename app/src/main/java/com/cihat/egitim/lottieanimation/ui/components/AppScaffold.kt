@@ -3,7 +3,6 @@ package com.cihat.egitim.lottieanimation.ui.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -21,7 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.ui.Modifier
 
-enum class BottomTab { MENU, HOME, EXPLORE, PROFILE }
+enum class BottomTab { HOME, EXPLORE, PROFILE }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,14 +39,8 @@ fun AppScaffold(
             CenterAlignedTopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                    if (showBack) {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    } else {
-                        IconButton(onClick = onMenu) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                        }
+                    IconButton(onClick = onMenu) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 },
                 actions = actions
@@ -56,12 +49,6 @@ fun AppScaffold(
         bottomBar = {
             bottomTab?.let { tab ->
                 NavigationBar {
-                    NavigationBarItem(
-                        selected = tab == BottomTab.MENU,
-                        onClick = { onTabSelected(BottomTab.MENU) },
-                        icon = { Icon(Icons.Default.Menu, contentDescription = "Menu") },
-                        label = { Text("Menu") }
-                    )
                     NavigationBarItem(
                         selected = tab == BottomTab.HOME,
                         onClick = { onTabSelected(BottomTab.HOME) },

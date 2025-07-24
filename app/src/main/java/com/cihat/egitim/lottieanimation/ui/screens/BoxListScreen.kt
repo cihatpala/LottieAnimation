@@ -43,7 +43,8 @@ fun BoxListScreen(
     onView: (Int) -> Unit,
     onBack: () -> Unit,
     onLogout: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    onTab: (BottomTab) -> Unit,
+    onMenu: () -> Unit
 ) {
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
@@ -51,7 +52,7 @@ fun BoxListScreen(
         title = quizName,
         showBack = true,
         onBack = onBack,
-        onMenu = { onTab(BottomTab.MENU) },
+        onMenu = onMenu,
         bottomTab = BottomTab.HOME,
         onTabSelected = onTab
     ) {

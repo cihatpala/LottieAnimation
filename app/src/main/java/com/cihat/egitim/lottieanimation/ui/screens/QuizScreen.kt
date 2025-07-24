@@ -39,7 +39,8 @@ fun QuizScreen(
     isAnswerVisible: Boolean,
     onReveal: () -> Unit,
     onAnswer: (Boolean) -> Unit,
-    onQuit: () -> Unit
+    onQuit: () -> Unit,
+    onMenu: () -> Unit
 ) {
     if (question == null) return
 
@@ -64,7 +65,7 @@ fun QuizScreen(
         title = "Quiz",
         showBack = true,
         onBack = onQuit,
-        onMenu = { }
+        onMenu = onMenu
     ) {
         Column(
             modifier = Modifier

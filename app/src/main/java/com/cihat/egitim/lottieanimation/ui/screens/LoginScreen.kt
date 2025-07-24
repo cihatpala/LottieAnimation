@@ -40,7 +40,8 @@ fun LoginScreen(
     onLogin: (String, String, (Boolean) -> Unit) -> Unit,
     onBack: () -> Unit,
     onForgot: () -> Unit,
-    onSignup: () -> Unit
+    onSignup: () -> Unit,
+    onMenu: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -52,7 +53,7 @@ fun LoginScreen(
         title = "Giriş Yap",
         showBack = true,
         onBack = onBack,
-        onMenu = { }
+        onMenu = onMenu
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(

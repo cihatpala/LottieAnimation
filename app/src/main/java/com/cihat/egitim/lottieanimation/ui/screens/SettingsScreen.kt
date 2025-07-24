@@ -28,13 +28,14 @@ import com.cihat.egitim.lottieanimation.ui.theme.ThemeMode
 fun SettingsScreen(
     themeMode: ThemeMode,
     onThemeChange: (ThemeMode) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onMenu: () -> Unit
 ) {
     AppScaffold(
         title = "Settings",
         showBack = true,
         onBack = onBack,
-        onMenu = { }
+        onMenu = onMenu
     ) {
         Column(
             modifier = Modifier
