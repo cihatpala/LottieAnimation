@@ -33,14 +33,12 @@ import androidx.compose.material.SwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -69,13 +67,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -185,45 +179,12 @@ fun QuizListScreen(
             }
         }
 
-        // State for draggable FAB
-        val density = LocalDensity.current
-        var containerWidthPx by remember { mutableStateOf(0f) }
-        var containerHeightPx by remember { mutableStateOf(0f) }
-        var fabWidthPx by remember { mutableStateOf(0f) }
-        var fabHeightPx by remember { mutableStateOf(0f) }
-        var fabInit by remember { mutableStateOf(false) }
-        val fabOffsetX = remember { Animatable(0f) }
-        val fabOffsetY = remember { Animatable(0f) }
-        val fabScope = rememberCoroutineScope()
-        var showFab by remember { mutableStateOf(true) }
-
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .onGloballyPositioned {
-                    containerWidthPx = it.size.width.toFloat()
-                    containerHeightPx = it.size.height.toFloat()
-                }
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LaunchedEffect(containerWidthPx, containerHeightPx, fabWidthPx, fabHeightPx) {
-                if (!fabInit &&
-                    containerWidthPx > 0f &&
-                    containerHeightPx > 0f &&
-                    fabWidthPx > 0f &&
-                    fabHeightPx > 0f
-                ) {
-                    val margin = with(density) { 16.dp.toPx() }
-                    fabOffsetX.snapTo(containerWidthPx - fabWidthPx - margin)
-                    fabOffsetY.snapTo(containerHeightPx - fabHeightPx - margin)
-                    fabInit = true
-                }
-            }
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
                 if (quizzes.isEmpty()) {
                     Text("Henüz quiziniz yok")
                 } else {
@@ -538,74 +499,6 @@ fun QuizListScreen(
 
 
                         }
-                    }
-                }
-            }
-            if (showFab) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .offset { IntOffset(fabOffsetX.value.roundToInt(), fabOffsetY.value.roundToInt()) }
-                        .onGloballyPositioned {
-                            fabWidthPx = it.size.width.toFloat()
-                            fabHeightPx = it.size.height.toFloat()
-                        }
-                ) {
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            if (folders.isEmpty()) {
-                                showWarning = true
-                            } else {
-                                showCreate = true
-                            }
-                        },
-                        icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
-                        text = { Text("Quiz Ekle") },
-                        modifier = Modifier
-                            .pointerInput(Unit) {
-                                detectDragGesturesAfterLongPress(
-                                    onDragEnd = {
-                                        fabScope.launch {
-                                            val margin = with(density) { 16.dp.toPx() }
-                                            val left = margin
-                                            val right = containerWidthPx - fabWidthPx - margin
-                                            val top = margin
-                                            val bottom = containerHeightPx - fabHeightPx - margin
-                                            val targetX = if (fabOffsetX.value < (containerWidthPx - fabWidthPx) / 2f) left else right
-                                            val targetY = if (fabOffsetY.value < (containerHeightPx - fabHeightPx) / 2f) top else bottom
-                                            launch { fabOffsetX.animateTo(targetX, animationSpec = tween(150)) }
-                                            launch { fabOffsetY.animateTo(targetY, animationSpec = tween(150)) }
-                                        }
-                                    },
-                                    onDrag = { change, dragAmount ->
-                                        change.consume()
-                                        fabScope.launch {
-                                            val margin = with(density) { 16.dp.toPx() }
-                                            val left = margin
-                                            val right = containerWidthPx - fabWidthPx - margin
-                                            val top = margin
-                                            val bottom = containerHeightPx - fabHeightPx - margin
-                                            val newX = (fabOffsetX.value + dragAmount.x).coerceIn(left, right)
-                                            val newY = (fabOffsetY.value + dragAmount.y).coerceIn(top, bottom)
-                                            fabOffsetX.snapTo(newX)
-                                            fabOffsetY.snapTo(newY)
-                                        }
-                                    }
-                                )
-                            }
-                            .shadow(8.dp, RoundedCornerShape(12.dp))
-                            .height(56.dp),
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                    IconButton(
-                        onClick = { showFab = false },
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .offset(x = 8.dp, y = (-8).dp)
-                            .size(24.dp)
-                    ) {
-                        Icon(Icons.Default.Close, contentDescription = "Kapat")
                     }
                 }
             }
