@@ -40,6 +40,7 @@ import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -86,6 +87,7 @@ import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.cihat.egitim.lottieanimation.ui.components.PrimaryAlert
+import com.cihat.egitim.lottieanimation.ui.components.OverflowMenu
 import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.data.Question
 import kotlinx.coroutines.launch
@@ -144,7 +146,18 @@ fun QuizListScreen(
         onBack = onBack,
         onMenu = onMenu,
         bottomTab = bottomTab,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        actions = {
+            OverflowMenu(listOf(
+                "Quiz Ekle" to {
+                    if (folders.isEmpty()) {
+                        showWarning = true
+                    } else {
+                        showCreate = true
+                    }
+                }
+            ))
+        }
     ) {
         var showCreate by remember { mutableStateOf(false) }
         var showWarning by remember { mutableStateOf(false) }
@@ -182,6 +195,7 @@ fun QuizListScreen(
         val fabOffsetX = remember { Animatable(0f) }
         val fabOffsetY = remember { Animatable(0f) }
         val fabScope = rememberCoroutineScope()
+        var showFab by remember { mutableStateOf(true) }
 
         Box(
             modifier = Modifier
@@ -527,59 +541,74 @@ fun QuizListScreen(
                     }
                 }
             }
-            ExtendedFloatingActionButton(
-                onClick = {
-                    if (folders.isEmpty()) {
-                        showWarning = true
-                    } else {
-                        showCreate = true
-                    }
-                },
-                icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
-                text = { Text("Quiz Ekle") },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .offset { IntOffset(fabOffsetX.value.roundToInt(), fabOffsetY.value.roundToInt()) }
-                    .onGloballyPositioned {
-                        fabWidthPx = it.size.width.toFloat()
-                        fabHeightPx = it.size.height.toFloat()
-                    }
-                    .pointerInput(Unit) {
-                        detectDragGesturesAfterLongPress(
-                            onDragEnd = {
-                                fabScope.launch {
-                                    val margin = with(density) { 16.dp.toPx() }
-                                    val left = margin
-                                    val right = containerWidthPx - fabWidthPx - margin
-                                    val top = margin
-                                    val bottom = containerHeightPx - fabHeightPx - margin
-                                    val targetX = if (fabOffsetX.value < (containerWidthPx - fabWidthPx) / 2f) left else right
-                                    val targetY = if (fabOffsetY.value < (containerHeightPx - fabHeightPx) / 2f) top else bottom
-                                    launch { fabOffsetX.animateTo(targetX, animationSpec = tween(150)) }
-                                    launch { fabOffsetY.animateTo(targetY, animationSpec = tween(150)) }
-                                }
-                            },
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                fabScope.launch {
-                                    val margin = with(density) { 16.dp.toPx() }
-                                    val left = margin
-                                    val right = containerWidthPx - fabWidthPx - margin
-                                    val top = margin
-                                    val bottom = containerHeightPx - fabHeightPx - margin
-                                    val newX = (fabOffsetX.value + dragAmount.x).coerceIn(left, right)
-                                    val newY = (fabOffsetY.value + dragAmount.y).coerceIn(top, bottom)
-                                    fabOffsetX.snapTo(newX)
-                                    fabOffsetY.snapTo(newY)
-                                }
+            if (showFab) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .offset { IntOffset(fabOffsetX.value.roundToInt(), fabOffsetY.value.roundToInt()) }
+                        .onGloballyPositioned {
+                            fabWidthPx = it.size.width.toFloat()
+                            fabHeightPx = it.size.height.toFloat()
+                        }
+                ) {
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            if (folders.isEmpty()) {
+                                showWarning = true
+                            } else {
+                                showCreate = true
                             }
-                        )
+                        },
+                        icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
+                        text = { Text("Quiz Ekle") },
+                        modifier = Modifier
+                            .pointerInput(Unit) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragEnd = {
+                                        fabScope.launch {
+                                            val margin = with(density) { 16.dp.toPx() }
+                                            val left = margin
+                                            val right = containerWidthPx - fabWidthPx - margin
+                                            val top = margin
+                                            val bottom = containerHeightPx - fabHeightPx - margin
+                                            val targetX = if (fabOffsetX.value < (containerWidthPx - fabWidthPx) / 2f) left else right
+                                            val targetY = if (fabOffsetY.value < (containerHeightPx - fabHeightPx) / 2f) top else bottom
+                                            launch { fabOffsetX.animateTo(targetX, animationSpec = tween(150)) }
+                                            launch { fabOffsetY.animateTo(targetY, animationSpec = tween(150)) }
+                                        }
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        fabScope.launch {
+                                            val margin = with(density) { 16.dp.toPx() }
+                                            val left = margin
+                                            val right = containerWidthPx - fabWidthPx - margin
+                                            val top = margin
+                                            val bottom = containerHeightPx - fabHeightPx - margin
+                                            val newX = (fabOffsetX.value + dragAmount.x).coerceIn(left, right)
+                                            val newY = (fabOffsetY.value + dragAmount.y).coerceIn(top, bottom)
+                                            fabOffsetX.snapTo(newX)
+                                            fabOffsetY.snapTo(newY)
+                                        }
+                                    }
+                                )
+                            }
+                            .shadow(8.dp, RoundedCornerShape(12.dp))
+                            .height(56.dp),
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                    IconButton(
+                        onClick = { showFab = false },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 8.dp, y = (-8).dp)
+                            .size(24.dp)
+                    ) {
+                        Icon(Icons.Default.Close, contentDescription = "Kapat")
                     }
-                    .shadow(8.dp, RoundedCornerShape(12.dp))
-                    .height(56.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
+                }
+            }
         }
 
 
