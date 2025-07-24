@@ -134,6 +134,12 @@ fun QuizListScreen(
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
+    var showCreate by remember { mutableStateOf(false) }
+    var showWarning by remember { mutableStateOf(false) }
+    var createName by remember { mutableStateOf("") }
+    var createCount by remember { mutableFloatStateOf(4f) }
+    var selectedFolder by remember { mutableStateOf(folders.firstOrNull()?.id) }
+
     AppScaffold(
         title = "My Quizzes",
         showBack = false,
@@ -153,11 +159,6 @@ fun QuizListScreen(
             ))
         }
     ) {
-        var showCreate by remember { mutableStateOf(false) }
-        var showWarning by remember { mutableStateOf(false) }
-        var createName by remember { mutableStateOf("") }
-        var createCount by remember { mutableFloatStateOf(4f) }
-        var selectedFolder by remember { mutableStateOf(folders.firstOrNull()?.id) }
 
         val listState = rememberLazyListState()
         var draggingQuizId by remember { mutableStateOf<Int?>(null) }
@@ -185,320 +186,319 @@ fun QuizListScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-                if (quizzes.isEmpty()) {
-                    Text("Henüz quiziniz yok")
-                } else {
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        // Use a stable key so Compose properly disposes state when
-                        // an item is removed. Without this, deleting the last item
-                        // triggers an IndexOutOfBoundsException as the old state
-                        // tries to read a missing index from the list.
-                        itemsIndexed(
-                            items = quizzes,
-                            key = { _, quiz -> quiz.id }
-                        ) { quizIndex, quiz ->
-                            var expanded by remember(quiz.id) { mutableStateOf(false) }
-                            var showRename by remember(quiz.id) { mutableStateOf(false) }
-                            var showDelete by remember(quiz.id) { mutableStateOf(false) }
-                            var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
-                            val scope = rememberCoroutineScope()
-                            val actionWidth = 72.dp
-                            val swipeState = rememberSwipeableState(0)
-                            DisposableEffect(quiz.id) {
-                                swipeStates[quiz.id] = swipeState
-                                onDispose {
-                                    swipeStates.remove(quiz.id)
-                                    if (openSwipeId == quiz.id) openSwipeId = null
-                                }
+            if (quizzes.isEmpty()) {
+                Text("Henüz quiziniz yok")
+            } else {
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    // Use a stable key so Compose properly disposes state when
+                    // an item is removed. Without this, deleting the last item
+                    // triggers an IndexOutOfBoundsException as the old state
+                    // tries to read a missing index from the list.
+                    itemsIndexed(
+                        items = quizzes,
+                        key = { _, quiz -> quiz.id }
+                    ) { quizIndex, quiz ->
+                        var expanded by remember(quiz.id) { mutableStateOf(false) }
+                        var showRename by remember(quiz.id) { mutableStateOf(false) }
+                        var showDelete by remember(quiz.id) { mutableStateOf(false) }
+                        var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
+                        val scope = rememberCoroutineScope()
+                        val actionWidth = 72.dp
+                        val swipeState = rememberSwipeableState(0)
+                        DisposableEffect(quiz.id) {
+                            swipeStates[quiz.id] = swipeState
+                            onDispose {
+                                swipeStates.remove(quiz.id)
+                                if (openSwipeId == quiz.id) openSwipeId = null
                             }
-                            val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+                        }
+                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
 
 // Eğer başka bir item açıksa, ben kapanmalıyım
-                            LaunchedEffect(openSwipeId) {
-                                if (openSwipeId != quiz.id && swipeState.currentValue != 0) {
-                                    swipeState.animateTo(0, tween(durationMillis = 100, easing = LinearEasing))
-                                }
+                        LaunchedEffect(openSwipeId) {
+                            if (openSwipeId != quiz.id && swipeState.currentValue != 0) {
+                                swipeState.animateTo(0, tween(durationMillis = 100, easing = LinearEasing))
                             }
+                        }
 
 // Eğer ben açılırsam, global swipe ID'yi kendime atamalıyım
-                            LaunchedEffect(swipeState.currentValue) {
-                                if (swipeState.currentValue != 0 && openSwipeId != quiz.id) {
-                                    openSwipeId = quiz.id
+                        LaunchedEffect(swipeState.currentValue) {
+                            if (swipeState.currentValue != 0 && openSwipeId != quiz.id) {
+                                openSwipeId = quiz.id
+                            }
+                        }
+
+
+                        // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
+                        val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+                        val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
+
+                        val isDragging = draggingQuizId == quiz.id
+                        val dragModifier = Modifier
+                            .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
+                            .pointerInput(quiz.id) {
+                                detectDragGesturesAfterLongPress(
+                                    onDragStart = {
+                                        draggingQuizId = quiz.id
+                                        draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
+                                        dragOffset = 0f
+                                    },
+                                    onDragCancel = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                        draggingQuizId = null
+                                    },
+                                    onDragEnd = {
+                                        dragOffset = 0f
+                                        draggingIndex = -1
+                                        draggingQuizId = null
+                                    },
+                                    onDrag = { change, dragAmount ->
+                                        change.consume()
+                                        dragOffset += dragAmount.y
+                                        val from = draggingIndex
+                                        val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
+                                            .coerceIn(0, quizzes.lastIndex)
+                                        if (potentialIndex != from) {
+                                            onMoveQuiz(from, potentialIndex)
+                                            draggingIndex = potentialIndex
+                                            dragOffset -= (potentialIndex - from) * itemHeightPx
+                                        }
+                                    }
+                                )
+                            }
+
+                        Box(
+                            modifier = dragModifier
+                                .fillMaxWidth()
+                                .clipToBounds()
+                                .swipeable(
+                                    state = swipeState,
+                                    anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
+                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                    orientation = Orientation.Horizontal
+                                )
+                                .animateItem()
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .height(72.dp)
+                                    .alpha(revealProgressEnd)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        showRename = true
+                                    },
+                                    enabled = swipeState.currentValue == 1,
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.tertiary)
+                                        .size(actionWidth)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Edit,
+                                        contentDescription = "Edit",
+                                        tint = MaterialTheme.colorScheme.onTertiary
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        showDelete = true
+                                    },
+                                    enabled = swipeState.currentValue == 1,
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.error)
+                                        .size(actionWidth)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Delete,
+                                        contentDescription = "Delete",
+                                        tint = MaterialTheme.colorScheme.onError
+                                    )
                                 }
                             }
 
-
-                            // How much the actions are revealed. 0f when hidden, 1f when fully swiped.
-                            val revealProgressEnd = (-swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-                            val revealProgressStart = (swipeState.offset.value / maxOffset).coerceIn(0f, 1f)
-
-                            val isDragging = draggingQuizId == quiz.id
-                            val dragModifier = Modifier
-                                .offset { IntOffset(0, if (isDragging) dragOffset.roundToInt() else 0) }
-                                .pointerInput(quiz.id) {
-                                    detectDragGesturesAfterLongPress(
-                                        onDragStart = {
-                                            draggingQuizId = quiz.id
-                                            draggingIndex = quizzes.indexOfFirst { it.id == quiz.id }
-                                            dragOffset = 0f
-                                        },
-                                        onDragCancel = {
-                                            dragOffset = 0f
-                                            draggingIndex = -1
-                                            draggingQuizId = null
-                                        },
-                                        onDragEnd = {
-                                            dragOffset = 0f
-                                            draggingIndex = -1
-                                            draggingQuizId = null
-                                        },
-                                        onDrag = { change, dragAmount ->
-                                            change.consume()
-                                            dragOffset += dragAmount.y
-                                            val from = draggingIndex
-                                            val potentialIndex = (from + (dragOffset / itemHeightPx).roundToInt())
-                                                .coerceIn(0, quizzes.lastIndex)
-                                            if (potentialIndex != from) {
-                                                onMoveQuiz(from, potentialIndex)
-                                                draggingIndex = potentialIndex
-                                                dragOffset -= (potentialIndex - from) * itemHeightPx
-                                            }
-                                        }
+                            Row(
+                                modifier = Modifier
+                                    .align(Alignment.CenterStart)
+                                    .height(72.dp)
+                                    .alpha(revealProgressStart)
+                            ) {
+                                IconButton(
+                                    onClick = {
+                                        scope.launch { swipeState.animateTo(0) }
+                                        onSetCurrentQuiz(quizIndex)
+                                        addDialogFor = quizIndex
+                                    },
+                                    enabled = swipeState.currentValue == 2,
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colorScheme.primary)
+                                        .size(actionWidth)
+                                ) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = "Add",
+                                        tint = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
+                            }
 
-                            Box(
-                                modifier = dragModifier
+                            Column(
+                                modifier = Modifier
+                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                     .fillMaxWidth()
-                                    .clipToBounds()
-                                    .swipeable(
-                                        state = swipeState,
-                                        anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
-                                        thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                        orientation = Orientation.Horizontal
-                                    )
-                                    .animateItem()
+                                    .padding(vertical = 8.dp)
                             ) {
                                 Row(
                                     modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .height(72.dp)
-                                        .alpha(revealProgressEnd)
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch { swipeState.animateTo(0) }
-                                            showRename = true
-                                        },
-                                        enabled = swipeState.currentValue == 1,
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.tertiary)
-                                            .size(actionWidth)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Edit,
-                                            contentDescription = "Edit",
-                                            tint = MaterialTheme.colorScheme.onTertiary
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch { swipeState.animateTo(0) }
-                                            showDelete = true
-                                        },
-                                        enabled = swipeState.currentValue == 1,
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.error)
-                                            .size(actionWidth)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Delete,
-                                            contentDescription = "Delete",
-                                            tint = MaterialTheme.colorScheme.onError
-                                        )
-                                    }
-                                }
-
-                                Row(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterStart)
-                                        .height(72.dp)
-                                        .alpha(revealProgressStart)
-                                ) {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch { swipeState.animateTo(0) }
-                                            onSetCurrentQuiz(quizIndex)
-                                            addDialogFor = quizIndex
-                                        },
-                                        enabled = swipeState.currentValue == 2,
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.primary)
-                                            .size(actionWidth)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            contentDescription = "Add",
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                }
-
-                                Column(
-                                    modifier = Modifier
-                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                         .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
+                                        .height(64.dp)
+                                        .padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(64.dp)
-                                            .padding(horizontal = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                    Text(text = quiz.name, modifier = Modifier.weight(1f))
+                                    FilledIconButton(
+                                        onClick = { expanded = !expanded },
+                                        enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
+                                        colors = IconButtonDefaults.filledIconButtonColors()
                                     ) {
-                                        Text(text = quiz.name, modifier = Modifier.weight(1f))
+                                        Icon(Icons.Default.Description, contentDescription = "Detay")
+                                    }
+                                    Spacer(Modifier.width(8.dp))
+                                    Box {
                                         FilledIconButton(
-                                            onClick = { expanded = !expanded },
+                                            onClick = {
+                                                if (quiz.boxes.flatten().isEmpty()) {
+                                                    emptyAlertFor = quizIndex
+                                                } else {
+                                                    startDialogFor = quizIndex
+                                                }
+                                            },
                                             enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
                                             colors = IconButtonDefaults.filledIconButtonColors()
                                         ) {
-                                            Icon(Icons.Default.Description, contentDescription = "Detay")
+                                            Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
                                         }
-                                        Spacer(Modifier.width(8.dp))
-                                        Box {
-                                            FilledIconButton(
-                                                onClick = {
-                                                    if (quiz.boxes.flatten().isEmpty()) {
-                                                        emptyAlertFor = quizIndex
-                                                    } else {
-                                                        startDialogFor = quizIndex
-                                                    }
-                                                },
-                                                enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
-                                                colors = IconButtonDefaults.filledIconButtonColors()
-                                            ) {
-                                                Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
-                                            }
-                                            if (quiz.boxes.flatten().isEmpty()) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(8.dp)
-                                                        .background(Color.Red, CircleShape)
-                                                        .align(Alignment.TopEnd)
-                                                )
-                                            }
+                                        if (quiz.boxes.flatten().isEmpty()) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(8.dp)
+                                                    .background(Color.Red, CircleShape)
+                                                    .align(Alignment.TopEnd)
+                                            )
                                         }
                                     }
-                                    if (expanded) {
-                                        Column(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(8.dp)
-                                        ) {
-                                            quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
-                                                Row(
-                                                    modifier = Modifier.fillMaxWidth(),
-                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                                ) {
-                                                    pair.forEachIndexed { colIndex, box ->
-                                                        val boxIndex = rowIndex * 2 + colIndex
-                                                        Card(
+                                }
+                                if (expanded) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(8.dp)
+                                    ) {
+                                        quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                pair.forEachIndexed { colIndex, box ->
+                                                    val boxIndex = rowIndex * 2 + colIndex
+                                                    Card(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .aspectRatio(1f)
+                                                            .clickable { onView(quizIndex, boxIndex) },
+                                                        shape = RoundedCornerShape(8.dp),
+                                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                                        colors = CardDefaults.cardColors(
+                                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                        )
+                                                    ) {
+                                                        Column(
                                                             modifier = Modifier
-                                                                .weight(1f)
-                                                                .aspectRatio(1f)
-                                                                .clickable { onView(quizIndex, boxIndex) },
-                                                            shape = RoundedCornerShape(8.dp),
-                                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                                            colors = CardDefaults.cardColors(
-                                                                containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                            )
+                                                                .fillMaxSize()
+                                                                .padding(8.dp),
+                                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                                            verticalArrangement = Arrangement.Center
                                                         ) {
-                                                            Column(
-                                                                modifier = Modifier
-                                                                    .fillMaxSize()
-                                                                    .padding(8.dp),
-                                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                                verticalArrangement = Arrangement.Center
-                                                            ) {
-                                                                Text(text = "Box ${boxIndex + 1}")
-                                                                Text(text = "${box.size} soru")
-                                                            }
+                                                            Text(text = "Box ${boxIndex + 1}")
+                                                            Text(text = "${box.size} soru")
                                                         }
                                                     }
-                                                    if (pair.size == 1) {
-                                                        Spacer(modifier = Modifier.weight(1f))
-                                                    }
                                                 }
-                                                Spacer(modifier = Modifier.height(8.dp))
+                                                if (pair.size == 1) {
+                                                    Spacer(modifier = Modifier.weight(1f))
+                                                }
                                             }
+                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
                                 }
                             }
-
-
-                            if (showRename) {
-                                AlertDialog(
-                                    onDismissRequest = { showRename = false },
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            onRename(quizIndex, newName)
-                                            showRename = false
-                                        }) { Text("Save") }
-                                    },
-                                    dismissButton = {
-                                        TextButton(onClick = { showRename = false }) { Text("Cancel") }
-                                    },
-                                    title = { Text("Edit Quiz") },
-                                    text = {
-                                        OutlinedTextField(
-                                            value = newName,
-                                            onValueChange = { newName = it },
-                                            label = { Text("Name") }
-                                        )
-                                    }
-                                )
-                            }
-
-                            if (showDelete) {
-                                AlertDialog(
-                                    onDismissRequest = { showDelete = false },
-                                    confirmButton = {
-                                        TextButton(onClick = {
-                                            onDelete(quizIndex)
-                                            showDelete = false
-                                        }) { Text("Evet") }
-                                    },
-                                    dismissButton = {
-                                        TextButton(onClick = { showDelete = false }) { Text("Hayır") }
-                                    },
-                                    text = { Text("Silmek istediğinize emin misiniz?") }
-                                )
-                            }
-
-                            if (addDialogFor == quizIndex) {
-                                val folderId = quiz.folderId
-                                val folder = folders.find { it.id == folderId }
-                                val folderHeadings = folder?.headings
-                                    ?: headingsFromQuestions(quiz.boxes.flatten())
-                                AddQuestionDialog(
-                                    boxCount = quiz.boxes.size,
-                                    headings = folderHeadings,
-                                    quizName = quiz.name,
-                                    folderName = folder?.name ?: "",
-                                    onAdd = { q, a, topic, sub, box ->
-                                        onAddQuestion(q, a, topic, sub, box)
-                                    },
-                                    onDismiss = { addDialogFor = null }
-                                )
-                            }
-
-
                         }
+
+
+                        if (showRename) {
+                            AlertDialog(
+                                onDismissRequest = { showRename = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        onRename(quizIndex, newName)
+                                        showRename = false
+                                    }) { Text("Save") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showRename = false }) { Text("Cancel") }
+                                },
+                                title = { Text("Edit Quiz") },
+                                text = {
+                                    OutlinedTextField(
+                                        value = newName,
+                                        onValueChange = { newName = it },
+                                        label = { Text("Name") }
+                                    )
+                                }
+                            )
+                        }
+
+                        if (showDelete) {
+                            AlertDialog(
+                                onDismissRequest = { showDelete = false },
+                                confirmButton = {
+                                    TextButton(onClick = {
+                                        onDelete(quizIndex)
+                                        showDelete = false
+                                    }) { Text("Evet") }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDelete = false }) { Text("Hayır") }
+                                },
+                                text = { Text("Silmek istediğinize emin misiniz?") }
+                            )
+                        }
+
+                        if (addDialogFor == quizIndex) {
+                            val folderId = quiz.folderId
+                            val folder = folders.find { it.id == folderId }
+                            val folderHeadings = folder?.headings
+                                ?: headingsFromQuestions(quiz.boxes.flatten())
+                            AddQuestionDialog(
+                                boxCount = quiz.boxes.size,
+                                headings = folderHeadings,
+                                quizName = quiz.name,
+                                folderName = folder?.name ?: "",
+                                onAdd = { q, a, topic, sub, box ->
+                                    onAddQuestion(q, a, topic, sub, box)
+                                },
+                                onDismiss = { addDialogFor = null }
+                            )
+                        }
+
+
                     }
                 }
             }
@@ -589,118 +589,121 @@ fun QuizListScreen(
                 }
             )
         }
+    }
 
-        if (showCreate) {
-            AlertDialog(
-                onDismissRequest = { showCreate = false },
-                confirmButton = {
-                    TextButton(onClick = {
-                        selectedFolder?.let { folderId ->
-                            onCreate(createName, createCount.toInt(), folderId)
-                        }
-                        showCreate = false
-                        createName = ""
-                        createCount = 4f
-                        selectedFolder = folders.firstOrNull()?.id
-                    }) { Text("Oluştur") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showCreate = false }) { Text("İptal") }
-                },
-                title = { Text("Quiz Oluştur") },
-                text = {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Slider(
-                            value = createCount,
-                            onValueChange = { createCount = it },
-                            valueRange = 1f..10f,
-                            steps = 8
-                        )
-                        Text("${createCount.toInt()} kutu")
-                        OutlinedTextField(
-                            value = createName,
-                            onValueChange = { createName = it },
-                            label = { Text("Ad") },
-                            modifier = Modifier.fillMaxWidth()
-                        )
 
-                        // Folder selection
-                        var expandedFolder by remember { mutableStateOf(false) }
-                        ExposedDropdownMenuBox(
-                            expanded = expandedFolder,
-                            onExpandedChange = { expandedFolder = !expandedFolder }
-                        ) {
-                            OutlinedTextField(
-                                value = folders.find { it.id == selectedFolder }?.name
-                                    ?: "Klasör Seç",
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Klasör") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedFolder) },
-                                modifier = Modifier
-                                    .menuAnchor()
-                                    .fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expandedFolder,
-                                onDismissRequest = { expandedFolder = false }
-                            ) {
-                                folders.forEach { folder ->
-                                    DropdownMenuItem(
-                                        text = { Text(folder.name) },
-                                        onClick = {
-                                            selectedFolder = folder.id
-                                            expandedFolder = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-            )
-        }
 
-        if (showWarning) {
-            PrimaryAlert(
-                title = "Uyarı",
-                message = "Quiz oluşturmak için klasör oluşturunuz.",
-                onDismiss = { showWarning = false },
-                confirmText = "Klasör Oluştur",
-                onConfirm = {
-                    showWarning = false
-                    onFolders()
-                }
-            )
-        }
-        /*
+    if (showCreate) {
         AlertDialog(
-            onDismissRequest = { showWarning = false },
+            onDismissRequest = { showCreate = false },
             confirmButton = {
                 TextButton(onClick = {
-                    showWarning = false
-                    onFolders()
-                }) { Text("Klasör Oluştur") }
+                    selectedFolder?.let { folderId ->
+                        onCreate(createName, createCount.toInt(), folderId)
+                    }
+                    showCreate = false
+                    createName = ""
+                    createCount = 4f
+                    selectedFolder = folders.firstOrNull()?.id
+                }) { Text("Oluştur") }
             },
             dismissButton = {
-                TextButton(onClick = { showWarning = false }) { Text("Kapat") }
+                TextButton(onClick = { showCreate = false }) { Text("İptal") }
             },
-            icon = {
-                androidx.compose.foundation.Image(
-                    painter = androidx.compose.ui.res.painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.knowledge_logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                )
-            },
-            title = { Text("Uyarı") },
-            text = { Text("Quiz oluşturmak için klasör oluşturunuz.") }
+            title = { Text("Quiz Oluştur") },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Slider(
+                        value = createCount,
+                        onValueChange = { createCount = it },
+                        valueRange = 1f..10f,
+                        steps = 8
+                    )
+                    Text("${createCount.toInt()} kutu")
+                    OutlinedTextField(
+                        value = createName,
+                        onValueChange = { createName = it },
+                        label = { Text("Ad") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    // Folder selection
+                    var expandedFolder by remember { mutableStateOf(false) }
+                    ExposedDropdownMenuBox(
+                        expanded = expandedFolder,
+                        onExpandedChange = { expandedFolder = !expandedFolder }
+                    ) {
+                        OutlinedTextField(
+                            value = folders.find { it.id == selectedFolder }?.name
+                                ?: "Klasör Seç",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Klasör") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expandedFolder) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expandedFolder,
+                            onDismissRequest = { expandedFolder = false }
+                        ) {
+                            folders.forEach { folder ->
+                                DropdownMenuItem(
+                                    text = { Text(folder.name) },
+                                    onClick = {
+                                        selectedFolder = folder.id
+                                        expandedFolder = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
         )
     }
-         */
+
+    if (showWarning) {
+        PrimaryAlert(
+            title = "Uyarı",
+            message = "Quiz oluşturmak için klasör oluşturunuz.",
+            onDismiss = { showWarning = false },
+            confirmText = "Klasör Oluştur",
+            onConfirm = {
+                showWarning = false
+                onFolders()
+            }
+        )
     }
+    /*
+    AlertDialog(
+        onDismissRequest = { showWarning = false },
+        confirmButton = {
+            TextButton(onClick = {
+                showWarning = false
+                onFolders()
+            }) { Text("Klasör Oluştur") }
+        },
+        dismissButton = {
+            TextButton(onClick = { showWarning = false }) { Text("Kapat") }
+        },
+        icon = {
+            androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(id = com.cihat.egitim.lottieanimation.R.drawable.knowledge_logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+            )
+        },
+        title = { Text("Uyarı") },
+        text = { Text("Quiz oluşturmak için klasör oluşturunuz.") }
+    )
 }
+     */
+}
+
 
 
