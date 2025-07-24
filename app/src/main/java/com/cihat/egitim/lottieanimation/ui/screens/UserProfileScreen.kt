@@ -15,14 +15,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
+import com.cihat.egitim.lottieanimation.ui.components.BottomTab
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit) {
+fun UserProfileScreen(user: FirebaseUser?, onBack: () -> Unit, bottomTab: BottomTab, onMenu: () -> Unit, onTab: (BottomTab) -> Unit = {}) {
     AppScaffold(
         title = "Profilim",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
+        onMenu = onMenu,
+        bottomTab = bottomTab,
+        onTabSelected = onTab
     ) {
         if (user == null) {
             Column(

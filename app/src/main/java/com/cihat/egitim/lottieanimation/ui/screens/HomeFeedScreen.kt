@@ -21,13 +21,16 @@ fun HomeFeedScreen(
     onImport: (Int) -> Unit,
     showBack: Boolean,
     onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    bottomTab: BottomTab,
+    onTab: (BottomTab) -> Unit,
+    onMenu: () -> Unit
 ) {
     AppScaffold(
         title = "Explore",
         showBack = showBack,
         onBack = onBack,
-        bottomTab = BottomTab.EXPLORE,
+        onMenu = onMenu,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         Column(

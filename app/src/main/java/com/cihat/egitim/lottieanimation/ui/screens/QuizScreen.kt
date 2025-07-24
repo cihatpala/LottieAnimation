@@ -39,7 +39,8 @@ fun QuizScreen(
     isAnswerVisible: Boolean,
     onReveal: () -> Unit,
     onAnswer: (Boolean) -> Unit,
-    onQuit: () -> Unit
+    onQuit: () -> Unit,
+    onMenu: () -> Unit
 ) {
     if (question == null) return
 
@@ -63,7 +64,8 @@ fun QuizScreen(
     AppScaffold(
         title = "Quiz",
         showBack = true,
-        onBack = onQuit
+        onBack = onQuit,
+        onMenu = onMenu
     ) {
         Column(
             modifier = Modifier

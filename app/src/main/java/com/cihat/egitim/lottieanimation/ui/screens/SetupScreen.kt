@@ -29,7 +29,8 @@ fun SetupScreen(
     AppScaffold(
         title = "Setup",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
+        onMenu = { }
     ) {
         Column(
             modifier = Modifier

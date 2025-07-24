@@ -69,13 +69,16 @@ fun FolderListScreen(
     onAddHeading: (Int, List<Int>, String) -> Unit,
     onCreate: (String, List<String>) -> Unit,
     onBack: () -> Unit,
-    onTab: (BottomTab) -> Unit
+    bottomTab: BottomTab,
+    onTab: (BottomTab) -> Unit,
+    onMenu: () -> Unit
 ) {
     AppScaffold(
         title = "Klasörlerim",
         showBack = true,
         onBack = onBack,
-        bottomTab = BottomTab.PROFILE,
+        onMenu = onMenu,
+        bottomTab = bottomTab,
         onTabSelected = onTab
     ) {
         var showCreate by remember { mutableStateOf(false) }

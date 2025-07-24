@@ -2,6 +2,10 @@ package com.cihat.egitim.lottieanimation.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -49,8 +53,11 @@ fun AppNavHost(
     authViewModel: AuthViewModel,
     quizViewModel: QuizViewModel,
     themeMode: ThemeMode,
-    onThemeChange: (ThemeMode) -> Unit
+    onThemeChange: (ThemeMode) -> Unit,
+    openDrawer: () -> Unit,
+    closeDrawer: () -> Unit
 ) {
+    var currentTab by rememberSaveable { mutableStateOf(BottomTab.HOME) }
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
             LaunchedEffect(Unit) {
@@ -69,7 +76,18 @@ fun AppNavHost(
                     }
                 },
                 onBack = { navController.popBackStack() },
-                onLogin = { navController.navigate(Screen.Login.route) }
+                onLogin = { navController.navigate(Screen.Login.route) },
+                bottomTab = currentTab,
+                onMenu = openDrawer,
+                onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
+                    when (tab) {
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                    }
+                }
             )
         }
         composable(Screen.Login.route) {
@@ -92,48 +110,68 @@ fun AppNavHost(
                 },
                 onBack = { navController.popBackStack() },
                 onForgot = {},
-                onSignup = { navController.navigate(Screen.Auth.route) }
+                onSignup = { navController.navigate(Screen.Auth.route) },
+                bottomTab = currentTab,
+                onMenu = openDrawer,
+                onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
+                    when (tab) {
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                    }
+                }
             )
         }
         composable(Screen.Profile.route) {
-            val canPop = navController.previousBackStackEntry != null
             ProfileScreen(
-                onPro = {},
-                onAuth = { navController.navigate(Screen.Auth.route) },
-                onSettings = { navController.navigate(Screen.Settings.route) },
-                onFolders = { navController.navigate(Screen.FolderList.route) },
-                onSupport = {},
-                onRate = {},
-                isLoggedIn = authViewModel.currentUser != null,
-                onLogout = {
-                    authViewModel.logout(navController.context)
-                    navController.navigate(Screen.QuizList.route) {
-                        popUpTo(Screen.Profile.route) { inclusive = true }
+                bottomTab = currentTab,
+                onMenu = openDrawer,
+                onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
+                    when (tab) {
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
-                },
-                onProfileInfo = { navController.navigate(Screen.MyProfile.route) },
-                showBack = canPop,
-                onBack = { navController.popBackStack() },
-                    onTab = { tab ->
-                        when (tab) {
-                            BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
-                            BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
-                            BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
-                        }
-                    }
+                }
             )
         }
         composable(Screen.MyProfile.route) {
             UserProfileScreen(
                 user = authViewModel.currentUser,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                bottomTab = currentTab,
+                onMenu = openDrawer,
+                onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
+                    when (tab) {
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                    }
+                }
             )
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
                 themeMode = themeMode,
                 onThemeChange = onThemeChange,
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                bottomTab = currentTab,
+                onMenu = openDrawer,
+                onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
+                    when (tab) {
+                        BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
+                        BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
+                    }
+                }
             )
         }
         composable(Screen.FolderList.route) {
@@ -146,13 +184,17 @@ fun AppNavHost(
                     onAddHeading = { f, path, n -> quizViewModel.addHeading(f, path, n) },
                     onCreate = { name, subs -> quizViewModel.createFolder(name, subs) },
                     onBack = { navController.popBackStack() },
+                    bottomTab = currentTab,
                     onTab = { tab ->
+                        closeDrawer()
+                        currentTab = tab
                         when (tab) {
-                            BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                             BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                             BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                            BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         }
-                    }
+                    },
+                    onMenu = openDrawer
             )
         }
         composable(Screen.QuizList.route) {
@@ -190,13 +232,17 @@ fun AppNavHost(
                 onSetCurrentQuiz = { idx -> quizViewModel.setCurrentQuiz(idx) },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },
+                bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
                     when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
-                }
+                },
+                onMenu = openDrawer
             )
         }
         composable(Screen.BoxList.route) {
@@ -227,13 +273,17 @@ fun AppNavHost(
                         popUpTo(Screen.BoxList.route) { inclusive = true }
                     }
                 },
+                bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
                     when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> navController.navigate(Screen.HomeFeed.route)
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
-                }
+                },
+                onMenu = openDrawer
             )
         }
         composable(Screen.HomeFeed.route) {
@@ -251,13 +301,17 @@ fun AppNavHost(
                 },
                 showBack = canPop,
                 onBack = { navController.popBackStack() },
+                bottomTab = currentTab,
                 onTab = { tab ->
+                    closeDrawer()
+                    currentTab = tab
                     when (tab) {
-                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                         BottomTab.HOME -> navController.navigate(Screen.QuizList.route)
                         BottomTab.EXPLORE -> {}
+                        BottomTab.PROFILE -> navController.navigate(Screen.Profile.route)
                     }
-                }
+                },
+                onMenu = openDrawer
             )
         }
         composable(Screen.Quiz.route) {
@@ -269,7 +323,8 @@ fun AppNavHost(
                     val more = quizViewModel.onAnswerSelected(correct)
                     if (!more) navController.popBackStack()
                 },
-                onQuit = { navController.popBackStack() }
+                onQuit = { navController.popBackStack() },
+                onMenu = openDrawer
             )
         }
         composable(
@@ -282,7 +337,8 @@ fun AppNavHost(
                 headings = quizViewModel.currentQuizHeadingOptions,
                 onEdit = { qIdx, q -> quizViewModel.editQuestion(index, qIdx, q) },
                 onDelete = { qIdx -> quizViewModel.deleteQuestion(index, qIdx) },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onMenu = openDrawer
             )
         }
     }

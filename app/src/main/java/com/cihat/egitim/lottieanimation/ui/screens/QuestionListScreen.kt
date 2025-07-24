@@ -70,12 +70,14 @@ fun QuestionListScreen(
     headings: List<FolderHeading>,
     onEdit: (Int, Question) -> Unit,
     onDelete: (Int) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onMenu: () -> Unit
 ) {
     AppScaffold(
         title = "Questions",
         showBack = true,
-        onBack = onBack
+        onBack = onBack,
+        onMenu = onMenu
     ) {
         Column(
             modifier = Modifier
