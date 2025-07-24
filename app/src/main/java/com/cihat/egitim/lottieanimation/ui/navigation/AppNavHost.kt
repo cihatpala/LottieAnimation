@@ -1,6 +1,7 @@
 package com.cihat.egitim.lottieanimation.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -8,6 +9,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavType
 import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -58,6 +60,17 @@ fun AppNavHost(
     closeDrawer: () -> Unit
 ) {
     var currentTab by rememberSaveable { mutableStateOf(BottomTab.HOME) }
+    DisposableEffect(navController) {
+        val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            when (destination.route) {
+                Screen.QuizList.route -> currentTab = BottomTab.HOME
+                Screen.HomeFeed.route -> currentTab = BottomTab.EXPLORE
+                Screen.Profile.route -> currentTab = BottomTab.PROFILE
+            }
+        }
+        navController.addOnDestinationChangedListener(listener)
+        onDispose { navController.removeOnDestinationChangedListener(listener) }
+    }
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
             LaunchedEffect(authViewModel.isSessionLoaded, authViewModel.currentUser, authViewModel.storedUser) {

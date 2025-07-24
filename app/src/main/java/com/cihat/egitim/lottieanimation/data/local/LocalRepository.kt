@@ -11,11 +11,14 @@ import kotlinx.coroutines.withContext
 import androidx.room.withTransaction
 
 class LocalRepository(private val db: AppDatabase) {
-    private val dao = db.dao()
+    private val folderDao = db.folderDao()
+    private val quizDao = db.quizDao()
+    private val settingsDao = db.settingsDao()
+    private val sessionDao = db.sessionDao()
 
     suspend fun loadFolders(): List<UserFolder> = withContext(Dispatchers.IO) {
-        val folders = dao.getFolders()
-        val headings = dao.getHeadings()
+        val folders = folderDao.getFolders()
+        val headings = folderDao.getHeadings()
         folders.map { folder ->
             val folderHeadings = headings.filter { it.folderId == folder.id }
             UserFolder(
@@ -44,9 +47,9 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun loadQuizzes(): List<UserQuiz> = withContext(Dispatchers.IO) {
-        val quizzes = dao.getQuizzes()
-        val questions = dao.getQuestions()
-        val subs = dao.getSubHeadings()
+        val quizzes = quizDao.getQuizzes()
+        val questions = quizDao.getQuestions()
+        val subs = quizDao.getSubHeadings()
         quizzes.map { quiz ->
             val qList = questions.filter { it.quizId == quiz.id }
             val sList = subs.filter { it.quizId == quiz.id }.sortedBy { it.boxIndex }
@@ -77,15 +80,15 @@ class LocalRepository(private val db: AppDatabase) {
             f.copy(headings = f.headings.map { copyHeading(it) }.toMutableList())
         }
         db.withTransaction {
-            dao.clearFolders()
-            dao.clearHeadings()
+            folderDao.clearFolders()
+            folderDao.clearHeadings()
             val folderEntities = snapshot.map { UserFolderEntity(it.id, it.name) }
             val headingEntities = mutableListOf<FolderHeadingEntity>()
             snapshot.forEach { folder ->
                 flattenHeadings(folder.id, null, folder.headings, headingEntities)
             }
-            dao.insertFolders(folderEntities)
-            dao.insertHeadings(headingEntities)
+            folderDao.insert(folderEntities)
+            folderDao.insertHeadings(headingEntities)
         }
     }
 
@@ -104,9 +107,9 @@ class LocalRepository(private val db: AppDatabase) {
             )
         }
         db.withTransaction {
-            dao.clearQuizzes()
-            dao.clearQuestions()
-            dao.clearSubHeadings()
+            quizDao.clearQuizzes()
+            quizDao.clearQuestions()
+            quizDao.clearSubHeadings()
             val quizEntities = snapshot.map { UserQuizEntity(it.id, it.name, it.folderId, it.boxes.size) }
             val questionEntities = mutableListOf<QuestionEntity>()
             val subEntities = mutableListOf<SubHeadingEntity>()
@@ -129,14 +132,14 @@ class LocalRepository(private val db: AppDatabase) {
                     subEntities.add(SubHeadingEntity(quizId = quiz.id, name = name, boxIndex = idx))
                 }
             }
-            dao.insertQuizzes(quizEntities)
-            dao.insertQuestions(questionEntities)
-            dao.insertSubHeadings(subEntities)
+            quizDao.insert(quizEntities)
+            quizDao.insertQuestions(questionEntities)
+            quizDao.insertSubHeadings(subEntities)
         }
     }
 
     suspend fun getTheme(): ThemeMode = withContext(Dispatchers.IO) {
-        when (dao.getSetting("theme")) {
+        when (settingsDao.getSetting("theme")) {
             ThemeMode.DARK.name -> ThemeMode.DARK
             ThemeMode.LIGHT.name -> ThemeMode.LIGHT
             else -> ThemeMode.SYSTEM
@@ -144,19 +147,19 @@ class LocalRepository(private val db: AppDatabase) {
     }
 
     suspend fun saveTheme(mode: ThemeMode) = withContext(Dispatchers.IO) {
-        dao.putSetting(SettingEntity("theme", mode.name))
+        settingsDao.insert(SettingEntity("theme", mode.name))
     }
 
     suspend fun loadUserSession(): StoredUser? = withContext(Dispatchers.IO) {
-        dao.getUserSession()?.let {
+        sessionDao.getUserSession()?.let {
             StoredUser(it.uid, it.name, it.email, it.photoUrl)
         }
     }
 
     suspend fun saveUserSession(user: StoredUser?) = withContext(Dispatchers.IO) {
-        dao.clearUserSession()
+        sessionDao.clearUserSession()
         user?.let {
-            dao.insertUserSession(
+            sessionDao.insert(
                 UserSessionEntity(
                     uid = it.uid,
                     name = it.name,
