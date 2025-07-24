@@ -57,4 +57,13 @@ interface AppDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun putSetting(setting: SettingEntity)
+
+    @Query("SELECT * FROM user_session LIMIT 1")
+    suspend fun getUserSession(): UserSessionEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUserSession(session: UserSessionEntity)
+
+    @Query("DELETE FROM user_session")
+    suspend fun clearUserSession()
 }

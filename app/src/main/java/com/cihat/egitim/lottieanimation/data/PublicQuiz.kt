@@ -6,5 +6,7 @@ package com.cihat.egitim.lottieanimation.data
 data class PublicQuiz(
     val name: String,
     val author: String,
-    val questions: List<Question>
+    val questions: List<Question>,
+    val authorPhotoUrl: String? = null,
+    val folderName: String? = null
 )

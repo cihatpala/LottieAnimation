@@ -134,7 +134,9 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                     topic = "Geography",
                     subtopic = "Europe"
                 )
-            )
+            ),
+            authorPhotoUrl = "https://randomuser.me/api/portraits/women/10.jpg2",
+            folderName = "Geography"
         ),
         PublicQuiz(
             name = "Math Basics",
@@ -152,7 +154,9 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                     topic = "Arithmetic",
                     subtopic = "Multiplication"
                 )
-            )
+            ),
+            authorPhotoUrl = "https://randomuser.me/api/portraits/men/22.jpg",
+            folderName = "Math"
         )
     )
 

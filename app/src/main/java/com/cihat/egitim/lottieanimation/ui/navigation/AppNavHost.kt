@@ -60,10 +60,17 @@ fun AppNavHost(
     var currentTab by rememberSaveable { mutableStateOf(BottomTab.HOME) }
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
-            LaunchedEffect(Unit) {
+            LaunchedEffect(authViewModel.isSessionLoaded, authViewModel.currentUser, authViewModel.storedUser) {
+                if (!authViewModel.isSessionLoaded) return@LaunchedEffect
                 delay(2500)
-                navController.navigate(Screen.QuizList.route) {
-                    popUpTo(Screen.Splash.route) { inclusive = true }
+                if (authViewModel.currentUser != null || authViewModel.storedUser != null) {
+                    navController.navigate(Screen.QuizList.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(Screen.Auth.route) {
+                        popUpTo(Screen.Splash.route) { inclusive = true }
+                    }
                 }
             }
             SplashScreen()
@@ -142,6 +149,7 @@ fun AppNavHost(
         composable(Screen.MyProfile.route) {
             UserProfileScreen(
                 user = authViewModel.currentUser,
+                storedUser = authViewModel.storedUser,
                 onBack = { navController.popBackStack() },
                 bottomTab = currentTab,
                 onMenu = openDrawer,
@@ -201,6 +209,8 @@ fun AppNavHost(
             QuizListScreen(
                 quizzes = quizViewModel.quizzes,
                 folders = quizViewModel.folders,
+                currentUser = authViewModel.currentUser,
+                storedUser = authViewModel.storedUser,
                 onQuiz = { quizIdx, boxIdx ->
                     quizViewModel.setCurrentQuiz(quizIdx)
                     if (quizViewModel.startQuiz(boxIdx)) {
