@@ -45,7 +45,9 @@ fun AppScaffold(
 ) {
     val scope = rememberCoroutineScope()
     val bottomPadding = if (bottomTab != null) 80.dp else 0.dp
-    val topPadding = 64.dp
+    // Drawer should start from the very top of the screen and stop above the
+    // bottom bar so the bar remains usable.
+    val topPadding = 0.dp
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
