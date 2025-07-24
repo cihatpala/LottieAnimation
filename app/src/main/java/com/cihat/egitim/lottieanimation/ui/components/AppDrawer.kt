@@ -47,9 +47,17 @@ fun AppDrawer(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Menu", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "Menu",
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             IconButton(onClick = onClose) {
-                Icon(Icons.Default.Close, contentDescription = "Kapat")
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Kapat",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
