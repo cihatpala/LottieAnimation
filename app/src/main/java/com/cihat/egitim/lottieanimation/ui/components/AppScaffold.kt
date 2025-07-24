@@ -2,6 +2,9 @@ package com.cihat.egitim.lottieanimation.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Menu
@@ -18,16 +21,22 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.foundation.shape.RectangleShape
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 enum class BottomTab { HOME, EXPLORE, PROFILE }
@@ -45,20 +54,9 @@ fun AppScaffold(
 ) {
     val scope = rememberCoroutineScope()
     val bottomPadding = if (bottomTab != null) 80.dp else 0.dp
-    // Drawer should start from the very top of the screen and stop above the
-    // bottom bar so the bar remains usable.
-    val topPadding = 0.dp
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.padding(top = topPadding, bottom = bottomPadding),
-                drawerShape = RectangleShape
-            ) {
-                drawerContent { scope.launch { drawerState.close() } }
-            }
-        }
-    ) {
+    val isDrawerVisible by remember { derivedStateOf { drawerState.targetValue == DrawerValue.Open } }
+
+    Box {
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -99,6 +97,32 @@ fun AppScaffold(
             }
         ) { inner ->
             Box(modifier = Modifier.padding(inner)) { content() }
+        }
+
+        if (isDrawerVisible.value) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = bottomPadding)
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .clickable { scope.launch { drawerState.close() } }
+            )
+        }
+
+        AnimatedVisibility(
+            visible = isDrawerVisible.value,
+            enter = slideInHorizontally { -it },
+            exit = slideOutHorizontally { -it }
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(250.dp)
+                    .padding(bottom = bottomPadding)
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                drawerContent { scope.launch { drawerState.close() } }
+            }
         }
     }
 }
