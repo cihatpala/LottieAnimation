@@ -28,7 +28,6 @@ import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +54,7 @@ import com.cihat.egitim.lottieanimation.data.FolderHeading
 import com.cihat.egitim.lottieanimation.data.UserFolder
 import com.cihat.egitim.lottieanimation.ui.components.AppScaffold
 import com.cihat.egitim.lottieanimation.ui.components.BottomTab
+import com.cihat.egitim.lottieanimation.ui.components.OverflowMenu
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -73,15 +73,20 @@ fun FolderListScreen(
     onTab: (BottomTab) -> Unit,
     onMenu: () -> Unit
 ) {
+    var showCreate by remember { mutableStateOf(false) }
     AppScaffold(
         title = "Klasörlerim",
         showBack = true,
         onBack = onBack,
         onMenu = onMenu,
         bottomTab = bottomTab,
-        onTabSelected = onTab
+        onTabSelected = onTab,
+        actions = {
+            OverflowMenu(listOf(
+                "Klasör Oluştur" to { showCreate = true }
+            ))
+        }
     ) {
-        var showCreate by remember { mutableStateOf(false) }
         var createName by remember { mutableStateOf("") }
         val newHeadings = remember { mutableStateListOf<String>() }
         var newHeadingText by remember { mutableStateOf("") }
@@ -110,16 +115,6 @@ fun FolderListScreen(
                     }
                 }
             }
-            ExtendedFloatingActionButton(
-                onClick = { showCreate = true },
-                icon = { Icon(Icons.Default.Add, contentDescription = "Add") },
-                text = { Text("Klasör Oluştur") },
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
         }
 
         if (showCreate) {
