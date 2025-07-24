@@ -16,5 +16,8 @@ import androidx.room.RoomDatabase
     version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun dao(): AppDao
+    abstract fun folderDao(): FolderDao
+    abstract fun quizDao(): QuizDao
+    abstract fun settingsDao(): SettingsDao
+    abstract fun sessionDao(): UserSessionDao
 }
