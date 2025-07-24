@@ -5,14 +5,32 @@ import com.cihat.egitim.lottieanimation.utils.NetworkUtils
 import androidx.lifecycle.ViewModel
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
 class AuthViewModel : ViewModel() {
     private val auth: FirebaseAuth = Firebase.auth
 
-    val currentUser
-        get() = auth.currentUser
+    /** Currently authenticated Firebase user, or null when logged out */
+    var currentUser: FirebaseUser? by mutableStateOf(auth.currentUser)
+        private set
+
+    private val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+        currentUser = firebaseAuth.currentUser
+    }
+
+    init {
+        auth.addAuthStateListener(listener)
+    }
+
+    override fun onCleared() {
+        auth.removeAuthStateListener(listener)
+        super.onCleared()
+    }
 
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
         if (email.isBlank() || password.isBlank()) {
