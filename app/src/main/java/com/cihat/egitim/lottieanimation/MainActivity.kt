@@ -12,6 +12,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.foundation.shape.RectangleShape
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,20 +74,38 @@ class MainActivity : ComponentActivity() {
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
-                        ModalDrawerSheet {
+                        ModalDrawerSheet(
+                            modifier = Modifier.padding(bottom = 80.dp),
+                            drawerShape = RectangleShape
+                        ) {
+                            val closeDrawer: () -> Unit = {
+                                coroutineScope.launch { drawerState.close() }
+                            }
                             AppDrawer(
                                 isLoggedIn = authViewModel.currentUser != null,
-                                onClose = { coroutineScope.launch { drawerState.close() } },
-                                onProfileInfo = { navController.navigate(Screen.MyProfile.route) },
+                                onClose = closeDrawer,
+                                onProfileInfo = {
+                                    navController.navigate(Screen.MyProfile.route)
+                                    closeDrawer()
+                                },
                                 onPro = {},
-                                onAuth = { navController.navigate(Screen.Auth.route) },
-                                onSettings = { navController.navigate(Screen.Settings.route) },
-                                onFolders = { navController.navigate(Screen.FolderList.route) },
+                                onAuth = {
+                                    navController.navigate(Screen.Auth.route)
+                                    closeDrawer()
+                                },
+                                onSettings = {
+                                    navController.navigate(Screen.Settings.route)
+                                    closeDrawer()
+                                },
+                                onFolders = {
+                                    navController.navigate(Screen.FolderList.route)
+                                    closeDrawer()
+                                },
                                 onSupport = {},
                                 onRate = {},
                                 onLogout = {
                                     authViewModel.logout(navController.context)
-                                    coroutineScope.launch { drawerState.close() }
+                                    closeDrawer()
                                 }
                             )
                         }
