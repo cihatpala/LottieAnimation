@@ -201,6 +201,7 @@ fun AppNavHost(
             QuizListScreen(
                 quizzes = quizViewModel.quizzes,
                 folders = quizViewModel.folders,
+                currentUser = authViewModel.currentUser,
                 onQuiz = { quizIdx, boxIdx ->
                     quizViewModel.setCurrentQuiz(quizIdx)
                     if (quizViewModel.startQuiz(boxIdx)) {

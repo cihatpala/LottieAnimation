@@ -48,6 +48,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import coil.compose.AsyncImage
+import com.google.firebase.auth.FirebaseUser
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,6 +116,7 @@ private fun headingsFromQuestions(questions: List<Question>): List<FolderHeading
 fun QuizListScreen(
     quizzes: List<UserQuiz>,
     folders: List<UserFolder>,
+    currentUser: FirebaseUser?,
     onQuiz: (Int, Int) -> Unit,
     onView: (Int, Int) -> Unit,
     onRename: (Int, String) -> Unit,
@@ -349,14 +352,34 @@ fun QuizListScreen(
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
                             ) {
+                                val folderName = folders.find { it.id == quiz.folderId }?.name ?: ""
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(64.dp)
+                                        .height(72.dp)
                                         .padding(horizontal = 8.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Text(text = quiz.name, modifier = Modifier.weight(1f))
+                                    Row(
+                                        modifier = Modifier.weight(1f),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        currentUser?.photoUrl?.let { url ->
+                                            AsyncImage(
+                                                model = url,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(CircleShape)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                        }
+                                        Column {
+                                            Text(currentUser?.displayName ?: "")
+                                            Text(folderName)
+                                            Text(quiz.name)
+                                        }
+                                    }
                                     FilledIconButton(
                                         onClick = { expanded = !expanded },
                                         enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
