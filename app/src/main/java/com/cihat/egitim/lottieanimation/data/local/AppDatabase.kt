@@ -13,7 +13,7 @@ import androidx.room.RoomDatabase
         SettingEntity::class,
         UserSessionEntity::class
     ],
-    version = 3
+    version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun folderDao(): FolderDao
