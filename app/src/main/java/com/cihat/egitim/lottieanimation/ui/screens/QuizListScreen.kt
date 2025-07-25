@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.SwipeableState
 import androidx.compose.material.swipeable
@@ -129,6 +130,7 @@ fun QuizListScreen(
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onAddQuestion: (String, String, String, String, Int) -> Unit,
+    onClaimQuiz: (Int) -> Unit,
     onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
@@ -334,19 +336,31 @@ fun QuizListScreen(
                                 IconButton(
                                     onClick = {
                                         scope.launch { swipeState.animateTo(0) }
-                                        onSetCurrentQuiz(quizIndex)
-                                        addDialogFor = quizIndex
+                                        if (quiz.isImported) {
+                                            onClaimQuiz(quizIndex)
+                                        } else {
+                                            onSetCurrentQuiz(quizIndex)
+                                            addDialogFor = quizIndex
+                                        }
                                     },
                                     enabled = swipeState.currentValue == 2,
                                     modifier = Modifier
                                         .background(MaterialTheme.colorScheme.primary)
                                         .size(actionWidth)
                                 ) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        contentDescription = "Add",
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
+                                    if (quiz.isImported) {
+                                        Icon(
+                                            Icons.Default.CloudUpload,
+                                            contentDescription = "Claim",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    } else {
+                                        Icon(
+                                            Icons.Default.Add,
+                                            contentDescription = "Add",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
                                 }
                             }
 
@@ -389,7 +403,7 @@ fun QuizListScreen(
                                             Spacer(Modifier.width(8.dp))
                                         }
                                         Column {
-                                            val name = currentUser?.displayName ?: storedUser?.name ?: ""
+                                            val name = quiz.authorName ?: currentUser?.displayName ?: storedUser?.name ?: ""
                                             Text(name)
                                             Text(folderName)
                                             Text(quiz.name)

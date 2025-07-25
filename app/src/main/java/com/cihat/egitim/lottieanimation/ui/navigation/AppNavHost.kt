@@ -252,14 +252,21 @@ fun AppNavHost(
                 onMoveQuiz = { from, to -> quizViewModel.moveQuiz(from, to) },
                 onCreate = { name, count, folderId ->
                     val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
-                    quizViewModel.createQuiz(name, count, emptyList(), folderId, photo)
+                    val displayName = authViewModel.currentUser?.displayName ?: authViewModel.storedUser?.name
+                    quizViewModel.createQuiz(name, count, emptyList(), folderId, photo, displayName)
                 },
                 onCreateWithQuestion = { name, count, folderId, topic, sub, q, a ->
                     val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
-                    quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a, photo)
+                    val displayName = authViewModel.currentUser?.displayName ?: authViewModel.storedUser?.name
+                    quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a, photo, displayName)
                 },
                 onAddQuestion = { q, a, topic, sub, box ->
                     quizViewModel.addQuestion(q, a, topic, sub, box)
+                },
+                onClaimQuiz = { idx ->
+                    val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
+                    val displayName = authViewModel.currentUser?.displayName ?: authViewModel.storedUser?.name
+                    quizViewModel.claimQuiz(idx, displayName, photo)
                 },
                 onSetCurrentQuiz = { idx -> quizViewModel.setCurrentQuiz(idx) },
                 onFolders = { navController.navigate(Screen.FolderList.route) },

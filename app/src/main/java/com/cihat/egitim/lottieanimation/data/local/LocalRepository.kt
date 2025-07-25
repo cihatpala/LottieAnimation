@@ -68,7 +68,10 @@ class LocalRepository(private val db: AppDatabase) {
                 boxes = boxes,
                 subHeadings = sList.sortedBy { it.boxIndex }.map { it.name }.toMutableList(),
                 folderId = quiz.folderId,
-                authorPhotoUrl = null
+                author = null,
+                authorName = null,
+                authorPhotoUrl = null,
+                isImported = false
             )
         }
     }

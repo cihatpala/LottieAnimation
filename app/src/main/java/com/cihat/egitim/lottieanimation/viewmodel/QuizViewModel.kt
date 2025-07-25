@@ -324,7 +324,8 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         count: Int,
         subHeadings: List<String> = emptyList(),
         folderId: Int? = null,
-        authorPhotoUrl: String? = null
+        authorPhotoUrl: String? = null,
+        authorName: String? = null
     ) {
         if (count <= 0) return
         // Prevent creating multiple quizzes with the same name
@@ -337,6 +338,7 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                 boxes = MutableList(count) { mutableListOf() },
                 subHeadings = subHeadings.toMutableList(),
                 folderId = folderId,
+                authorName = authorName,
                 authorPhotoUrl = authorPhotoUrl
             )
         )
@@ -355,9 +357,10 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         subtopic: String,
         question: String,
         answer: String,
-        authorPhotoUrl: String? = null
+        authorPhotoUrl: String? = null,
+        authorName: String? = null
     ) {
-        createQuiz(name, count, emptyList(), folderId, authorPhotoUrl)
+        createQuiz(name, count, emptyList(), folderId, authorPhotoUrl, authorName)
         addQuestion(question, answer, topic, subtopic, 0)
     }
 
@@ -380,8 +383,25 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                 id = nextQuizId++,
                 name = quiz.name,
                 boxes = newBoxes,
-                authorPhotoUrl = quiz.authorPhotoUrl
+                author = quiz.author,
+                authorName = quiz.authorName,
+                authorPhotoUrl = quiz.authorPhotoUrl,
+                isImported = true
             )
+        )
+        persistState()
+    }
+
+    /**
+     * Marks an imported quiz as owned by the current user.
+     */
+    fun claimQuiz(index: Int, authorName: String?, authorPhotoUrl: String?) {
+        val quiz = quizzes.getOrNull(index) ?: return
+        quizzes[index] = quiz.copy(
+            author = null,
+            authorName = authorName,
+            authorPhotoUrl = authorPhotoUrl,
+            isImported = false
         )
         persistState()
     }
