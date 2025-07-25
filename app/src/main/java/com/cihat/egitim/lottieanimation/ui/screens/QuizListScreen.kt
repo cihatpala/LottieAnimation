@@ -172,6 +172,7 @@ fun QuizListScreen(
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
         var addDialogFor by remember { mutableStateOf<Int?>(null) }
+        var claimDialogFor by remember { mutableStateOf<Int?>(null) }
         var openSwipeId by remember { mutableStateOf<Int?>(null) }
         val swipeStates = remember { mutableMapOf<Int, SwipeableState<Int>>() }
 
@@ -354,7 +355,7 @@ fun QuizListScreen(
                                     IconButton(
                                         onClick = {
                                             scope.launch { swipeState.animateTo(0) }
-                                            onClaimQuiz(quizIndex)
+                                            claimDialogFor = quizIndex
                                         },
                                         enabled = swipeState.currentValue == 2,
                                         modifier = Modifier
@@ -640,6 +641,22 @@ fun QuizListScreen(
                     onSetCurrentQuiz(idx)
                     addDialogFor = idx
                 }
+            )
+        }
+
+        claimDialogFor?.let { idx ->
+            AlertDialog(
+                onDismissRequest = { claimDialogFor = null },
+                confirmButton = {
+                    TextButton(onClick = {
+                        onClaimQuiz(idx)
+                        claimDialogFor = null
+                    }) { Text("Kabul et") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { claimDialogFor = null }) { Text("Reddet") }
+                },
+                text = { Text("Quiz referanslı olacak. Kabul ediyor musunuz?") }
             )
         }
     }
