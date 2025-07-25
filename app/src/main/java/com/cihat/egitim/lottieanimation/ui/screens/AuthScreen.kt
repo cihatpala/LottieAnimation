@@ -103,7 +103,7 @@ fun AuthScreen(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .height(80.dp)
+                        .aspectRatio(1f)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Login, contentDescription = null)
@@ -116,7 +116,7 @@ fun AuthScreen(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .height(80.dp)
+                        .aspectRatio(1f)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.PersonAdd, contentDescription = null)
@@ -142,7 +142,7 @@ fun AuthScreen(
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.8f)
                     .height(48.dp)
             ) {
                 Icon(
