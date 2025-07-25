@@ -251,10 +251,12 @@ fun AppNavHost(
                 onDelete = { index -> quizViewModel.deleteQuiz(index) },
                 onMoveQuiz = { from, to -> quizViewModel.moveQuiz(from, to) },
                 onCreate = { name, count, folderId ->
-                    quizViewModel.createQuiz(name, count, emptyList(), folderId)
+                    val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
+                    quizViewModel.createQuiz(name, count, emptyList(), folderId, photo)
                 },
                 onCreateWithQuestion = { name, count, folderId, topic, sub, q, a ->
-                    quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a)
+                    val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
+                    quizViewModel.createQuizWithQuestion(name, count, folderId, topic, sub, q, a, photo)
                 },
                 onAddQuestion = { q, a, topic, sub, box ->
                     quizViewModel.addQuestion(q, a, topic, sub, box)

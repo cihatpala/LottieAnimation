@@ -323,7 +323,8 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         name: String,
         count: Int,
         subHeadings: List<String> = emptyList(),
-        folderId: Int? = null
+        folderId: Int? = null,
+        authorPhotoUrl: String? = null
     ) {
         if (count <= 0) return
         // Prevent creating multiple quizzes with the same name
@@ -335,7 +336,8 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                 name = name,
                 boxes = MutableList(count) { mutableListOf() },
                 subHeadings = subHeadings.toMutableList(),
-                folderId = folderId
+                folderId = folderId,
+                authorPhotoUrl = authorPhotoUrl
             )
         )
         currentQuizIndex = quizzes.lastIndex
@@ -352,9 +354,10 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         topic: String,
         subtopic: String,
         question: String,
-        answer: String
+        answer: String,
+        authorPhotoUrl: String? = null
     ) {
-        createQuiz(name, count, emptyList(), folderId)
+        createQuiz(name, count, emptyList(), folderId, authorPhotoUrl)
         addQuestion(question, answer, topic, subtopic, 0)
     }
 
@@ -372,7 +375,14 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         if (exists) return
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
-        quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
+        quizzes.add(
+            UserQuiz(
+                id = nextQuizId++,
+                name = quiz.name,
+                boxes = newBoxes,
+                authorPhotoUrl = quiz.authorPhotoUrl
+            )
+        )
         persistState()
     }
 

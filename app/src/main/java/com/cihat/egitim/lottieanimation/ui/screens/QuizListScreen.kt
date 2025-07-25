@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.SwipeableState
 import androidx.compose.material.swipeable
@@ -367,14 +368,23 @@ fun QuizListScreen(
                                         modifier = Modifier.weight(1f),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        val photo = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
-                                        photo?.let { url ->
+                                        val photo = quiz.authorPhotoUrl
+                                            ?: currentUser?.photoUrl?.toString()
+                                            ?: storedUser?.photoUrl
+                                        if (photo != null) {
                                             AsyncImage(
-                                                model = url,
+                                                model = photo,
                                                 contentDescription = null,
                                                 modifier = Modifier
                                                     .size(40.dp)
                                                     .clip(CircleShape)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
+                                        } else {
+                                            Icon(
+                                                Icons.Default.Person,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(40.dp)
                                             )
                                             Spacer(Modifier.width(8.dp))
                                         }
