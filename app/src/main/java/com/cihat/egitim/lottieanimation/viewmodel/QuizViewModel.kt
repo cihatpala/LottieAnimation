@@ -117,48 +117,24 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         }
 
     /** Sample public quizzes that could come from a backend in a real app */
-    val publicQuizzes: List<PublicQuiz> = listOf(
+    val publicQuizzes: List<PublicQuiz> = List(10) { i ->
+        val index = i + 1
         PublicQuiz(
-            name = "Capital Cities",
-            author = "Alice",
+            name = "Sample Quiz $index",
+            author = "user$index",
+            authorName = "User $index",
             questions = listOf(
                 Question(
-                    text = "Capital of France?",
-                    answer = "Paris",
-                    topic = "Geography",
-                    subtopic = "Europe"
-                ),
-                Question(
-                    text = "Capital of Spain?",
-                    answer = "Madrid",
-                    topic = "Geography",
-                    subtopic = "Europe"
+                    text = "Sample question $index?",
+                    answer = "Answer $index",
+                    topic = "General",
+                    subtopic = "Demo"
                 )
             ),
-            authorPhotoUrl = "https://randomuser.me/api/portraits/women/10.jpg2",
-            folderName = "Geography"
-        ),
-        PublicQuiz(
-            name = "Math Basics",
-            author = "Bob",
-            questions = listOf(
-                Question(
-                    text = "2 + 2?",
-                    answer = "4",
-                    topic = "Arithmetic",
-                    subtopic = "Addition"
-                ),
-                Question(
-                    text = "5 * 3?",
-                    answer = "15",
-                    topic = "Arithmetic",
-                    subtopic = "Multiplication"
-                )
-            ),
-            authorPhotoUrl = "https://randomuser.me/api/portraits/men/22.jpg",
-            folderName = "Math"
+            authorPhotoUrl = "https://randomuser.me/api/portraits/men/${10 + i}.jpg",
+            folderName = "General"
         )
-    )
+    }
 
     private var currentBoxIndex by mutableStateOf(0)
     private var currentQuestionIndex by mutableStateOf(0)

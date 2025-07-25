@@ -333,7 +333,7 @@ fun AppNavHost(
                     navController.navigate(
                         Screen.PublicProfile.createRoute(
                             username = quiz.author,
-                            name = quiz.author,
+                            name = quiz.authorName,
                             photoUrl = quiz.authorPhotoUrl
                         )
                     )
