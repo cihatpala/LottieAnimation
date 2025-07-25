@@ -73,6 +73,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
