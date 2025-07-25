@@ -21,5 +21,9 @@ data class UserQuizEntity(
     @PrimaryKey val id: Int,
     val name: String,
     val folderId: Int? = null,
-    val boxCount: Int
+    val boxCount: Int,
+    val author: String? = null,
+    val authorName: String? = null,
+    val authorPhotoUrl: String? = null,
+    val isImported: Boolean = false,
 )

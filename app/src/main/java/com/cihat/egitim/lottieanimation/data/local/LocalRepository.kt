@@ -68,10 +68,10 @@ class LocalRepository(private val db: AppDatabase) {
                 boxes = boxes,
                 subHeadings = sList.sortedBy { it.boxIndex }.map { it.name }.toMutableList(),
                 folderId = quiz.folderId,
-                author = null,
-                authorName = null,
-                authorPhotoUrl = null,
-                isImported = false
+                author = quiz.author,
+                authorName = quiz.authorName,
+                authorPhotoUrl = quiz.authorPhotoUrl,
+                isImported = quiz.isImported,
             )
         }
     }
@@ -114,7 +114,18 @@ class LocalRepository(private val db: AppDatabase) {
             quizDao.clearQuizzes()
             quizDao.clearQuestions()
             quizDao.clearSubHeadings()
-            val quizEntities = snapshot.map { UserQuizEntity(it.id, it.name, it.folderId, it.boxes.size) }
+            val quizEntities = snapshot.map {
+                UserQuizEntity(
+                    id = it.id,
+                    name = it.name,
+                    folderId = it.folderId,
+                    boxCount = it.boxes.size,
+                    author = it.author,
+                    authorName = it.authorName,
+                    authorPhotoUrl = it.authorPhotoUrl,
+                    isImported = it.isImported,
+                )
+            }
             val questionEntities = mutableListOf<QuestionEntity>()
             val subEntities = mutableListOf<SubHeadingEntity>()
             snapshot.forEach { quiz ->

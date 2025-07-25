@@ -336,28 +336,34 @@ fun QuizListScreen(
                                 IconButton(
                                     onClick = {
                                         scope.launch { swipeState.animateTo(0) }
-                                        if (quiz.isImported) {
-                                            onClaimQuiz(quizIndex)
-                                        } else {
-                                            onSetCurrentQuiz(quizIndex)
-                                            addDialogFor = quizIndex
-                                        }
+                                        onSetCurrentQuiz(quizIndex)
+                                        addDialogFor = quizIndex
                                     },
                                     enabled = swipeState.currentValue == 2,
                                     modifier = Modifier
                                         .background(MaterialTheme.colorScheme.primary)
                                         .size(actionWidth)
                                 ) {
-                                    if (quiz.isImported) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        contentDescription = "Add",
+                                        tint = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                }
+                                if (quiz.isImported) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            onClaimQuiz(quizIndex)
+                                        },
+                                        enabled = swipeState.currentValue == 2,
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.primary)
+                                            .size(actionWidth)
+                                    ) {
                                         Icon(
                                             Icons.Default.CloudUpload,
                                             contentDescription = "Claim",
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    } else {
-                                        Icon(
-                                            Icons.Default.Add,
-                                            contentDescription = "Add",
                                             tint = MaterialTheme.colorScheme.onPrimary
                                         )
                                     }
