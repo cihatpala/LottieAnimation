@@ -50,16 +50,16 @@ fun AppScaffold(
             bottomTab?.let { tab ->
                 NavigationBar {
                     NavigationBarItem(
-                        selected = tab == BottomTab.HOME,
-                        onClick = { onTabSelected(BottomTab.HOME) },
-                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
-                        label = { Text("Home") }
-                    )
-                    NavigationBarItem(
                         selected = tab == BottomTab.EXPLORE,
                         onClick = { onTabSelected(BottomTab.EXPLORE) },
                         icon = { Icon(Icons.Default.Search, contentDescription = "Explore") },
                         label = { Text("Explore") }
+                    )
+                    NavigationBarItem(
+                        selected = tab == BottomTab.HOME,
+                        onClick = { onTabSelected(BottomTab.HOME) },
+                        icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                        label = { Text("Home") }
                     )
                     NavigationBarItem(
                         selected = tab == BottomTab.PROFILE,
