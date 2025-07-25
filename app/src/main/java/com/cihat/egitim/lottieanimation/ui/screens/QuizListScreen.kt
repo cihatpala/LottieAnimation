@@ -411,7 +411,24 @@ fun QuizListScreen(
                                         }
                                         Column {
                                             val name = quiz.authorName ?: currentUser?.displayName ?: storedUser?.name ?: ""
-                                            Text(name)
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(name)
+                                                if (!quiz.isImported && quiz.author != null) {
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Icon(
+                                                        Icons.Default.Download,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.tertiary,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(Modifier.width(2.dp))
+                                                    Text(
+                                                        quiz.author,
+                                                        color = MaterialTheme.colorScheme.tertiary,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                }
+                                            }
                                             Text(folderName)
                                             Text(quiz.name)
                                         }
@@ -645,18 +662,15 @@ fun QuizListScreen(
         }
 
         claimDialogFor?.let { idx ->
-            AlertDialog(
-                onDismissRequest = { claimDialogFor = null },
-                confirmButton = {
-                    TextButton(onClick = {
-                        onClaimQuiz(idx)
-                        claimDialogFor = null
-                    }) { Text("Kabul et") }
-                },
-                dismissButton = {
-                    TextButton(onClick = { claimDialogFor = null }) { Text("Reddet") }
-                },
-                text = { Text("Quiz referanslı olacak. Kabul ediyor musunuz?") }
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "Quiz referanslı olacak. Kabul ediyor musunuz?",
+                onDismiss = { claimDialogFor = null },
+                confirmText = "Kabul et",
+                onConfirm = {
+                    onClaimQuiz(idx)
+                    claimDialogFor = null
+                }
             )
         }
     }

@@ -398,7 +398,6 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
     fun claimQuiz(index: Int, authorName: String?, authorPhotoUrl: String?) {
         val quiz = quizzes.getOrNull(index) ?: return
         quizzes[index] = quiz.copy(
-            author = null,
             authorName = authorName,
             authorPhotoUrl = authorPhotoUrl,
             isImported = false
