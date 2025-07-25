@@ -10,5 +10,13 @@ data class UserQuiz(
     /** Optional sub headings defined by the user */
     val subHeadings: MutableList<String> = mutableListOf(),
     /** Id of the folder this quiz belongs to */
-    val folderId: Int? = null
+    val folderId: Int? = null,
+    /** Username of the quiz author if imported */
+    val author: String? = null,
+    /** Full name of the quiz author */
+    val authorName: String? = null,
+    /** Photo of the quiz owner if imported from another user */
+    val authorPhotoUrl: String? = null,
+    /** Whether this quiz was imported from another user */
+    val isImported: Boolean = false,
 )

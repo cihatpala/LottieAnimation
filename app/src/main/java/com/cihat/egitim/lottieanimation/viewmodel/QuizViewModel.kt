@@ -117,48 +117,24 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         }
 
     /** Sample public quizzes that could come from a backend in a real app */
-    val publicQuizzes: List<PublicQuiz> = listOf(
+    val publicQuizzes: List<PublicQuiz> = List(10) { i ->
+        val index = i + 1
         PublicQuiz(
-            name = "Capital Cities",
-            author = "Alice",
+            name = "Sample Quiz $index",
+            author = "user$index",
+            authorName = "User $index",
             questions = listOf(
                 Question(
-                    text = "Capital of France?",
-                    answer = "Paris",
-                    topic = "Geography",
-                    subtopic = "Europe"
-                ),
-                Question(
-                    text = "Capital of Spain?",
-                    answer = "Madrid",
-                    topic = "Geography",
-                    subtopic = "Europe"
+                    text = "Sample question $index?",
+                    answer = "Answer $index",
+                    topic = "General",
+                    subtopic = "Demo"
                 )
             ),
-            authorPhotoUrl = "https://randomuser.me/api/portraits/women/10.jpg2",
-            folderName = "Geography"
-        ),
-        PublicQuiz(
-            name = "Math Basics",
-            author = "Bob",
-            questions = listOf(
-                Question(
-                    text = "2 + 2?",
-                    answer = "4",
-                    topic = "Arithmetic",
-                    subtopic = "Addition"
-                ),
-                Question(
-                    text = "5 * 3?",
-                    answer = "15",
-                    topic = "Arithmetic",
-                    subtopic = "Multiplication"
-                )
-            ),
-            authorPhotoUrl = "https://randomuser.me/api/portraits/men/22.jpg",
-            folderName = "Math"
+            authorPhotoUrl = "https://randomuser.me/api/portraits/men/${10 + i}.jpg",
+            folderName = "General"
         )
-    )
+    }
 
     private var currentBoxIndex by mutableStateOf(0)
     private var currentQuestionIndex by mutableStateOf(0)
@@ -347,7 +323,9 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         name: String,
         count: Int,
         subHeadings: List<String> = emptyList(),
-        folderId: Int? = null
+        folderId: Int? = null,
+        authorPhotoUrl: String? = null,
+        authorName: String? = null
     ) {
         if (count <= 0) return
         // Prevent creating multiple quizzes with the same name
@@ -359,7 +337,9 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                 name = name,
                 boxes = MutableList(count) { mutableListOf() },
                 subHeadings = subHeadings.toMutableList(),
-                folderId = folderId
+                folderId = folderId,
+                authorName = authorName,
+                authorPhotoUrl = authorPhotoUrl
             )
         )
         currentQuizIndex = quizzes.lastIndex
@@ -376,9 +356,11 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         topic: String,
         subtopic: String,
         question: String,
-        answer: String
+        answer: String,
+        authorPhotoUrl: String? = null,
+        authorName: String? = null
     ) {
-        createQuiz(name, count, emptyList(), folderId)
+        createQuiz(name, count, emptyList(), folderId, authorPhotoUrl, authorName)
         addQuestion(question, answer, topic, subtopic, 0)
     }
 
@@ -396,7 +378,30 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         if (exists) return
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
-        quizzes.add(UserQuiz(nextQuizId++, quiz.name, newBoxes))
+        quizzes.add(
+            UserQuiz(
+                id = nextQuizId++,
+                name = quiz.name,
+                boxes = newBoxes,
+                author = quiz.author,
+                authorName = quiz.authorName,
+                authorPhotoUrl = quiz.authorPhotoUrl,
+                isImported = true
+            )
+        )
+        persistState()
+    }
+
+    /**
+     * Marks an imported quiz as owned by the current user.
+     */
+    fun claimQuiz(index: Int, authorName: String?, authorPhotoUrl: String?) {
+        val quiz = quizzes.getOrNull(index) ?: return
+        quizzes[index] = quiz.copy(
+            authorName = authorName,
+            authorPhotoUrl = authorPhotoUrl,
+            isImported = false
+        )
         persistState()
     }
 

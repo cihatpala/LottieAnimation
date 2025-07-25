@@ -27,6 +27,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.rememberSwipeableState
 import androidx.compose.material.SwipeableState
 import androidx.compose.material.swipeable
@@ -71,6 +73,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
@@ -128,6 +131,7 @@ fun QuizListScreen(
     onCreate: (String, Int, Int?) -> Unit,
     onCreateWithQuestion: (String, Int, Int?, String, String, String, String) -> Unit,
     onAddQuestion: (String, String, String, String, Int) -> Unit,
+    onClaimQuiz: (Int) -> Unit,
     onSetCurrentQuiz: (Int) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
@@ -169,6 +173,7 @@ fun QuizListScreen(
         var startDialogFor by remember { mutableStateOf<Int?>(null) }
         var emptyAlertFor by remember { mutableStateOf<Int?>(null) }
         var addDialogFor by remember { mutableStateOf<Int?>(null) }
+        var claimDialogFor by remember { mutableStateOf<Int?>(null) }
         var openSwipeId by remember { mutableStateOf<Int?>(null) }
         val swipeStates = remember { mutableMapOf<Int, SwipeableState<Int>>() }
 
@@ -347,6 +352,24 @@ fun QuizListScreen(
                                         tint = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
+                                if (quiz.isImported) {
+                                    IconButton(
+                                        onClick = {
+                                            scope.launch { swipeState.animateTo(0) }
+                                            claimDialogFor = quizIndex
+                                        },
+                                        enabled = swipeState.currentValue == 2,
+                                        modifier = Modifier
+                                            .background(MaterialTheme.colorScheme.primary)
+                                            .size(actionWidth)
+                                    ) {
+                                        Icon(
+                                            Icons.Default.CloudUpload,
+                                            contentDescription = "Claim",
+                                            tint = MaterialTheme.colorScheme.onPrimary
+                                        )
+                                    }
+                                }
                             }
 
                             Column(
@@ -367,20 +390,46 @@ fun QuizListScreen(
                                         modifier = Modifier.weight(1f),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        val photo = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
-                                        photo?.let { url ->
+                                        val photo = quiz.authorPhotoUrl
+                                            ?: currentUser?.photoUrl?.toString()
+                                            ?: storedUser?.photoUrl
+                                        if (photo != null) {
                                             AsyncImage(
-                                                model = url,
+                                                model = photo,
                                                 contentDescription = null,
                                                 modifier = Modifier
                                                     .size(40.dp)
                                                     .clip(CircleShape)
                                             )
                                             Spacer(Modifier.width(8.dp))
+                                        } else {
+                                            Icon(
+                                                Icons.Default.Person,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(40.dp)
+                                            )
+                                            Spacer(Modifier.width(8.dp))
                                         }
                                         Column {
-                                            val name = currentUser?.displayName ?: storedUser?.name ?: ""
-                                            Text(name)
+                                            val name = quiz.authorName ?: currentUser?.displayName ?: storedUser?.name ?: ""
+                                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                                Text(name)
+                                                if (!quiz.isImported && quiz.author != null) {
+                                                    Spacer(Modifier.width(4.dp))
+                                                    Icon(
+                                                        Icons.Default.Download,
+                                                        contentDescription = null,
+                                                        tint = MaterialTheme.colorScheme.tertiary,
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(Modifier.width(2.dp))
+                                                    Text(
+                                                        quiz.author,
+                                                        color = MaterialTheme.colorScheme.tertiary,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                }
+                                            }
                                             Text(folderName)
                                             Text(quiz.name)
                                         }
@@ -609,6 +658,19 @@ fun QuizListScreen(
                     emptyAlertFor = null
                     onSetCurrentQuiz(idx)
                     addDialogFor = idx
+                }
+            )
+        }
+
+        claimDialogFor?.let { idx ->
+            PrimaryAlert(
+                title = "Uyarı",
+                message = "Quiz referanslı olacak. Kabul ediyor musunuz?",
+                onDismiss = { claimDialogFor = null },
+                confirmText = "Kabul et",
+                onConfirm = {
+                    onClaimQuiz(idx)
+                    claimDialogFor = null
                 }
             )
         }
