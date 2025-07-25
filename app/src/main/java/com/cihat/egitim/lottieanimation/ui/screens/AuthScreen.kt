@@ -142,7 +142,7 @@ fun AuthScreen(
                 },
                 shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth()
                     .height(48.dp)
             ) {
                 Icon(

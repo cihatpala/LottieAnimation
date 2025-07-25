@@ -73,17 +73,11 @@ fun AppNavHost(
     }
     NavHost(navController = navController, startDestination = Screen.Splash.route) {
         composable(Screen.Splash.route) {
-            LaunchedEffect(authViewModel.isSessionLoaded, authViewModel.currentUser, authViewModel.storedUser) {
+            LaunchedEffect(authViewModel.isSessionLoaded) {
                 if (!authViewModel.isSessionLoaded) return@LaunchedEffect
                 delay(2500)
-                if (authViewModel.currentUser != null || authViewModel.storedUser != null) {
-                    navController.navigate(Screen.QuizList.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
-                } else {
-                    navController.navigate(Screen.Auth.route) {
-                        popUpTo(Screen.Splash.route) { inclusive = true }
-                    }
+                navController.navigate(Screen.QuizList.route) {
+                    popUpTo(Screen.Splash.route) { inclusive = true }
                 }
             }
             SplashScreen()
