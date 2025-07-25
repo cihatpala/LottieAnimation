@@ -82,7 +82,10 @@ fun AuthScreen(
             Image(
                 painter = painterResource(id = R.drawable.knowledge_logo),
                 contentDescription = null,
-                modifier = Modifier.size(250.dp),
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+                    .aspectRatio(1f)
+                    .sizeIn(maxWidth = 250.dp),
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground)
             )
             Spacer(Modifier.height(24.dp))
@@ -100,7 +103,7 @@ fun AuthScreen(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .aspectRatio(1f)
+                        .height(80.dp)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.Login, contentDescription = null)
@@ -113,7 +116,7 @@ fun AuthScreen(
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .aspectRatio(1f)
+                        .height(80.dp)
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(Icons.Default.PersonAdd, contentDescription = null)
@@ -123,7 +126,8 @@ fun AuthScreen(
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Button(onClick = {
+            Button(
+                onClick = {
                 if (!NetworkUtils.isConnected(context)) {
                     showError = true
                 } else {
@@ -135,7 +139,12 @@ fun AuthScreen(
                         .build()
                     launcher.launch(intent)
                 }
-            }) {
+                },
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_google_logo),
                     contentDescription = "Google"
