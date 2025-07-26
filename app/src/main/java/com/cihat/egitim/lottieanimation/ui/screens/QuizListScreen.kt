@@ -281,101 +281,8 @@ fun QuizListScreen(
                         Box(
                             modifier = dragModifier
                                 .fillMaxWidth()
-                                .clipToBounds()
-                                .swipeable(
-                                    state = swipeState,
-                                    anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
-                                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
-                                    orientation = Orientation.Horizontal
-                                )
                                 .animateItem()
                         ) {
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterEnd)
-                                    .height(72.dp)
-                                    .alpha(revealProgressEnd)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showRename = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.tertiary)
-                                        .size(actionWidth)
-                                        .clip(CircleShape)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Edit",
-                                        tint = MaterialTheme.colorScheme.onTertiary
-                                    )
-                                }
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        showDelete = true
-                                    },
-                                    enabled = swipeState.currentValue == 1,
-                                    modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.error)
-                                        .size(actionWidth)
-                                        .clip(CircleShape)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Delete,
-                                        contentDescription = "Delete",
-                                        tint = MaterialTheme.colorScheme.onError
-                                    )
-                                }
-                            }
-
-                            Row(
-                                modifier = Modifier
-                                    .align(Alignment.CenterStart)
-                                    .height(72.dp)
-                                    .alpha(revealProgressStart)
-                            ) {
-                                IconButton(
-                                    onClick = {
-                                        scope.launch { swipeState.animateTo(0) }
-                                        onSetCurrentQuiz(quizIndex)
-                                        addDialogFor = quizIndex
-                                    },
-                                    enabled = swipeState.currentValue == 2,
-                                    modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.primary)
-                                        .size(actionWidth)
-                                        .clip(CircleShape)
-                                ) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        contentDescription = "Add",
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                                if (quiz.isImported) {
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch { swipeState.animateTo(0) }
-                                            claimDialogFor = quizIndex
-                                        },
-                                        enabled = swipeState.currentValue == 2,
-                                        modifier = Modifier
-                                            .background(MaterialTheme.colorScheme.primary)
-                                            .size(actionWidth)
-                                            .clip(CircleShape)
-                                    ) {
-                                        Icon(
-                                            Icons.Default.CloudUpload,
-                                            contentDescription = "Claim",
-                                            tint = MaterialTheme.colorScheme.onPrimary
-                                        )
-                                    }
-                                }
-                            }
 
                             Card(
                                 modifier = Modifier
@@ -449,102 +356,201 @@ fun QuizListScreen(
                                     }
                                 }
 
-                                Column(
+                                Box(
                                     modifier = Modifier
-                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                         .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
+                                        .clipToBounds()
+                                        .swipeable(
+                                            state = swipeState,
+                                            anchors = mapOf(-maxOffset to 1, 0f to 0, maxOffset to 2),
+                                            thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                                            orientation = Orientation.Horizontal
+                                        )
                                 ) {
-                                    val folderName = folders.find { it.id == quiz.folderId }?.name ?: ""
                                     Row(
                                         modifier = Modifier
-                                            .fillMaxWidth()
+                                            .align(Alignment.CenterEnd)
                                             .height(72.dp)
-                                            .padding(horizontal = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                            .alpha(revealProgressEnd)
                                     ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(folderName, style = MaterialTheme.typography.labelSmall)
-                                            Text(quiz.name, style = MaterialTheme.typography.bodyLarge)
-                                        }
-                                        FilledIconButton(
-                                            onClick = { expanded = !expanded },
-                                            enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
-                                            colors = IconButtonDefaults.filledIconButtonColors(),
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch { swipeState.animateTo(0) }
+                                                showRename = true
+                                            },
+                                            enabled = swipeState.currentValue == 1,
+                                            modifier = Modifier
+                                                .background(MaterialTheme.colorScheme.tertiary)
+                                                .size(actionWidth)
+                                                .clip(CircleShape)
                                         ) {
-                                            Icon(Icons.Default.Description, contentDescription = "Detay")
+                                            Icon(
+                                                Icons.Default.Edit,
+                                                contentDescription = "Edit",
+                                                tint = MaterialTheme.colorScheme.onTertiary
+                                            )
                                         }
-                                        Spacer(Modifier.width(8.dp))
-                                        Box {
-                                            FilledIconButton(
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch { swipeState.animateTo(0) }
+                                                showDelete = true
+                                            },
+                                            enabled = swipeState.currentValue == 1,
+                                            modifier = Modifier
+                                                .background(MaterialTheme.colorScheme.error)
+                                                .size(actionWidth)
+                                                .clip(CircleShape)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Delete,
+                                                contentDescription = "Delete",
+                                                tint = MaterialTheme.colorScheme.onError
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier
+                                            .align(Alignment.CenterStart)
+                                            .height(72.dp)
+                                            .alpha(revealProgressStart)
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch { swipeState.animateTo(0) }
+                                                onSetCurrentQuiz(quizIndex)
+                                                addDialogFor = quizIndex
+                                            },
+                                            enabled = swipeState.currentValue == 2,
+                                            modifier = Modifier
+                                                .background(MaterialTheme.colorScheme.primary)
+                                                .size(actionWidth)
+                                                .clip(CircleShape)
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Add,
+                                                contentDescription = "Add",
+                                                tint = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        }
+                                        if (quiz.isImported) {
+                                            IconButton(
                                                 onClick = {
-                                                    if (quiz.boxes.flatten().isEmpty()) {
-                                                        emptyAlertFor = quizIndex
-                                                    } else {
-                                                        startDialogFor = quizIndex
-                                                    }
+                                                    scope.launch { swipeState.animateTo(0) }
+                                                    claimDialogFor = quizIndex
                                                 },
-                                                enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
-                                                colors = IconButtonDefaults.filledIconButtonColors(),
+                                                enabled = swipeState.currentValue == 2,
+                                                modifier = Modifier
+                                                    .background(MaterialTheme.colorScheme.primary)
+                                                    .size(actionWidth)
+                                                    .clip(CircleShape)
                                             ) {
-                                                Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
-                                            }
-                                            if (quiz.boxes.flatten().isEmpty()) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(8.dp)
-                                                        .background(Color.Red, CircleShape)
-                                                        .align(Alignment.TopEnd)
+                                                Icon(
+                                                    Icons.Default.CloudUpload,
+                                                    contentDescription = "Claim",
+                                                    tint = MaterialTheme.colorScheme.onPrimary
                                                 )
                                             }
                                         }
                                     }
-                                if (expanded) {
+
                                     Column(
                                         modifier = Modifier
+                                            .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                             .fillMaxWidth()
-                                            .padding(8.dp)
+                                            .padding(vertical = 8.dp)
                                     ) {
-                                        quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
-                                            Row(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        val folderName = folders.find { it.id == quiz.folderId }?.name ?: ""
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(72.dp)
+                                                .padding(horizontal = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(folderName, style = MaterialTheme.typography.labelSmall)
+                                                Text(quiz.name, style = MaterialTheme.typography.bodyLarge)
+                                            }
+                                            FilledIconButton(
+                                                onClick = { expanded = !expanded },
+                                                enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
+                                                colors = IconButtonDefaults.filledIconButtonColors(),
                                             ) {
-                                                pair.forEachIndexed { colIndex, box ->
-                                                    val boxIndex = rowIndex * 2 + colIndex
-                                                    Card(
-                                                        modifier = Modifier
-                                                            .weight(1f)
-                                                            .aspectRatio(1f)
-                                                            .clickable { onView(quizIndex, boxIndex) },
-                                                        shape = RoundedCornerShape(8.dp),
-                                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                                        colors = CardDefaults.cardColors(
-                                                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                                                        )
-                                                    ) {
-                                                        Column(
-                                                            modifier = Modifier
-                                                                .fillMaxSize()
-                                                                .padding(8.dp),
-                                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                                            verticalArrangement = Arrangement.Center
-                                                        ) {
-                                                            Text(text = "Box ${boxIndex + 1}")
-                                                            Text(text = "${box.size} soru")
+                                                Icon(Icons.Default.Description, contentDescription = "Detay")
+                                            }
+                                            Spacer(Modifier.width(8.dp))
+                                            Box {
+                                                FilledIconButton(
+                                                    onClick = {
+                                                        if (quiz.boxes.flatten().isEmpty()) {
+                                                            emptyAlertFor = quizIndex
+                                                        } else {
+                                                            startDialogFor = quizIndex
                                                         }
-                                                    }
+                                                    },
+                                                    enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
+                                                    colors = IconButtonDefaults.filledIconButtonColors(),
+                                                ) {
+                                                    Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
                                                 }
-                                                if (pair.size == 1) {
-                                                    Spacer(modifier = Modifier.weight(1f))
+                                                if (quiz.boxes.flatten().isEmpty()) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(8.dp)
+                                                            .background(Color.Red, CircleShape)
+                                                            .align(Alignment.TopEnd)
+                                                    )
                                                 }
                                             }
-                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+                                        if (expanded) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(8.dp)
+                                            ) {
+                                                quiz.boxes.chunked(2).forEachIndexed { rowIndex, pair ->
+                                                    Row(
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                    ) {
+                                                        pair.forEachIndexed { colIndex, box ->
+                                                            val boxIndex = rowIndex * 2 + colIndex
+                                                            Card(
+                                                                modifier = Modifier
+                                                                    .weight(1f)
+                                                                    .aspectRatio(1f)
+                                                                    .clickable { onView(quizIndex, boxIndex) },
+                                                                shape = RoundedCornerShape(8.dp),
+                                                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                                                colors = CardDefaults.cardColors(
+                                                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                                                )
+                                                            ) {
+                                                                Column(
+                                                                    modifier = Modifier
+                                                                        .fillMaxSize()
+                                                                        .padding(8.dp),
+                                                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                                                    verticalArrangement = Arrangement.Center
+                                                                ) {
+                                                                    Text(text = "Box ${boxIndex + 1}")
+                                                                    Text(text = "${box.size} soru")
+                                                                }
+                                                            }
+                                                        }
+                                                        if (pair.size == 1) {
+                                                            Spacer(modifier = Modifier.weight(1f))
+                                                        }
+                                                    }
+                                                    Spacer(modifier = Modifier.height(8.dp))
+                                                }
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
 
                         if (showRename) {
