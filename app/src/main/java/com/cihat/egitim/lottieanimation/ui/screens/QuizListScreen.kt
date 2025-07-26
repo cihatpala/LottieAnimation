@@ -214,6 +214,8 @@ fun QuizListScreen(
                         val scope = rememberCoroutineScope()
                         // Use the same icon size as the "Start" and "Detail" buttons
                         val actionWidth = 40.dp
+                        val actionSpacing = 8.dp
+                        val contentPadding = 8.dp
                         val swipeState = rememberSwipeableState(0)
                         DisposableEffect(quiz.id) {
                             swipeStates[quiz.id] = swipeState
@@ -222,7 +224,7 @@ fun QuizListScreen(
                                 if (openSwipeId == quiz.id) openSwipeId = null
                             }
                         }
-                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2 + actionSpacing + contentPadding).toPx() }
 
 // Eğer başka bir item açıksa, ben kapanmalıyım
                         LaunchedEffect(openSwipeId) {
@@ -297,7 +299,7 @@ fun QuizListScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        .padding(horizontal = contentPadding, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     val ownerPhoto = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
@@ -389,7 +391,7 @@ fun QuizListScreen(
                                         ) {
                                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-                                        Spacer(Modifier.width(8.dp))
+                                        Spacer(Modifier.width(actionSpacing))
                                         FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
@@ -429,7 +431,7 @@ fun QuizListScreen(
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = "Add")
                                         }
-                                        Spacer(Modifier.width(8.dp))
+                                        Spacer(Modifier.width(actionSpacing))
                                         if (quiz.isImported) {
                                             FilledIconButton(
                                                 onClick = {
@@ -459,7 +461,7 @@ fun QuizListScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(72.dp)
-                                                .padding(horizontal = 8.dp),
+                                                .padding(horizontal = contentPadding),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Column(modifier = Modifier.weight(1f)) {
