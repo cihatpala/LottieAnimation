@@ -213,7 +213,8 @@ fun QuizListScreen(
                         var showDelete by remember(quiz.id) { mutableStateOf(false) }
                         var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                         val scope = rememberCoroutineScope()
-                        val actionWidth = 72.dp
+                        // Use the same icon size as the "Start" and "Detail" buttons
+                        val actionWidth = 48.dp
                         val swipeState = rememberSwipeableState(0)
                         DisposableEffect(quiz.id) {
                             swipeStates[quiz.id] = swipeState
