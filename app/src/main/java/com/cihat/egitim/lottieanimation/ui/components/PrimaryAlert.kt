@@ -50,7 +50,7 @@ fun PrimaryAlert(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(scheme.scrim.copy(alpha = 0.5f))
+            .background(scheme.primary.copy(alpha = 0.2f))
             .clickable(onClick = onDismiss),
         contentAlignment = Alignment.Center
     ) {

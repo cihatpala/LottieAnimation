@@ -35,7 +35,6 @@ import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -214,7 +213,7 @@ fun QuizListScreen(
                         var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                         val scope = rememberCoroutineScope()
                         // Use the same icon size as the "Start" and "Detail" buttons
-                        val actionWidth = 48.dp
+                        val actionWidth = 40.dp
                         val swipeState = rememberSwipeableState(0)
                         DisposableEffect(quiz.id) {
                             swipeStates[quiz.id] = swipeState
@@ -370,99 +369,79 @@ fun QuizListScreen(
                                 ) {
                                     Row(
                                         modifier = Modifier
-                                            .align(Alignment.CenterEnd)
+                                            .align(Alignment.TopEnd)
+                                            .padding(top = 8.dp)
                                             .height(72.dp)
-                                            .alpha(revealProgressEnd)
+                                            .alpha(revealProgressEnd),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        IconButton(
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 showRename = true
                                             },
                                             enabled = swipeState.currentValue == 1,
-                                            modifier = Modifier
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    MaterialTheme.colorScheme.tertiary,
-                                                    CircleShape
-                                                )
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Edit,
-                                                contentDescription = "Edit",
-                                                tint = MaterialTheme.colorScheme.onTertiary
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                                contentColor = MaterialTheme.colorScheme.onTertiary
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-                                        IconButton(
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 showDelete = true
                                             },
                                             enabled = swipeState.currentValue == 1,
-                                            modifier = Modifier
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    MaterialTheme.colorScheme.error,
-                                                    CircleShape
-                                                )
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = MaterialTheme.colorScheme.onError
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.error,
+                                                contentColor = MaterialTheme.colorScheme.onError
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
                                         }
                                     }
 
                                     Row(
                                         modifier = Modifier
-                                            .align(Alignment.CenterStart)
+                                            .align(Alignment.TopStart)
+                                            .padding(top = 8.dp)
                                             .height(72.dp)
-                                            .alpha(revealProgressStart)
+                                            .alpha(revealProgressStart),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        IconButton(
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 onSetCurrentQuiz(quizIndex)
                                                 addDialogFor = quizIndex
                                             },
                                             enabled = swipeState.currentValue == 2,
-                                            modifier = Modifier
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    CircleShape
-                                                )
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Add,
-                                                contentDescription = "Add",
-                                                tint = MaterialTheme.colorScheme.onPrimary
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Add, contentDescription = "Add")
                                         }
                                         if (quiz.isImported) {
-                                            IconButton(
+                                            FilledIconButton(
                                                 onClick = {
                                                     scope.launch { swipeState.animateTo(0) }
                                                     claimDialogFor = quizIndex
                                                 },
                                                 enabled = swipeState.currentValue == 2,
-                                                modifier = Modifier
-                                                    .size(actionWidth)
-                                                    .clip(CircleShape)
-                                                    .background(
-                                                        MaterialTheme.colorScheme.primary,
-                                                        CircleShape
-                                                    )
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.CloudUpload,
-                                                    contentDescription = "Claim",
-                                                    tint = MaterialTheme.colorScheme.onPrimary
+                                                modifier = Modifier.size(actionWidth),
+                                                colors = IconButtonDefaults.filledIconButtonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
                                                 )
+                                            ) {
+                                                Icon(Icons.Default.CloudUpload, contentDescription = "Claim")
                                             }
                                         }
                                     }
