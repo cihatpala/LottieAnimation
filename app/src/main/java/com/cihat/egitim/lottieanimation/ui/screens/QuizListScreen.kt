@@ -35,7 +35,6 @@ import androidx.compose.material.swipeable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedTextField
@@ -213,7 +212,10 @@ fun QuizListScreen(
                         var showDelete by remember(quiz.id) { mutableStateOf(false) }
                         var newName by remember(quiz.id) { mutableStateOf(quiz.name) }
                         val scope = rememberCoroutineScope()
-                        val actionWidth = 72.dp
+                        // Use the same icon size as the "Start" and "Detail" buttons
+                        val actionWidth = 40.dp
+                        val actionSpacing = 8.dp
+                        val contentPadding = 8.dp
                         val swipeState = rememberSwipeableState(0)
                         DisposableEffect(quiz.id) {
                             swipeStates[quiz.id] = swipeState
@@ -222,7 +224,7 @@ fun QuizListScreen(
                                 if (openSwipeId == quiz.id) openSwipeId = null
                             }
                         }
-                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2).toPx() }
+                        val maxOffset = with(LocalDensity.current) { (actionWidth * 2 + actionSpacing + contentPadding).toPx() }
 
 // Eğer başka bir item açıksa, ben kapanmalıyım
                         LaunchedEffect(openSwipeId) {
@@ -297,7 +299,7 @@ fun QuizListScreen(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                                        .padding(horizontal = contentPadding, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     val ownerPhoto = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
@@ -369,87 +371,81 @@ fun QuizListScreen(
                                 ) {
                                     Row(
                                         modifier = Modifier
-                                            .align(Alignment.CenterEnd)
+                                            .align(Alignment.TopEnd)
+                                            .padding(top = 8.dp, end = 8.dp)
                                             .height(72.dp)
-                                            .alpha(revealProgressEnd)
+                                            .alpha(revealProgressEnd),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        IconButton(
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 showRename = true
                                             },
                                             enabled = swipeState.currentValue == 1,
-                                            modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.tertiary)
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Edit,
-                                                contentDescription = "Edit",
-                                                tint = MaterialTheme.colorScheme.onTertiary
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                                contentColor = MaterialTheme.colorScheme.onTertiary
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
-                                        IconButton(
+                                        Spacer(Modifier.width(actionSpacing))
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 showDelete = true
                                             },
                                             enabled = swipeState.currentValue == 1,
-                                            modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.error)
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Delete,
-                                                contentDescription = "Delete",
-                                                tint = MaterialTheme.colorScheme.onError
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.error,
+                                                contentColor = MaterialTheme.colorScheme.onError
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
                                         }
                                     }
 
                                     Row(
                                         modifier = Modifier
-                                            .align(Alignment.CenterStart)
+                                            .align(Alignment.TopStart)
+                                            .padding(top = 8.dp, start = 8.dp)
                                             .height(72.dp)
-                                            .alpha(revealProgressStart)
+                                            .alpha(revealProgressStart),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        IconButton(
+                                        FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
                                                 onSetCurrentQuiz(quizIndex)
                                                 addDialogFor = quizIndex
                                             },
                                             enabled = swipeState.currentValue == 2,
-                                            modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.primary)
-                                                .size(actionWidth)
-                                                .clip(CircleShape)
-                                        ) {
-                                            Icon(
-                                                Icons.Default.Add,
-                                                contentDescription = "Add",
-                                                tint = MaterialTheme.colorScheme.onPrimary
+                                            modifier = Modifier.size(actionWidth),
+                                            colors = IconButtonDefaults.filledIconButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                contentColor = MaterialTheme.colorScheme.onPrimary
                                             )
+                                        ) {
+                                            Icon(Icons.Default.Add, contentDescription = "Add")
                                         }
+                                        Spacer(Modifier.width(actionSpacing))
                                         if (quiz.isImported) {
-                                            IconButton(
+                                            FilledIconButton(
                                                 onClick = {
                                                     scope.launch { swipeState.animateTo(0) }
                                                     claimDialogFor = quizIndex
                                                 },
                                                 enabled = swipeState.currentValue == 2,
-                                                modifier = Modifier
-                                                    .background(MaterialTheme.colorScheme.primary)
-                                                    .size(actionWidth)
-                                                    .clip(CircleShape)
-                                            ) {
-                                                Icon(
-                                                    Icons.Default.CloudUpload,
-                                                    contentDescription = "Claim",
-                                                    tint = MaterialTheme.colorScheme.onPrimary
+                                                modifier = Modifier.size(actionWidth),
+                                                colors = IconButtonDefaults.filledIconButtonColors(
+                                                    containerColor = MaterialTheme.colorScheme.primary,
+                                                    contentColor = MaterialTheme.colorScheme.onPrimary
                                                 )
+                                            ) {
+                                                Icon(Icons.Default.CloudUpload, contentDescription = "Claim")
                                             }
                                         }
                                     }
@@ -465,7 +461,7 @@ fun QuizListScreen(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .height(72.dp)
-                                                .padding(horizontal = 8.dp),
+                                                .padding(horizontal = contentPadding),
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Column(modifier = Modifier.weight(1f)) {
