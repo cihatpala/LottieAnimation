@@ -305,6 +305,7 @@ fun QuizListScreen(
                                     modifier = Modifier
                                         .background(MaterialTheme.colorScheme.tertiary)
                                         .size(actionWidth)
+                                        .clip(CircleShape)
                                 ) {
                                     Icon(
                                         Icons.Default.Edit,
@@ -321,6 +322,7 @@ fun QuizListScreen(
                                     modifier = Modifier
                                         .background(MaterialTheme.colorScheme.error)
                                         .size(actionWidth)
+                                        .clip(CircleShape)
                                 ) {
                                     Icon(
                                         Icons.Default.Delete,
@@ -346,6 +348,7 @@ fun QuizListScreen(
                                     modifier = Modifier
                                         .background(MaterialTheme.colorScheme.primary)
                                         .size(actionWidth)
+                                        .clip(CircleShape)
                                 ) {
                                     Icon(
                                         Icons.Default.Add,
@@ -363,6 +366,7 @@ fun QuizListScreen(
                                         modifier = Modifier
                                             .background(MaterialTheme.colorScheme.primary)
                                             .size(actionWidth)
+                                            .clip(CircleShape)
                                     ) {
                                         Icon(
                                             Icons.Default.CloudUpload,
@@ -375,7 +379,6 @@ fun QuizListScreen(
 
                             Card(
                                 modifier = Modifier
-                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp),
                                 shape = RoundedCornerShape(12.dp),
@@ -448,6 +451,7 @@ fun QuizListScreen(
 
                                 Column(
                                     modifier = Modifier
+                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp)
                                 ) {
@@ -792,6 +796,14 @@ fun QuizListScreen(
         )
     }
 }
+
+// Close AppScaffold and the QuizListScreen function
+}
+}
+
+
+
+
 
 
 
