@@ -373,7 +373,16 @@ fun QuizListScreen(
                                 }
                             }
 
-                            Column(modifier = Modifier.fillMaxWidth()) {
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                )
+                            ) {
+                                Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -399,7 +408,7 @@ fun QuizListScreen(
                                     Spacer(Modifier.width(8.dp))
                                     Text(currentUser?.displayName ?: storedUser?.name ?: "", modifier = Modifier.alignByBaseline())
                                     Spacer(Modifier.weight(1f))
-                                    if (quiz.author != null) {
+                                    if (quiz.author != null && !quiz.isImported) {
                                         Row(
                                             modifier = Modifier
                                                 .clickable { onUser(quiz.author, quiz.authorName ?: quiz.author, quiz.authorPhotoUrl) }
