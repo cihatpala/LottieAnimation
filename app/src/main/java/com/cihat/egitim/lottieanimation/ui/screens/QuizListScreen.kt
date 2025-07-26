@@ -380,9 +380,12 @@ fun QuizListScreen(
                                             },
                                             enabled = swipeState.currentValue == 1,
                                             modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.tertiary)
                                                 .size(actionWidth)
                                                 .clip(CircleShape)
+                                                .background(
+                                                    MaterialTheme.colorScheme.tertiary,
+                                                    CircleShape
+                                                )
                                         ) {
                                             Icon(
                                                 Icons.Default.Edit,
@@ -397,9 +400,12 @@ fun QuizListScreen(
                                             },
                                             enabled = swipeState.currentValue == 1,
                                             modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.error)
                                                 .size(actionWidth)
                                                 .clip(CircleShape)
+                                                .background(
+                                                    MaterialTheme.colorScheme.error,
+                                                    CircleShape
+                                                )
                                         ) {
                                             Icon(
                                                 Icons.Default.Delete,
@@ -423,9 +429,12 @@ fun QuizListScreen(
                                             },
                                             enabled = swipeState.currentValue == 2,
                                             modifier = Modifier
-                                                .background(MaterialTheme.colorScheme.primary)
                                                 .size(actionWidth)
                                                 .clip(CircleShape)
+                                                .background(
+                                                    MaterialTheme.colorScheme.primary,
+                                                    CircleShape
+                                                )
                                         ) {
                                             Icon(
                                                 Icons.Default.Add,
@@ -441,9 +450,12 @@ fun QuizListScreen(
                                                 },
                                                 enabled = swipeState.currentValue == 2,
                                                 modifier = Modifier
-                                                    .background(MaterialTheme.colorScheme.primary)
                                                     .size(actionWidth)
                                                     .clip(CircleShape)
+                                                    .background(
+                                                        MaterialTheme.colorScheme.primary,
+                                                        CircleShape
+                                                    )
                                             ) {
                                                 Icon(
                                                     Icons.Default.CloudUpload,
