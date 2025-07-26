@@ -132,7 +132,7 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
                 )
             ),
             authorPhotoUrl = "https://randomuser.me/api/portraits/men/${10 + i}.jpg",
-            folderName = "General"
+            folderName = if (i % 2 == 0) "General > Demo" else "Science > Physics"
         )
     }
 
@@ -378,11 +378,29 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
         if (exists) return
         val newBoxes = MutableList(4) { mutableListOf<Question>() }
         newBoxes[0].addAll(quiz.questions.map { it.copy() })
+        var folderId: Int? = null
+        val subNames = mutableListOf<String>()
+        quiz.folderName?.takeIf { it.isNotBlank() }?.let { f ->
+            val parts = f.split(">").map { it.trim() }.filter { it.isNotBlank() }
+            if (parts.isNotEmpty()) {
+                val folderName = parts.first()
+                val existing = folders.find { it.name == folderName }
+                val id = existing?.id ?: run {
+                    val newId = nextFolderId++
+                    folders.add(UserFolder(id = newId, name = folderName))
+                    newId
+                }
+                folderId = id
+                if (parts.size > 1) subNames.addAll(parts.drop(1))
+            }
+        }
         quizzes.add(
             UserQuiz(
                 id = nextQuizId++,
                 name = quiz.name,
                 boxes = newBoxes,
+                subHeadings = subNames,
+                folderId = folderId,
                 author = quiz.author,
                 authorName = quiz.authorName,
                 authorPhotoUrl = quiz.authorPhotoUrl,
@@ -395,13 +413,9 @@ class QuizViewModel(private val repository: LocalRepository) : ViewModel() {
     /**
      * Marks an imported quiz as owned by the current user.
      */
-    fun claimQuiz(index: Int, authorName: String?, authorPhotoUrl: String?) {
+    fun claimQuiz(index: Int) {
         val quiz = quizzes.getOrNull(index) ?: return
-        quizzes[index] = quiz.copy(
-            authorName = authorName,
-            authorPhotoUrl = authorPhotoUrl,
-            isImported = false
-        )
+        quizzes[index] = quiz.copy(isImported = false)
         persistState()
     }
 
