@@ -375,6 +375,7 @@ fun QuizListScreen(
 
                             Card(
                                 modifier = Modifier
+                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                     .fillMaxWidth()
                                     .padding(vertical = 4.dp),
                                 shape = RoundedCornerShape(12.dp),
@@ -447,7 +448,6 @@ fun QuizListScreen(
 
                                 Column(
                                     modifier = Modifier
-                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp)
                                 ) {
