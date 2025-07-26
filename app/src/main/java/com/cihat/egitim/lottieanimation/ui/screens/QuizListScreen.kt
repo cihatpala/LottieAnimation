@@ -133,6 +133,7 @@ fun QuizListScreen(
     onAddQuestion: (String, String, String, String, Int) -> Unit,
     onClaimQuiz: (Int) -> Unit,
     onSetCurrentQuiz: (Int) -> Unit,
+    onUser: (String, String, String?) -> Unit,
     onFolders: () -> Unit,
     onBack: () -> Unit,
     bottomTab: BottomTab,
@@ -372,100 +373,119 @@ fun QuizListScreen(
                                 }
                             }
 
-                            Column(
-                                modifier = Modifier
-                                    .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                val folderName = folders.find { it.id == quiz.folderId }?.name ?: ""
+                            Column(modifier = Modifier.fillMaxWidth()) {
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(72.dp)
-                                        .padding(horizontal = 8.dp),
+                                        .padding(horizontal = 8.dp, vertical = 4.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Row(
-                                        modifier = Modifier.weight(1f),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        val photo = quiz.authorPhotoUrl
-                                            ?: currentUser?.photoUrl?.toString()
-                                            ?: storedUser?.photoUrl
-                                        if (photo != null) {
-                                            AsyncImage(
-                                                model = photo,
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .size(40.dp)
-                                                    .clip(CircleShape)
-                                            )
-                                            Spacer(Modifier.width(8.dp))
-                                        } else {
-                                            Icon(
-                                                Icons.Default.Person,
-                                                contentDescription = null,
-                                                modifier = Modifier.size(40.dp)
-                                            )
-                                            Spacer(Modifier.width(8.dp))
-                                        }
-                                        Column {
-                                            val name = quiz.authorName ?: currentUser?.displayName ?: storedUser?.name ?: ""
-                                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                                Text(name)
-                                                if (!quiz.isImported && quiz.author != null) {
-                                                    Spacer(Modifier.width(4.dp))
-                                                    Icon(
-                                                        Icons.Default.Download,
-                                                        contentDescription = null,
-                                                        tint = MaterialTheme.colorScheme.tertiary,
-                                                        modifier = Modifier.size(16.dp)
-                                                    )
-                                                    Spacer(Modifier.width(2.dp))
-                                                    Text(
-                                                        quiz.author,
-                                                        color = MaterialTheme.colorScheme.tertiary,
-                                                        style = MaterialTheme.typography.bodySmall
-                                                    )
-                                                }
-                                            }
-                                            Text(folderName)
-                                            Text(quiz.name)
-                                        }
-                                    }
-                                    FilledIconButton(
-                                        onClick = { expanded = !expanded },
-                                        enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
-                                        colors = IconButtonDefaults.filledIconButtonColors()
-                                    ) {
-                                        Icon(Icons.Default.Description, contentDescription = "Detay")
+                                    val ownerPhoto = currentUser?.photoUrl?.toString() ?: storedUser?.photoUrl
+                                    if (ownerPhoto != null) {
+                                        AsyncImage(
+                                            model = ownerPhoto,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    } else {
+                                        Icon(
+                                            Icons.Default.Person,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(40.dp)
+                                        )
                                     }
                                     Spacer(Modifier.width(8.dp))
-                                    Box {
-                                        FilledIconButton(
-                                            onClick = {
-                                                if (quiz.boxes.flatten().isEmpty()) {
-                                                    emptyAlertFor = quizIndex
-                                                } else {
-                                                    startDialogFor = quizIndex
-                                                }
-                                            },
-                                            enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
-                                            colors = IconButtonDefaults.filledIconButtonColors()
+                                    Text(currentUser?.displayName ?: storedUser?.name ?: "", modifier = Modifier.alignByBaseline())
+                                    Spacer(Modifier.weight(1f))
+                                    if (quiz.author != null) {
+                                        Row(
+                                            modifier = Modifier
+                                                .clickable { onUser(quiz.author, quiz.authorName ?: quiz.author, quiz.authorPhotoUrl) }
+                                                .background(
+                                                    MaterialTheme.colorScheme.secondaryContainer,
+                                                    RoundedCornerShape(12.dp)
+                                                )
+                                                .padding(horizontal = 6.dp, vertical = 2.dp),
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
-                                        }
-                                        if (quiz.boxes.flatten().isEmpty()) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .background(Color.Red, CircleShape)
-                                                    .align(Alignment.TopEnd)
+                                            Icon(
+                                                Icons.Default.Download,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.tertiary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            quiz.authorPhotoUrl?.let { url ->
+                                                Spacer(Modifier.width(4.dp))
+                                                AsyncImage(
+                                                    model = url,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .size(24.dp)
+                                                        .clip(CircleShape)
+                                                )
+                                            }
+                                            Spacer(Modifier.width(4.dp))
+                                            Text(
+                                                quiz.author,
+                                                color = MaterialTheme.colorScheme.tertiary,
+                                                style = MaterialTheme.typography.bodySmall
                                             )
                                         }
                                     }
                                 }
+
+                                Column(
+                                    modifier = Modifier
+                                        .offset { IntOffset(swipeState.offset.value.roundToInt(), 0) }
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    val folderName = folders.find { it.id == quiz.folderId }?.name ?: ""
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(72.dp)
+                                            .padding(horizontal = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(folderName, style = MaterialTheme.typography.labelSmall)
+                                            Text(quiz.name, style = MaterialTheme.typography.bodyLarge)
+                                        }
+                                        FilledIconButton(
+                                            onClick = { expanded = !expanded },
+                                            enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
+                                            colors = IconButtonDefaults.filledIconButtonColors(),
+                                        ) {
+                                            Icon(Icons.Default.Description, contentDescription = "Detay")
+                                        }
+                                        Spacer(Modifier.width(8.dp))
+                                        Box {
+                                            FilledIconButton(
+                                                onClick = {
+                                                    if (quiz.boxes.flatten().isEmpty()) {
+                                                        emptyAlertFor = quizIndex
+                                                    } else {
+                                                        startDialogFor = quizIndex
+                                                    }
+                                                },
+                                                enabled = kotlin.math.abs(swipeState.offset.value) < 1f,
+                                                colors = IconButtonDefaults.filledIconButtonColors(),
+                                            ) {
+                                                Icon(Icons.Default.PlayArrow, contentDescription = "Başlat")
+                                            }
+                                            if (quiz.boxes.flatten().isEmpty()) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(8.dp)
+                                                        .background(Color.Red, CircleShape)
+                                                        .align(Alignment.TopEnd)
+                                                )
+                                            }
+                                        }
+                                    }
                                 if (expanded) {
                                     Column(
                                         modifier = Modifier

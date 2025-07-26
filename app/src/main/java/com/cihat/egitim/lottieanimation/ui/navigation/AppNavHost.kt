@@ -264,11 +264,18 @@ fun AppNavHost(
                     quizViewModel.addQuestion(q, a, topic, sub, box)
                 },
                 onClaimQuiz = { idx ->
-                    val photo = authViewModel.currentUser?.photoUrl?.toString() ?: authViewModel.storedUser?.photoUrl
-                    val displayName = authViewModel.currentUser?.displayName ?: authViewModel.storedUser?.name
-                    quizViewModel.claimQuiz(idx, displayName, photo)
+                    quizViewModel.claimQuiz(idx)
                 },
                 onSetCurrentQuiz = { idx -> quizViewModel.setCurrentQuiz(idx) },
+                onUser = { username, name, photo ->
+                    navController.navigate(
+                        Screen.PublicProfile.createRoute(
+                            username = username,
+                            name = name,
+                            photoUrl = photo
+                        )
+                    )
+                },
                 onFolders = { navController.navigate(Screen.FolderList.route) },
                 onBack = { navController.popBackStack() },
                 bottomTab = currentTab,
