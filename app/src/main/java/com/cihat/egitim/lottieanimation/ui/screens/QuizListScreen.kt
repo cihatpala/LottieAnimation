@@ -370,7 +370,7 @@ fun QuizListScreen(
                                     Row(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
-                                            .padding(top = 8.dp)
+                                            .padding(top = 8.dp, end = 8.dp)
                                             .height(72.dp)
                                             .alpha(revealProgressEnd),
                                         verticalAlignment = Alignment.CenterVertically
@@ -389,6 +389,7 @@ fun QuizListScreen(
                                         ) {
                                             Icon(Icons.Default.Edit, contentDescription = "Edit")
                                         }
+                                        Spacer(Modifier.width(8.dp))
                                         FilledIconButton(
                                             onClick = {
                                                 scope.launch { swipeState.animateTo(0) }
@@ -408,7 +409,7 @@ fun QuizListScreen(
                                     Row(
                                         modifier = Modifier
                                             .align(Alignment.TopStart)
-                                            .padding(top = 8.dp)
+                                            .padding(top = 8.dp, start = 8.dp)
                                             .height(72.dp)
                                             .alpha(revealProgressStart),
                                         verticalAlignment = Alignment.CenterVertically
@@ -428,6 +429,7 @@ fun QuizListScreen(
                                         ) {
                                             Icon(Icons.Default.Add, contentDescription = "Add")
                                         }
+                                        Spacer(Modifier.width(8.dp))
                                         if (quiz.isImported) {
                                             FilledIconButton(
                                                 onClick = {
